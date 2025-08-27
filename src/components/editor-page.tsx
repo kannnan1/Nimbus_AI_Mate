@@ -12,8 +12,13 @@ import { AddSectionDialog } from "@/components/add-section-dialog";
 import { RenameSectionDialog } from "@/components/rename-section-dialog";
 import type { Section, SubSection } from "@/types/document";
 
-export function EditorPage() {
-  const [documentContent, setDocumentContent] = useState("");
+interface EditorPageProps {
+  initialTitle?: string;
+  initialContent?: string;
+}
+
+export function EditorPage({ initialTitle = "Untitled Document", initialContent = "" }: EditorPageProps) {
+  const [documentContent, setDocumentContent] = useState(initialContent);
   const [sections, setSections] = useState<Section[]>([]);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
@@ -22,17 +27,20 @@ export function EditorPage() {
   const [itemToRename, setItemToRename] = useState<{ id: string; currentTitle: string; type: 'section' | 'subsection', sectionId?: string } | null>(null);
 
   useEffect(() => {
+    // Only update content from sections if the document is new/empty
+    if (initialContent) return;
+
     const generateMarkdownFromSections = (sections: Section[]): string => {
       return sections.map((section, secIndex) => {
-        const sectionTitle = `${'#'.repeat(1)} ${secIndex + 1}. ${section.title}\n\n`;
+        const sectionTitle = `# ${secIndex + 1}. ${section.title}\n\n`;
         const subsectionsContent = section.subsections.map((subsection, subIndex) => {
-          return `${'#'.repeat(2)} ${secIndex + 1}.${subIndex + 1}. ${subsection.title}\n\n`;
+          return `## ${secIndex + 1}.${subIndex + 1}. ${subsection.title}\n\n`;
         }).join('');
         return sectionTitle + subsectionsContent;
       }).join('');
     };
     setDocumentContent(generateMarkdownFromSections(sections));
-  }, [sections]);
+  }, [sections, initialContent]);
 
   const handleAddSection = (title: string) => {
     const newSection: Section = {
@@ -77,7 +85,7 @@ export function EditorPage() {
 
   return (
     <div className="h-screen w-screen flex flex-col bg-accent/40">
-      <EditorToolbar />
+      <EditorToolbar initialTitle={initialTitle} documentContent={documentContent} />
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full w-full">
           <ResizablePanel defaultSize={18} minSize={15} maxSize={25}>

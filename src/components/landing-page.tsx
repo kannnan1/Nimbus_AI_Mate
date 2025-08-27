@@ -47,6 +47,7 @@ const options: {
 type MyDocument = {
     title: string;
     lastModified: string;
+    content?: string;
 };
 
 const sharedDocuments = [
@@ -166,7 +167,7 @@ export function LandingPage() {
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <Button variant="ghost" size="icon" asChild>
-                                                        <Link href="/editor"><Eye className="h-4 w-4" /></Link>
+                                                        <Link href={`/editor?title=${encodeURIComponent(doc.title)}`}><Eye className="h-4 w-4" /></Link>
                                                     </Button>
                                                 </TooltipTrigger>
                                                 <TooltipContent><p>Open document</p></TooltipContent>

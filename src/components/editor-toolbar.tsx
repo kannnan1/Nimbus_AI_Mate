@@ -6,15 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Feather, Save, History, MessageSquarePlus, Share2, ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { formatRelative } from "date-fns";
 
-export function EditorToolbar() {
-  const [documentTitle, setDocumentTitle] = useState("Untitled Document");
+interface EditorToolbarProps {
+  initialTitle?: string;
+  documentContent: string;
+}
+
+export function EditorToolbar({ initialTitle = "Untitled Document", documentContent }: EditorToolbarProps) {
+  const [documentTitle, setDocumentTitle] = useState(initialTitle);
   const [saveStatus, setSaveStatus] = useState("Not saved");
   const { toast } = useToast();
+
+  useEffect(() => {
+    setDocumentTitle(initialTitle);
+  }, [initialTitle]);
 
   const handleSave = () => {
     if (documentTitle === "Untitled Document" || !documentTitle.trim()) {
@@ -29,23 +38,24 @@ export function EditorToolbar() {
     const lastModified = formatRelative(new Date(), new Date());
     setSaveStatus(`Saved ${lastModified}`);
     
-    // In a real application, this would trigger an API call to save the document.
-    // For this prototype, we'll use localStorage.
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
     
     const existingDocIndex = storedDocs.findIndex((doc: {title: string}) => doc.title === documentTitle);
     
+    const newDocData = { 
+      title: documentTitle, 
+      lastModified,
+      content: documentContent,
+    };
+
     if (existingDocIndex > -1) {
-      // Update existing document
-      storedDocs[existingDocIndex].lastModified = lastModified;
+      storedDocs[existingDocIndex] = newDocData;
     } else {
-      // Add new document
-      storedDocs.push({ title: documentTitle, lastModified });
+      storedDocs.push(newDocData);
     }
 
-    // Sort documents by date (not perfectly accurate with relative dates, but good for demo)
-    storedDocs.sort((a: any, b: any) => new Date().getTime() - new Date().getTime());
+    storedDocs.sort((a: any, b: any) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime());
 
     localStorage.setItem("myDocuments", JSON.stringify(storedDocs));
 
