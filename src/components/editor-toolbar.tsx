@@ -10,15 +10,19 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { formatRelative } from "date-fns";
+import type { Section } from "@/types/document";
+import { VersionHistoryDialog } from "./version-history-dialog";
 
 interface EditorToolbarProps {
   initialTitle?: string;
   documentContent: string;
+  sections: Section[];
 }
 
-export function EditorToolbar({ initialTitle = "Untitled Document", documentContent }: EditorToolbarProps) {
+export function EditorToolbar({ initialTitle = "Untitled Document", documentContent, sections }: EditorToolbarProps) {
   const [documentTitle, setDocumentTitle] = useState(initialTitle);
   const [saveStatus, setSaveStatus] = useState("Not saved");
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,6 +51,7 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
       title: documentTitle, 
       lastModified,
       content: documentContent,
+      sections: sections,
     };
 
     if (existingDocIndex > -1) {
@@ -71,72 +76,75 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
   }
 
   return (
-    <header className="flex h-16 items-center border-b bg-card px-4 shrink-0">
-      <div className="flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-2 text-primary font-semibold">
-          <Feather className="w-5 h-5" />
-          <span>Nimbus Uno</span>
-        </Link>
-        <Separator orientation="vertical" className="h-8" />
-        <div>
-          <Input 
-            value={documentTitle}
-            onChange={handleTitleChange}
-            className="text-lg font-semibold border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-            aria-label="Document Title"
-          />
-          <p className="text-xs text-muted-foreground">{saveStatus}</p>
+    <>
+      <header className="flex h-16 items-center border-b bg-card px-4 shrink-0">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2 text-primary font-semibold">
+            <Feather className="w-5 h-5" />
+            <span>Nimbus Uno</span>
+          </Link>
+          <Separator orientation="vertical" className="h-8" />
+          <div>
+            <Input 
+              value={documentTitle}
+              onChange={handleTitleChange}
+              className="text-lg font-semibold border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+              aria-label="Document Title"
+            />
+            <p className="text-xs text-muted-foreground">{saveStatus}</p>
+          </div>
         </div>
-      </div>
-      <div className="ml-auto flex items-center gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-               <Button variant="ghost" size="icon" asChild>
-                <Link href="/">
-                  <ArrowLeft className="h-4 w-4" />
-                  <span className="sr-only">Go Back</span>
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Back to Documents</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={handleSave}>
-                <Save className="h-4 w-4" />
-                <span className="sr-only">Save</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Save Document</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <History className="h-4 w-4" />
-                <span className="sr-only">Version History</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Version History</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MessageSquarePlus className="h-4 w-4" />
-                <span className="sr-only">Comments</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Comments</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="ml-auto flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                 <Button variant="ghost" size="icon" asChild>
+                  <Link href="/">
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="sr-only">Go Back</span>
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Back to Documents</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={handleSave}>
+                  <Save className="h-4 w-4" />
+                  <span className="sr-only">Save</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Save Document</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={() => setIsHistoryOpen(true)}>
+                  <History className="h-4 w-4" />
+                  <span className="sr-only">Version History</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Version History</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MessageSquarePlus className="h-4 w-4" />
+                  <span className="sr-only">Comments</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Comments</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-        <Separator orientation="vertical" className="h-8 mx-2" />
-        
-        <Button>
-          <Share2 className="mr-2 h-4 w-4" />
-          Share
-        </Button>
-      </div>
-    </header>
+          <Separator orientation="vertical" className="h-8 mx-2" />
+          
+          <Button>
+            <Share2 className="mr-2 h-4 w-4" />
+            Share
+          </Button>
+        </div>
+      </header>
+      <VersionHistoryDialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen} />
+    </>
   );
 }

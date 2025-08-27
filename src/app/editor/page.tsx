@@ -11,6 +11,7 @@ function EditorContent() {
 
   let initialContent = "";
   let initialTitle = "Untitled Document";
+  let initialSections = [];
 
   if (documentTitle) {
     const storedDocsString = localStorage.getItem("myDocuments");
@@ -19,10 +20,11 @@ function EditorContent() {
     if (docToOpen) {
       initialContent = docToOpen.content || "";
       initialTitle = docToOpen.title;
+      initialSections = docToOpen.sections || [];
     }
   }
   
-  return <EditorPage initialTitle={initialTitle} initialContent={initialContent} />;
+  return <EditorPage initialTitle={initialTitle} initialContent={initialContent} initialSections={initialSections} />;
 }
 
 

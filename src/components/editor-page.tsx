@@ -15,11 +15,12 @@ import type { Section, SubSection } from "@/types/document";
 interface EditorPageProps {
   initialTitle?: string;
   initialContent?: string;
+  initialSections?: Section[];
 }
 
-export function EditorPage({ initialTitle = "Untitled Document", initialContent = "" }: EditorPageProps) {
+export function EditorPage({ initialTitle = "Untitled Document", initialContent = "", initialSections = [] }: EditorPageProps) {
   const [documentContent, setDocumentContent] = useState(initialContent);
-  const [sections, setSections] = useState<Section[]>([]);
+  const [sections, setSections] = useState<Section[]>(initialSections);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
   const [isAddSubsectionOpen, setIsAddSubsectionOpen] = useState(false);
@@ -85,7 +86,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
 
   return (
     <div className="h-screen w-screen flex flex-col bg-accent/40">
-      <EditorToolbar initialTitle={initialTitle} documentContent={documentContent} />
+      <EditorToolbar initialTitle={initialTitle} documentContent={documentContent} sections={sections} />
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full w-full">
           <ResizablePanel defaultSize={18} minSize={15} maxSize={25}>
