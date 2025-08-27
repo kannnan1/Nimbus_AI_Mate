@@ -1,11 +1,13 @@
+
 "use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { FileText, PlusCircle, ChevronsRight, ArrowUp, ArrowDown } from "lucide-react";
+import { FileText, PlusCircle, ChevronsRight, ArrowUp, ArrowDown, Pencil } from "lucide-react";
 import { AddSectionDialog } from "@/components/add-section-dialog";
+import { RenameSectionDialog } from "@/components/rename-section-dialog";
 import { cn } from "@/lib/utils";
 
 type SubSection = {
@@ -24,6 +26,8 @@ export function DocumentSidebar() {
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
   const [isAddSubsectionOpen, setIsAddSubsectionOpen] = useState(false);
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+  const [itemToRename, setItemToRename] = useState<{ id: string; currentTitle: string; type: 'section' | 'subsection', sectionId?: string } | null>(null);
 
   const handleAddSection = (title: string) => {
     const newSection: Section = {
@@ -42,6 +46,33 @@ export function DocumentSidebar() {
         ? { ...section, subsections: [...section.subsections, newSubSection] }
         : section
     ));
+  };
+  
+  const handleOpenRenameDialog = (item: { id: string, title: string }, type: 'section' | 'subsection', sectionId?: string) => {
+    setItemToRename({ id: item.id, currentTitle: item.title, type, sectionId });
+    setIsRenameDialogOpen(true);
+  };
+
+  const handleRename = (newTitle: string) => {
+    if (!itemToRename) return;
+
+    if (itemToRename.type === 'section') {
+      setSections(sections.map(section =>
+        section.id === itemToRename.id ? { ...section, title: newTitle } : section
+      ));
+    } else if (itemToRename.type === 'subsection' && itemToRename.sectionId) {
+      setSections(sections.map(section =>
+        section.id === itemToRename.sectionId
+          ? {
+              ...section,
+              subsections: section.subsections.map(sub =>
+                sub.id === itemToRename.id ? { ...sub, title: newTitle } : sub
+              )
+            }
+          : section
+      ));
+    }
+    setItemToRename(null);
   };
 
   const moveItem = <T,>(array: T[], index: number, direction: 'up' | 'down'): T[] => {
@@ -113,8 +144,11 @@ export function DocumentSidebar() {
                   )}
                   onClick={() => setSelectedSectionId(section.id)}
                 >
-                  <span className="font-semibold text-sm">{secIndex + 1}. {section.title}</span>
+                  <span className="font-semibold text-sm truncate">{secIndex + 1}. {section.title}</span>
                   <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleOpenRenameDialog(section, 'section')}}>
+                      <Pencil className="w-3 h-3" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleMoveSection(secIndex, 'up')}} disabled={secIndex === 0}>
                       <ArrowUp className="w-4 h-4" />
                     </Button>
@@ -127,8 +161,11 @@ export function DocumentSidebar() {
                    <div className="pl-6 mt-1 space-y-1">
                       {section.subsections.map((subsection, subIndex) => (
                           <div key={subsection.id} className="group flex items-center justify-between p-2 rounded-md hover:bg-accent/50">
-                             <span className="text-sm">{secIndex + 1}.{subIndex + 1}. {subsection.title}</span>
+                             <span className="text-sm truncate">{secIndex + 1}.{subIndex + 1}. {subsection.title}</span>
                              <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleOpenRenameDialog(subsection, 'subsection', section.id)}}>
+                                  <Pencil className="w-3 h-3" />
+                                </Button>
                                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleMoveSubsection(secIndex, subIndex, 'up')}} disabled={subIndex === 0}>
                                   <ArrowUp className="w-4 h-4" />
                                 </Button>
@@ -159,6 +196,14 @@ export function DocumentSidebar() {
         title="Add New Subsection"
         description="Enter a title for your new subsection."
       />
+      {itemToRename && (
+        <RenameSectionDialog
+          open={isRenameDialogOpen}
+          onOpenChange={setIsRenameDialogOpen}
+          onRename={handleRename}
+          currentTitle={itemToRename.currentTitle}
+        />
+      )}
     </aside>
   );
 }
