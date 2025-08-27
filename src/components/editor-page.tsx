@@ -1,17 +1,79 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DocumentSidebar } from "@/components/document-sidebar";
 import { EditorToolbar } from "@/components/editor-toolbar";
 import { AiChatbot } from "@/components/ai-chatbot";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { RichTextEditor } from "./rich-text-editor";
-
-const initialDocumentContent = ``;
+import { AddSectionDialog } from "@/components/add-section-dialog";
+import { RenameSectionDialog } from "@/components/rename-section-dialog";
+import type { Section, SubSection } from "@/types/document";
 
 export function EditorPage() {
-  const [documentContent, setDocumentContent] = useState(initialDocumentContent);
+  const [documentContent, setDocumentContent] = useState("");
+  const [sections, setSections] = useState<Section[]>([]);
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
+  const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
+  const [isAddSubsectionOpen, setIsAddSubsectionOpen] = useState(false);
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+  const [itemToRename, setItemToRename] = useState<{ id: string; currentTitle: string; type: 'section' | 'subsection', sectionId?: string } | null>(null);
+
+  useEffect(() => {
+    const generateMarkdownFromSections = (sections: Section[]): string => {
+      return sections.map((section, secIndex) => {
+        const sectionTitle = `${'#'.repeat(1)} ${secIndex + 1}. ${section.title}\n\n`;
+        const subsectionsContent = section.subsections.map((subsection, subIndex) => {
+          return `${'#'.repeat(2)} ${secIndex + 1}.${subIndex + 1}. ${subsection.title}\n\n`;
+        }).join('');
+        return sectionTitle + subsectionsContent;
+      }).join('');
+    };
+    setDocumentContent(generateMarkdownFromSections(sections));
+  }, [sections]);
+
+  const handleAddSection = (title: string) => {
+    const newSection: Section = {
+      id: `sec-${Date.now()}`,
+      title,
+      subsections: [],
+    };
+    setSections([...sections, newSection]);
+  };
+
+  const handleAddSubsection = (title: string) => {
+    if (!selectedSectionId) return;
+    const newSubSection: SubSection = { id: `sub-${Date.now()}`, title };
+    setSections(sections.map(section =>
+      section.id === selectedSectionId
+        ? { ...section, subsections: [...section.subsections, newSubSection] }
+        : section
+    ));
+  };
+
+  const handleRename = (newTitle: string) => {
+    if (!itemToRename) return;
+
+    if (itemToRename.type === 'section') {
+      setSections(sections.map(section =>
+        section.id === itemToRename.id ? { ...section, title: newTitle } : section
+      ));
+    } else if (itemToRename.type === 'subsection' && itemToRename.sectionId) {
+      setSections(sections.map(section =>
+        section.id === itemToRename.sectionId
+          ? {
+              ...section,
+              subsections: section.subsections.map(sub =>
+                sub.id === itemToRename.id ? { ...sub, title: newTitle } : sub
+              )
+            }
+          : section
+      ));
+    }
+    setItemToRename(null);
+  };
 
   return (
     <div className="h-screen w-screen flex flex-col bg-accent/40">
@@ -19,7 +81,16 @@ export function EditorPage() {
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full w-full">
           <ResizablePanel defaultSize={18} minSize={15} maxSize={25}>
-            <DocumentSidebar />
+            <DocumentSidebar
+              sections={sections}
+              setSections={setSections}
+              selectedSectionId={selectedSectionId}
+              setSelectedSectionId={setSelectedSectionId}
+              setIsAddSectionOpen={setIsAddSectionOpen}
+              setIsAddSubsectionOpen={setIsAddSubsectionOpen}
+              setIsRenameDialogOpen={setIsRenameDialogOpen}
+              setItemToRename={setItemToRename}
+            />
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={52} minSize={30}>
@@ -40,10 +111,33 @@ export function EditorPage() {
             <AiChatbot
               documentContent={documentContent}
               setDocumentContent={setDocumentContent}
+              onInsertSection={() => setIsAddSectionOpen(true)}
             />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+       <AddSectionDialog
+        open={isAddSectionOpen}
+        onOpenChange={setIsAddSectionOpen}
+        onAdd={handleAddSection}
+        title="Add New Section"
+        description="Enter a title for your new section."
+      />
+      <AddSectionDialog
+        open={isAddSubsectionOpen}
+        onOpenChange={setIsAddSubsectionOpen}
+        onAdd={handleAddSubsection}
+        title="Add New Subsection"
+        description="Enter a title for your new subsection."
+      />
+      {itemToRename && (
+        <RenameSectionDialog
+          open={isRenameDialogOpen}
+          onOpenChange={setIsRenameDialogOpen}
+          onRename={handleRename}
+          currentTitle={itemToRename.currentTitle}
+        />
+      )}
     </div>
   );
 }

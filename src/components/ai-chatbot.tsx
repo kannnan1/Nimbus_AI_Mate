@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
@@ -23,9 +24,10 @@ type Message = {
 interface AiChatbotProps {
   documentContent: string;
   setDocumentContent: Dispatch<SetStateAction<string>>;
+  onInsertSection: () => void;
 }
 
-export function AiChatbot({ documentContent, setDocumentContent }: AiChatbotProps) {
+export function AiChatbot({ documentContent, setDocumentContent, onInsertSection }: AiChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, role: "assistant", content: "Hello! I'm your Nimbus AI assistant. How can I help you with this document?" },
   ]);
@@ -86,17 +88,17 @@ export function AiChatbot({ documentContent, setDocumentContent }: AiChatbotProp
     setIsLoading(false);
   };
   
-  const handleInsertSection = async () => {
+  const handleInsertSectionFromPastDoc = async () => {
     if (isLoading) return;
     setIsLoading(true);
-    addMessage("user", "Help me insert a 'Risk Assessment' section.");
+    addMessage("user", "Insert 'Risk Assessment' section from a past document.");
     try {
       const pastSection = "### 4. Risk Assessment\n- Market Risk: The competitive landscape may shift, impacting our market share.\n- Technical Risk: Integration with legacy systems could pose challenges.";
       const result = await insertSectionsFromPastDocuments({ currentDocument: documentContent, pastDocumentSection: pastSection });
       setDocumentContent(result.updatedDocument);
-      addMessage("assistant", "I've added the 'Risk Assessment' section to your document.");
+      addMessage("assistant", "I've added the 'Risk Assessment' section to your document from a past example.");
     } catch (error) {
-      addMessage("assistant", "Sorry, I couldn't insert the section.");
+      addMessage("assistant", "Sorry, I couldn't insert the section from a past document.");
     }
     setIsLoading(false);
   };
@@ -131,7 +133,7 @@ export function AiChatbot({ documentContent, setDocumentContent }: AiChatbotProp
   const aiActions = [
     { label: "Search Repository", icon: Book, action: handleSearchRepository },
     { label: "Check Alignment", icon: Scale, action: handleAlignmentCheck },
-    { label: "Insert Section", icon: ClipboardPlus, action: handleInsertSection },
+    { label: "Insert Section", icon: ClipboardPlus, action: onInsertSection },
     { label: "Quality Check", icon: CheckCircle, action: handleQualityCheck },
   ];
 
@@ -196,7 +198,7 @@ export function AiChatbot({ documentContent, setDocumentContent }: AiChatbotProp
       <CardFooter className="p-4 border-t flex-col items-start gap-4">
         <div className="grid grid-cols-2 gap-2 w-full">
             {aiActions.map(({ label, icon: Icon, action}) => (
-                <Button key={label} variant="outline" size="sm" onClick={action} disabled={isLoading}>
+                <Button key={label} variant="outline" size="sm" onClick={action} disabled={isLoading && label !== 'Insert Section'}>
                     <Icon className="w-4 h-4 mr-2" />
                     {label}
                 </Button>
