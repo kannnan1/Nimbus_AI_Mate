@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -7,9 +8,26 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Feather, Save, History, MessageSquarePlus, Share2 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 export function EditorToolbar() {
   const [documentTitle, setDocumentTitle] = useState("Untitled Document");
+  const [saveStatus, setSaveStatus] = useState("Not saved");
+  const { toast } = useToast();
+
+  const handleSave = () => {
+    // In a real application, this would trigger an API call to save the document.
+    setSaveStatus("Saved");
+    toast({
+      title: "Document Saved!",
+      description: `"${documentTitle}" has been saved successfully.`,
+    });
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDocumentTitle(e.target.value);
+    setSaveStatus("Not saved");
+  }
 
   return (
     <header className="flex h-16 items-center border-b bg-card px-4 shrink-0">
@@ -22,18 +40,18 @@ export function EditorToolbar() {
         <div>
           <Input 
             value={documentTitle}
-            onChange={(e) => setDocumentTitle(e.target.value)}
+            onChange={handleTitleChange}
             className="text-lg font-semibold border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
             aria-label="Document Title"
           />
-          <p className="text-xs text-muted-foreground">Not saved</p>
+          <p className="text-xs text-muted-foreground">{saveStatus}</p>
         </div>
       </div>
       <div className="ml-auto flex items-center gap-2">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" onClick={handleSave}>
                 <Save className="h-4 w-4" />
                 <span className="sr-only">Save</span>
               </Button>
