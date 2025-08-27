@@ -13,7 +13,7 @@ export function EditorToolbar() {
       <div className="flex items-center gap-4">
         <Link href="/" className="flex items-center gap-2 text-primary font-semibold">
           <Feather className="w-5 h-5" />
-          <span>Nimbus AI Mate</span>
+          <span>Nimbus Uno</span>
         </Link>
         <Separator orientation="vertical" className="h-8" />
         <div>
