@@ -8,27 +8,56 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
+import { format } from "date-fns";
+import type { Section } from "@/types/document";
+
+
+export type DocumentVersion = {
+  timestamp: string;
+  content: string;
+  sections: Section[];
+};
 
 interface VersionHistoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  versions: DocumentVersion[];
 }
 
-export function VersionHistoryDialog({ open, onOpenChange }: VersionHistoryDialogProps) {
+export function VersionHistoryDialog({ open, onOpenChange, versions }: VersionHistoryDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Version History</DialogTitle>
           <DialogDescription>
-            Here you would see a list of past saves and the changes between them.
+            A list of all saved versions for this document.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
-          <p className="text-sm text-muted-foreground">
-            This feature is not fully implemented in this prototype. A real implementation would show a timeline of document versions.
-          </p>
-        </div>
+        <ScrollArea className="max-h-[60vh] pr-4">
+          <div className="py-4 space-y-4">
+            {versions.length > 0 ? (
+              versions.map((version, index) => (
+                <Card key={version.timestamp} className="hover:bg-accent/50 cursor-pointer">
+                  <CardContent className="p-4">
+                    <p className="font-semibold">
+                      Saved on {format(new Date(version.timestamp), "MMM d, yyyy 'at' h:mm a")}
+                    </p>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {version.content ? version.content.substring(0, 80) + "..." : "No content"}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center pt-8">
+                No saved versions found for this document.
+              </p>
+            )}
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

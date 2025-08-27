@@ -9,9 +9,9 @@ import { Feather, Save, History, MessageSquarePlus, Share2, ArrowLeft } from "lu
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { formatRelative } from "date-fns";
+import { format, formatRelative } from "date-fns";
 import type { Section } from "@/types/document";
-import { VersionHistoryDialog } from "./version-history-dialog";
+import { VersionHistoryDialog, type DocumentVersion } from "./version-history-dialog";
 
 interface EditorToolbarProps {
   initialTitle?: string;
@@ -23,11 +23,25 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
   const [documentTitle, setDocumentTitle] = useState(initialTitle);
   const [saveStatus, setSaveStatus] = useState("Not saved");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [versionHistory, setVersionHistory] = useState<DocumentVersion[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     setDocumentTitle(initialTitle);
   }, [initialTitle]);
+
+  const loadVersionHistory = () => {
+    if (documentTitle && documentTitle !== "Untitled Document") {
+      const historyString = localStorage.getItem(`doc-history-${documentTitle}`);
+      const history = historyString ? JSON.parse(historyString) : [];
+      setVersionHistory(history);
+    }
+  };
+  
+  const handleOpenHistory = () => {
+    loadVersionHistory();
+    setIsHistoryOpen(true);
+  };
 
   const handleSave = () => {
     if (documentTitle === "Untitled Document" || !documentTitle.trim()) {
@@ -39,9 +53,11 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
       return;
     }
 
-    const lastModified = formatRelative(new Date(), new Date());
+    const now = new Date();
+    const lastModified = formatRelative(now, new Date());
     setSaveStatus(`Saved ${lastModified}`);
     
+    // --- Update main document list ---
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
     
@@ -59,10 +75,24 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
     } else {
       storedDocs.push(newDocData);
     }
-
+    
     storedDocs.sort((a: any, b: any) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime());
-
     localStorage.setItem("myDocuments", JSON.stringify(storedDocs));
+
+    // --- Update version history ---
+    const historyKey = `doc-history-${documentTitle}`;
+    const historyString = localStorage.getItem(historyKey);
+    const history = historyString ? JSON.parse(historyString) : [];
+
+    const newVersion: DocumentVersion = {
+      timestamp: now.toISOString(),
+      content: documentContent,
+      sections: sections,
+    };
+
+    history.unshift(newVersion); // Add new version to the beginning
+    localStorage.setItem(historyKey, JSON.stringify(history));
+
 
     toast({
       title: "Document Saved!",
@@ -118,7 +148,7 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => setIsHistoryOpen(true)}>
+                <Button variant="ghost" size="icon" onClick={handleOpenHistory}>
                   <History className="h-4 w-4" />
                   <span className="sr-only">Version History</span>
                 </Button>
@@ -144,7 +174,11 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
           </Button>
         </div>
       </header>
-      <VersionHistoryDialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen} />
+      <VersionHistoryDialog 
+        open={isHistoryOpen} 
+        onOpenChange={setIsHistoryOpen} 
+        versions={versionHistory} 
+      />
     </>
   );
 }
