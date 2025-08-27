@@ -67,7 +67,7 @@ export function LandingPage() {
         </div>
       </header>
       <div className="flex flex-1">
-        <aside className="w-64 border-r p-4">
+        <aside className="w-64 border-r p-4 bg-[hsl(var(--sidebar-background))]">
             <nav className="flex flex-col gap-2">
                 <Link href="#" className="flex items-center gap-2 p-2 rounded-md bg-accent text-accent-foreground" prefetch={false}>
                     <Bot className="w-5 h-5" />
@@ -75,7 +75,7 @@ export function LandingPage() {
                 </Link>
             </nav>
         </aside>
-        <main className="flex-1 flex items-center justify-center p-4 sm:p-8">
+        <main className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-background">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Welcome to Nimbus AI Mate
