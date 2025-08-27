@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { FileText, PlusCircle, ChevronsRight } from "lucide-react";
 
 export function DocumentSidebar() {
@@ -13,15 +14,29 @@ export function DocumentSidebar() {
           <span>Document Outline</span>
         </h2>
       </div>
-      <div className="p-2 flex items-center gap-2">
-          <Button variant="outline" size="sm" className="flex-1">
-            <PlusCircle className="w-4 h-4 mr-2" />
-            Add Section
-          </Button>
-          <Button variant="outline" size="sm" className="flex-1">
-            <ChevronsRight className="w-4 h-4 mr-2" />
-            Add Subsection
-          </Button>
+      <div className="p-2 flex items-center gap-2 justify-center">
+          <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon">
+                        <PlusCircle className="w-4 h-4" />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Add Section</p>
+                </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon">
+                        <ChevronsRight className="w-4 h-4" />
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Add Subsection</p>
+                </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       <ScrollArea className="flex-1 p-2">
         <div className="p-4 text-center text-sm text-muted-foreground">

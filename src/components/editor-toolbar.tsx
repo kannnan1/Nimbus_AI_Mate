@@ -5,8 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Feather, Save, History, MessageSquarePlus, Share2 } from "lucide-react";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
 
 export function EditorToolbar() {
+  const [documentTitle, setDocumentTitle] = useState("Untitled Document");
+
   return (
     <header className="flex h-16 items-center border-b bg-card px-4 shrink-0">
       <div className="flex items-center gap-4">
@@ -16,7 +20,12 @@ export function EditorToolbar() {
         </Link>
         <Separator orientation="vertical" className="h-8" />
         <div>
-          <h1 className="text-lg font-semibold">Untitled Document</h1>
+          <Input 
+            value={documentTitle}
+            onChange={(e) => setDocumentTitle(e.target.value)}
+            className="text-lg font-semibold border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+            aria-label="Document Title"
+          />
           <p className="text-xs text-muted-foreground">Not saved</p>
         </div>
       </div>

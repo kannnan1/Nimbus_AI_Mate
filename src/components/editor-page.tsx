@@ -4,9 +4,9 @@ import { useState } from "react";
 import { DocumentSidebar } from "@/components/document-sidebar";
 import { EditorToolbar } from "@/components/editor-toolbar";
 import { AiChatbot } from "@/components/ai-chatbot";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { RichTextEditor } from "./rich-text-editor";
 
 const initialDocumentContent = ``;
 
@@ -26,10 +26,9 @@ export function EditorPage() {
             <main className="h-full w-full p-4 flex flex-col">
               <Card className="flex-1 w-full shadow-inner">
                 <CardContent className="p-0 h-full">
-                  <Textarea
+                  <RichTextEditor
                     value={documentContent}
-                    onChange={(e) => setDocumentContent(e.target.value)}
-                    className="h-full w-full resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base"
+                    onChange={setDocumentContent}
                     placeholder="Start writing your document here..."
                   />
                 </CardContent>
