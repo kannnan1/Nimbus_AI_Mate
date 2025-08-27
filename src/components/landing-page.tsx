@@ -1,10 +1,13 @@
+
 "use client";
 
 import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Bot, Feather, User, FilePlus2, LayoutTemplate, CopyPlus } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Bot, Feather, User, FilePlus2, LayoutTemplate, CopyPlus, Eye, Share2, MoreVertical, Trash2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const options: {
@@ -37,6 +40,17 @@ const options: {
     href: "/editor",
     Icon: Bot,
   },
+];
+
+const myDocuments = [
+    { title: "Project Nimbus: Q3 Strategy", lastModified: "2 hours ago" },
+    { title: "Marketing Campaign Brief", lastModified: "1 day ago" },
+    { title: "Onboarding Manual v2", lastModified: "3 days ago" },
+];
+
+const sharedDocuments = [
+    { title: "Q2 Financial Report", sharedBy: "Jane Doe" },
+    { title: "Competitor Analysis", sharedBy: "Steve Miller" },
 ];
 
 export function LandingPage() {
@@ -75,7 +89,7 @@ export function LandingPage() {
                 </Link>
             </nav>
         </aside>
-        <main className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-background">
+        <main className="flex-1 flex flex-col justify-between p-4 sm:p-8 bg-background">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
               Welcome to Nimbus AI Mate
@@ -100,6 +114,84 @@ export function LandingPage() {
                 </Link>
               ))}
             </div>
+          </div>
+
+          <div className="mt-12 max-w-4xl mx-auto w-full">
+             <h2 className="text-2xl font-bold tracking-tight mb-4">Recent Documents</h2>
+             <Tabs defaultValue="my-documents">
+                <TabsList>
+                    <TabsTrigger value="my-documents">Created by me</TabsTrigger>
+                    <TabsTrigger value="shared-with-me">Shared with me</TabsTrigger>
+                </TabsList>
+                <TabsContent value="my-documents">
+                    <div className="grid gap-4 mt-4">
+                        {myDocuments.map((doc) => (
+                            <Card key={doc.title}>
+                                <CardContent className="p-4 flex items-center justify-between">
+                                    <div>
+                                        <h3 className="font-semibold">{doc.title}</h3>
+                                        <p className="text-sm text-muted-foreground">Last modified: {doc.lastModified}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" asChild>
+                                                        <Link href="/editor"><Eye className="h-4 w-4" /></Link>
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent><p>Open document</p></TooltipContent>
+                                            </Tooltip>
+                                             <Tooltip>
+                                                <TooltipTrigger asChild><Button variant="ghost" size="icon"><Share2 className="h-4 w-4" /></Button></TooltipTrigger>
+                                                <TooltipContent><p>Share</p></TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild><Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive/70" /></Button></TooltipTrigger>
+                                                <TooltipContent><p>Delete</p></TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem>Rename</DropdownMenuItem>
+                                                <DropdownMenuItem>Make a copy</DropdownMenuItem>
+                                                <DropdownMenuItem>Download</DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </TabsContent>
+                <TabsContent value="shared-with-me">
+                     <div className="grid gap-4 mt-4">
+                        {sharedDocuments.map((doc) => (
+                            <Card key={doc.title}>
+                                <CardContent className="p-4 flex items-center justify-between">
+                                    <div>
+                                        <h3 className="font-semibold">{doc.title}</h3>
+                                        <p className="text-sm text-muted-foreground">Shared by: {doc.sharedBy}</p>
+                                    </div>
+                                     <div className="flex items-center gap-2">
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" asChild>
+                                                        <Link href="/editor"><Eye className="h-4 w-4" /></Link>
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent><p>Open document</p></TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </TabsContent>
+             </Tabs>
           </div>
         </main>
       </div>
