@@ -26,10 +26,14 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [isAddSubsectionOpen, setIsAddSubsectionOpen] = useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [itemToRename, setItemToRename] = useState<{ id: string; currentTitle: string; type: 'section' | 'subsection', sectionId?: string } | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    // Only update content from sections if the document is new/empty
-    if (initialContent) return;
+    // On initial load, if there's content, we don't want to immediately overwrite it.
+    if (isInitialLoad) {
+      setIsInitialLoad(false);
+      return;
+    }
 
     const generateMarkdownFromSections = (sections: Section[]): string => {
       return sections.map((section, secIndex) => {
@@ -41,7 +45,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
       }).join('');
     };
     setDocumentContent(generateMarkdownFromSections(sections));
-  }, [sections, initialContent]);
+  }, [sections]);
 
   const handleAddSection = (title: string) => {
     const newSection: Section = {
