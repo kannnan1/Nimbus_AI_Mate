@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Feather, Save, History, MessageSquarePlus, Share2 } from "lucide-react";
+import { Feather, Save, History, MessageSquarePlus, Share2, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -49,6 +49,17 @@ export function EditorToolbar() {
       </div>
       <div className="ml-auto flex items-center gap-2">
         <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+               <Button variant="ghost" size="icon" asChild>
+                <Link href="/">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="sr-only">Go Back</span>
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Back to Documents</TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" onClick={handleSave}>
