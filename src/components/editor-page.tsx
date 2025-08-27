@@ -8,19 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
-const initialDocumentContent = `## Project Nimbus: Q3 Strategy
-
-### 1. Introduction
-This document outlines the strategic objectives for Project Nimbus for the third quarter. Our primary focus is on expanding market reach and enhancing product features based on user feedback.
-
-### 2. Key Objectives
-- Objective A: Increase user engagement by 20%.
-- Objective B: Launch version 2.0 of the core platform.
-- Objective C: Penetrate the European market.
-
-### 3. Execution Plan
-The execution will be divided into three main phases...
-`;
+const initialDocumentContent = ``;
 
 export function EditorPage() {
   const [documentContent, setDocumentContent] = useState(initialDocumentContent);

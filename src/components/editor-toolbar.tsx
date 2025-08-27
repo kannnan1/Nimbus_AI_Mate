@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Feather, Save, History, MessageSquarePlus, Users, Share2 } from "lucide-react";
+import { Feather, Save, History, MessageSquarePlus, Share2 } from "lucide-react";
 
 export function EditorToolbar() {
   return (
@@ -17,8 +16,8 @@ export function EditorToolbar() {
         </Link>
         <Separator orientation="vertical" className="h-8" />
         <div>
-          <h1 className="text-lg font-semibold">Project Nimbus: Q3 Strategy</h1>
-          <p className="text-xs text-muted-foreground">Last saved 2 minutes ago</p>
+          <h1 className="text-lg font-semibold">Untitled Document</h1>
+          <p className="text-xs text-muted-foreground">Not saved</p>
         </div>
       </div>
       <div className="ml-auto flex items-center gap-2">
@@ -53,37 +52,7 @@ export function EditorToolbar() {
         </TooltipProvider>
 
         <Separator orientation="vertical" className="h-8 mx-2" />
-
-        <div className="flex items-center -space-x-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Avatar className="h-8 w-8 border-2 border-card">
-                  <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-              </TooltipTrigger>
-              <TooltipContent>Jane Doe</TooltipContent>
-            </Tooltip>
-             <Tooltip>
-              <TooltipTrigger>
-                <Avatar className="h-8 w-8 border-2 border-card">
-                  <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" />
-                  <AvatarFallback>SM</AvatarFallback>
-                </Avatar>
-              </TooltipTrigger>
-              <TooltipContent>Steve Miller</TooltipContent>
-            </Tooltip>
-             <Tooltip>
-              <TooltipTrigger>
-                <Avatar className="h-8 w-8 border-2 border-card">
-                  <AvatarFallback>+2</AvatarFallback>
-                </Avatar>
-              </TooltipTrigger>
-              <TooltipContent>2 others</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+        
         <Button>
           <Share2 className="mr-2 h-4 w-4" />
           Share
