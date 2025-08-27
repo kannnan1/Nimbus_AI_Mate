@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Bot, Feather, User, FilePlus2, LayoutTemplate, CopyPlus, Eye, Share2, MoreVertical, Trash2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { ShareDialog } from "@/components/share-dialog";
 
 const options: {
   title: string;
@@ -54,6 +56,14 @@ const sharedDocuments = [
 ];
 
 export function LandingPage() {
+  const [isShareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<{ title: string } | null>(null);
+
+  const handleShareClick = (doc: { title: string }) => {
+    setSelectedDocument(doc);
+    setShareModalOpen(true);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center" style={{ backgroundColor: '#272d55' }}>
@@ -143,7 +153,7 @@ export function LandingPage() {
                                                 <TooltipContent><p>Open document</p></TooltipContent>
                                             </Tooltip>
                                              <Tooltip>
-                                                <TooltipTrigger asChild><Button variant="ghost" size="icon"><Share2 className="h-4 w-4" /></Button></TooltipTrigger>
+                                                <TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleShareClick(doc)}><Share2 className="h-4 w-4" /></Button></TooltipTrigger>
                                                 <TooltipContent><p>Share</p></TooltipContent>
                                             </Tooltip>
                                             <Tooltip>
@@ -198,6 +208,14 @@ export function LandingPage() {
       <footer className="flex items-center justify-center py-4 border-t">
         <p className="text-sm text-muted-foreground">© 2024 Nimbus Uno. All rights reserved.</p>
       </footer>
+
+      {selectedDocument && (
+        <ShareDialog
+            open={isShareModalOpen}
+            onOpenChange={setShareModalOpen}
+            documentTitle={selectedDocument.title}
+        />
+      )}
     </div>
   );
 }
