@@ -18,11 +18,12 @@ export type DocumentVersion = {
   timestamp: string;
   content: string;
   sections: Section[];
+  summary?: string;
 };
 
 interface VersionHistoryDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpencha: (open: boolean) => void;
   versions: DocumentVersion[];
 }
 
@@ -41,11 +42,16 @@ export function VersionHistoryDialog({ open, onOpenChange, versions }: VersionHi
             {versions.length > 0 ? (
               versions.map((version, index) => (
                 <Card key={version.timestamp} className="hover:bg-accent/50 cursor-pointer">
-                  <CardContent className="p-4">
-                    <p className="font-semibold">
+                  <CardContent className="p-4 space-y-2">
+                    <p className="font-semibold text-sm">
                       Saved on {format(new Date(version.timestamp), "MMM d, yyyy 'at' h:mm a")}
                     </p>
-                    <p className="text-sm text-muted-foreground truncate">
+                     {version.summary && (
+                      <p className="text-sm text-foreground italic">
+                        "{version.summary}"
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground truncate">
                       {version.content ? version.content.substring(0, 80) + "..." : "No content"}
                     </p>
                   </CardContent>

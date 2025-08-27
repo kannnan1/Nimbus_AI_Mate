@@ -88,6 +88,7 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
       timestamp: now.toISOString(),
       content: documentContent,
       sections: sections,
+      summary: "Placeholder: Changes to sections and content will be summarized here.",
     };
 
     history.unshift(newVersion); // Add new version to the beginning
