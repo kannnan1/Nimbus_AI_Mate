@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -44,11 +44,10 @@ const options: {
   },
 ];
 
-const myDocuments = [
-    { title: "Project Nimbus: Q3 Strategy", lastModified: "2 hours ago" },
-    { title: "Marketing Campaign Brief", lastModified: "1 day ago" },
-    { title: "Onboarding Manual v2", lastModified: "3 days ago" },
-];
+type MyDocument = {
+    title: string;
+    lastModified: string;
+};
 
 const sharedDocuments = [
     { title: "Q2 Financial Report", sharedBy: "Jane Doe" },
@@ -58,10 +57,27 @@ const sharedDocuments = [
 export function LandingPage() {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<{ title: string } | null>(null);
+  const [myDocuments, setMyDocuments] = useState<MyDocument[]>([]);
+
+  useEffect(() => {
+    // We need to check for `window` because this component is rendered on the server first.
+    if (typeof window !== "undefined") {
+      const storedDocs = localStorage.getItem("myDocuments");
+      if (storedDocs) {
+        setMyDocuments(JSON.parse(storedDocs));
+      }
+    }
+  }, []);
 
   const handleShareClick = (doc: { title: string }) => {
     setSelectedDocument(doc);
     setShareModalOpen(true);
+  };
+  
+  const handleDeleteDocument = (docTitle: string) => {
+    const updatedDocs = myDocuments.filter(doc => doc.title !== docTitle);
+    setMyDocuments(updatedDocs);
+    localStorage.setItem("myDocuments", JSON.stringify(updatedDocs));
   };
 
   return (
@@ -135,7 +151,10 @@ export function LandingPage() {
                 </TabsList>
                 <TabsContent value="my-documents">
                     <div className="grid gap-4 mt-4">
-                        {myDocuments.map((doc) => (
+                        {myDocuments.length === 0 ? (
+                           <p className="text-center text-muted-foreground mt-4">You haven't created any documents yet.</p>
+                        ) : (
+                          myDocuments.map((doc) => (
                             <Card key={doc.title}>
                                 <CardContent className="p-4 flex items-center justify-between">
                                     <div>
@@ -157,7 +176,7 @@ export function LandingPage() {
                                                 <TooltipContent><p>Share</p></TooltipContent>
                                             </Tooltip>
                                             <Tooltip>
-                                                <TooltipTrigger asChild><Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-destructive/70" /></Button></TooltipTrigger>
+                                                <TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={() => handleDeleteDocument(doc.title)}><Trash2 className="h-4 w-4 text-destructive/70" /></Button></TooltipTrigger>
                                                 <TooltipContent><p>Delete</p></TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
@@ -172,7 +191,8 @@ export function LandingPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        ))}
+                          ))
+                        )}
                     </div>
                 </TabsContent>
                 <TabsContent value="shared-with-me">

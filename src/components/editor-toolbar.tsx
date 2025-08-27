@@ -9,6 +9,7 @@ import { Feather, Save, History, MessageSquarePlus, Share2, ArrowLeft } from "lu
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { formatRelative } from "date-fns";
 
 export function EditorToolbar() {
   const [documentTitle, setDocumentTitle] = useState("Untitled Document");
@@ -16,8 +17,38 @@ export function EditorToolbar() {
   const { toast } = useToast();
 
   const handleSave = () => {
+    if (documentTitle === "Untitled Document" || !documentTitle.trim()) {
+      toast({
+        title: "Cannot Save",
+        description: "Please enter a title for your document before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const lastModified = formatRelative(new Date(), new Date());
+    setSaveStatus(`Saved ${lastModified}`);
+    
     // In a real application, this would trigger an API call to save the document.
-    setSaveStatus("Saved");
+    // For this prototype, we'll use localStorage.
+    const storedDocsString = localStorage.getItem("myDocuments");
+    const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
+    
+    const existingDocIndex = storedDocs.findIndex((doc: {title: string}) => doc.title === documentTitle);
+    
+    if (existingDocIndex > -1) {
+      // Update existing document
+      storedDocs[existingDocIndex].lastModified = lastModified;
+    } else {
+      // Add new document
+      storedDocs.push({ title: documentTitle, lastModified });
+    }
+
+    // Sort documents by date (not perfectly accurate with relative dates, but good for demo)
+    storedDocs.sort((a: any, b: any) => new Date().getTime() - new Date().getTime());
+
+    localStorage.setItem("myDocuments", JSON.stringify(storedDocs));
+
     toast({
       title: "Document Saved!",
       description: `"${documentTitle}" has been saved successfully.`,
