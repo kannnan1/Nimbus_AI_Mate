@@ -9,7 +9,7 @@ import { Feather, Save, History, MessageSquarePlus, Share2, ArrowLeft } from "lu
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { format, formatRelative } from "date-fns";
+import { formatRelative } from "date-fns";
 import type { Section } from "@/types/document";
 import { VersionHistoryDialog, type DocumentVersion } from "./version-history-dialog";
 
@@ -17,9 +17,10 @@ interface EditorToolbarProps {
   initialTitle?: string;
   documentContent: string;
   sections: Section[];
+  onToggleComments: () => void;
 }
 
-export function EditorToolbar({ initialTitle = "Untitled Document", documentContent, sections }: EditorToolbarProps) {
+export function EditorToolbar({ initialTitle = "Untitled Document", documentContent, sections, onToggleComments }: EditorToolbarProps) {
   const [documentTitle, setDocumentTitle] = useState(initialTitle);
   const [saveStatus, setSaveStatus] = useState("Not saved");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -158,7 +159,7 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" onClick={onToggleComments}>
                   <MessageSquarePlus className="h-4 w-4" />
                   <span className="sr-only">Comments</span>
                 </Button>
