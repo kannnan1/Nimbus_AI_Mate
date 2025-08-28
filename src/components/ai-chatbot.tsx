@@ -121,13 +121,36 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     try {
       const result = await automatedSectionQualityChecks({ sectionContent: contentToCheck });
       addMessage("assistant", (
-        <div>
-          <p className="font-semibold mb-2">Quality Score: {result.qualityScore}/100</p>
-          <p className="font-semibold">Feedback:</p>
-          <p>{result.feedback}</p>
+        <div className="space-y-3">
+            <div>
+                <p className="font-semibold mb-2">Quality Assessment:</p>
+                <ul className="space-y-2 text-xs">
+                    <li className="p-2 bg-background/50 rounded-md">
+                        <p><strong>Clarity: {result.clarity.score}/100</strong></p>
+                        <p className="text-muted-foreground">{result.clarity.reasoning}</p>
+                    </li>
+                     <li className="p-2 bg-background/50 rounded-md">
+                        <p><strong>Conciseness: {result.conciseness.score}/100</strong></p>
+                        <p className="text-muted-foreground">{result.conciseness.reasoning}</p>
+                    </li>
+                     <li className="p-2 bg-background/50 rounded-md">
+                        <p><strong>Accuracy: {result.accuracy.score}/100</strong></p>
+                        <p className="text-muted-foreground">{result.accuracy.reasoning}</p>
+                    </li>
+                     <li className="p-2 bg-background/50 rounded-md">
+                        <p><strong>Completeness: {result.completeness.score}/100</strong></p>
+                        <p className="text-muted-foreground">{result.completeness.reasoning}</p>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <p className="font-semibold">Overall Feedback:</p>
+                <p>{result.overallFeedback}</p>
+            </div>
         </div>
       ));
     } catch (error) {
+      console.error(error);
       addMessage("assistant", "Sorry, I couldn't complete the quality check.");
     }
     setIsLoading(false);

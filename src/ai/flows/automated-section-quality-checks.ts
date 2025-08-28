@@ -23,16 +23,20 @@ export type AutomatedSectionQualityChecksInput = z.infer<
   typeof AutomatedSectionQualityChecksInputSchema
 >;
 
+const ScoreSchema = z.object({
+    score: z.number().describe('A numerical score from 0 to 100.'),
+    reasoning: z.string().describe('A brief justification for the score.')
+});
+
 const AutomatedSectionQualityChecksOutputSchema = z.object({
-  qualityScore: z
-    .number()
-    .describe(
-      'A numerical score representing the overall quality of the section.'
-    ),
-  feedback: z
+  clarity: ScoreSchema.describe('Assessment of how easy the section is to understand.'),
+  conciseness: ScoreSchema.describe('Assessment of whether the section is free of unnecessary jargon or wordiness.'),
+  accuracy: ScoreSchema.describe('Assessment of the likely factual accuracy and up-to-dateness of the information.'),
+  completeness: ScoreSchema.describe('Assessment of whether the section covers all necessary information relevant to its topic.'),
+  overallFeedback: z
     .string()
     .describe(
-      'Detailed feedback on the section, including potential issues and suggestions for improvement.'
+      'A summary of potential issues and suggestions for improvement.'
     ),
 });
 export type AutomatedSectionQualityChecksOutput = z.infer<
@@ -49,26 +53,19 @@ const prompt = ai.definePrompt({
   name: 'automatedSectionQualityChecksPrompt',
   input: {schema: AutomatedSectionQualityChecksInputSchema},
   output: {schema: AutomatedSectionQualityChecksOutputSchema},
-  prompt: `You are an AI assistant that reviews documents and provides feedback on their quality, adhering to industry best practices.
+  prompt: `You are an expert documentation reviewer. Analyze the provided section content and score it on a scale of 0 to 100 for each of the following four categories: Clarity, Conciseness, Accuracy, and Completeness.
 
-You will be given a section of a document and, optionally, some context about the overall document.
+You must provide a score and a brief reasoning for each category.
 
-Based on this, you will assess the quality of the section and provide a quality score and detailed feedback.
+Finally, provide a brief "overallFeedback" with actionable suggestions for improvement.
 
-Section Content: {{{sectionContent}}}
-Document Context: {{{documentContext}}}
+**Section Content to Analyze:**
+{{{sectionContent}}}
 
-Consider the following aspects when assessing the section:
-
-*   Clarity: Is the section easy to understand?
-*   Conciseness: Is the section free of unnecessary jargon?
-*   Accuracy: Is the information presented accurate and up-to-date?
-*   Completeness: Does the section cover all the necessary information?
-*   Relevance: Is the section relevant to the overall document?
-
-Provide a quality score between 0 and 100, where 0 is the lowest quality and 100 is the highest quality.
-
-Provide detailed feedback on the section, including potential issues and suggestions for improvement.
+{{#if documentContext}}
+**Overall Document Context:**
+{{{documentContext}}}
+{{/if}}
 `,
 });
 
