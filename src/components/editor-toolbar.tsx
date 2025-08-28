@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Feather, Save, History, MessageSquarePlus, ArrowLeft, ClipboardPlus } from "lucide-react";
+import { Feather, Save, History, MessageSquarePlus, ArrowLeft, ClipboardPlus, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import type { Section } from "@/types/document";
 import { VersionHistoryDialog, type DocumentVersion } from "./version-history-dialog";
 import type { Comment } from "./comments-sidebar";
+import { PreviewDialog } from "./preview-dialog";
 
 interface EditorToolbarProps {
   initialTitle?: string;
@@ -34,6 +35,7 @@ export function EditorToolbar({
   const [documentTitle, setDocumentTitle] = useState(initialTitle);
   const [saveStatus, setSaveStatus] = useState("Not saved");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [versionHistory, setVersionHistory] = useState<DocumentVersion[]>([]);
   const { toast } = useToast();
 
@@ -170,6 +172,15 @@ export function EditorToolbar({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={() => setIsPreviewOpen(true)}>
+                  <Eye className="h-4 w-4" />
+                  <span className="sr-only">Preview</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Preview</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" onClick={onToggleComments}>
                   <MessageSquarePlus className="h-4 w-4" />
                   <span className="sr-only">Comments</span>
@@ -191,6 +202,12 @@ export function EditorToolbar({
         open={isHistoryOpen} 
         onOpenChange={setIsHistoryOpen} 
         versions={versionHistory} 
+      />
+      <PreviewDialog
+        open={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+        title={documentTitle}
+        content={documentContent}
       />
     </>
   );
