@@ -91,10 +91,10 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
 
   useEffect(() => {
     const generateMarkdownFromSections = (sections: Section[]): string => {
-      return sections.map((section, secIndex) => {
-        const sectionTitle = `# ${secIndex + 1}. ${section.title}\n\n`;
-        const subsectionsContent = section.subsections.map((subsection, subIndex) => {
-          return `## ${secIndex + 1}.${subIndex + 1}. ${subsection.title}\n\n`;
+      return sections.map((section) => {
+        const sectionTitle = `# ${section.title}\n\n`;
+        const subsectionsContent = section.subsections.map((subsection) => {
+          return `## ${subsection.title}\n\n`;
         }).join('');
         return sectionTitle + subsectionsContent;
       }).join('');
