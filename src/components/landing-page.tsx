@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Bot, User, FilePlus2, LayoutTemplate, CopyPlus, Eye, Share2, MoreVertical, Trash2, BarChart, Copy, Folder, Download, ClipboardPlus, CheckCircle, FileText, Monitor } from "lucide-react";
+import { Bot, User, FilePlus2, LayoutTemplate, CopyPlus, Eye, Share2, MoreVertical, Trash2, Copy, Folder, Download, ClipboardPlus, CheckCircle, FileText } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { TemplateSelectionDialog } from "./template-selection-dialog";
@@ -26,9 +26,7 @@ type MyDocument = {
     lastModified: string;
     createdAt: string;
     projectId: string;
-    datasetCount: number;
-    projectType: string;
-    modelType: string;
+    documentType: string;
     content?: string;
     sections?: Section[];
     comments?: Comment[];
@@ -65,9 +63,7 @@ export function LandingPage() {
         ...doc,
         createdAt: doc.createdAt || (isValidDate ? new Date(lastModifiedDate.getTime() - 86400000).toISOString() : new Date().toISOString()),
         projectId: doc.projectId || Math.floor(1000 + Math.random() * 9000).toString(),
-        datasetCount: doc.datasetCount || Math.floor(2 + Math.random() * 10),
-        projectType: doc.projectType || "Model Validation",
-        modelType: doc.modelType || "Classification",
+        documentType: doc.documentType || "Blank Document",
       }});
 
       setMyDocuments(enhancedDocs);
@@ -87,6 +83,7 @@ export function LandingPage() {
   };
 
   const handleOptionSelect = (option: 'blank' | 'template' | 'populated' | 'auto', title: string) => {
+    setNewDocumentTitle(title);
     if (option === 'blank') {
         const newDoc = {
             title: title,
@@ -94,6 +91,7 @@ export function LandingPage() {
             content: `# ${title}\n\n`,
             sections: [],
             comments: [],
+            documentType: "Blank Document",
         };
         const storedDocsString = localStorage.getItem("myDocuments");
         const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
@@ -101,7 +99,6 @@ export function LandingPage() {
         localStorage.setItem("myDocuments", JSON.stringify(storedDocs));
         router.push(`/editor?title=${encodeURIComponent(newDoc.title)}`);
     } else {
-        setNewDocumentTitle(title);
         if (option === 'template') setTemplateModalOpen(true);
         if (option === 'populated') setIsPopulatedModalOpen(true);
         if (option === 'auto') setIsSmartModalOpen(true);
@@ -110,7 +107,7 @@ export function LandingPage() {
 
 
   const documentActions = [
-    { icon: BarChart, tooltip: "View Analytics" },
+    { icon: Eye, tooltip: "View Document" },
     { icon: Copy, tooltip: "Duplicate" },
     { icon: Folder, tooltip: "Move" },
     { icon: Download, tooltip: "Download" },
@@ -118,7 +115,6 @@ export function LandingPage() {
     { icon: CheckCircle, tooltip: "Validate" },
     { icon: FileText, tooltip: "Generate Report" },
     { icon: Share2, tooltip: "Share" },
-    { icon: Monitor, tooltip: "Deploy" },
     { icon: Trash2, tooltip: "Delete" },
   ];
   
@@ -127,12 +123,17 @@ export function LandingPage() {
       handleShareClick(doc);
     } else if (action === "Delete") {
       handleDeleteDocument(doc.title);
+    } else if (action === "View Document") {
+      router.push(`/editor?title=${encodeURIComponent(doc.title)}`);
     }
     // Handle other actions...
   };
 
   const formatDate = (dateString: string) => {
     try {
+        if (!dateString || isNaN(new Date(dateString).getTime())) {
+             return "Not available";
+        }
         return format(new Date(dateString), "MMM d, yyyy");
     } catch (error) {
         return "Invalid date";
@@ -193,16 +194,12 @@ export function LandingPage() {
                                 <CardContent className="p-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm flex-1">
                                     <div className="font-medium text-muted-foreground">Project ID</div>
                                     <div>{doc.projectId}</div>
-                                    <div className="font-medium text-muted-foreground">Dataset count</div>
-                                    <div>{doc.datasetCount}</div>
                                     <div className="font-medium text-muted-foreground">Created at</div>
                                     <div>{formatDate(doc.createdAt)}</div>
                                     <div className="font-medium text-muted-foreground">Updated at</div>
                                     <div>{formatDate(doc.lastModified)}</div>
-                                    <div className="font-medium text-muted-foreground">Project type</div>
-                                    <div>{doc.projectType}</div>
-                                    <div className="font-medium text-muted-foreground">Model type</div>
-                                    <div>{doc.modelType}</div>
+                                    <div className="font-medium text-muted-foreground">Document type</div>
+                                    <div>{doc.documentType}</div>
                                 </CardContent>
                                 <div className="p-2 border-t flex flex-wrap justify-center gap-1">
                                     <TooltipProvider>
@@ -292,3 +289,5 @@ export function LandingPage() {
     </>
   );
 }
+
+    
