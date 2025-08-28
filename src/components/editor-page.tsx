@@ -211,9 +211,6 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
                     placeholder="Start writing your document here..."
                     onSelectText={(text) => {
                       setSelectedText(text);
-                      if (text) {
-                        setIsCommentsOpen(true);
-                      }
                     }}
                   />
                 </CardContent>
