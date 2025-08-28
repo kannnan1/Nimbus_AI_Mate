@@ -237,7 +237,11 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
                   <AddResultsSidebar onAddResult={(result) => setDocumentContent(prev => prev + `\n\n${result}`)} />
                )}
                {isPreviewOpen && (
-                  <PreviewSidebar title={documentTitle} content={documentContent} />
+                  <PreviewSidebar 
+                    title={documentTitle} 
+                    content={documentContent} 
+                    onClose={() => setIsPreviewOpen(false)}
+                  />
                )}
              </ResizablePanel>
           </div>
