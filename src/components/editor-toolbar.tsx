@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Feather, Save, History, MessageSquarePlus, Share2, ArrowLeft } from "lucide-react";
+import { Feather, Save, History, MessageSquarePlus, ArrowLeft, ClipboardPlus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -20,9 +20,17 @@ interface EditorToolbarProps {
   sections: Section[];
   comments: Comment[];
   onToggleComments: () => void;
+  onToggleAddResults: () => void;
 }
 
-export function EditorToolbar({ initialTitle = "Untitled Document", documentContent, sections, comments, onToggleComments }: EditorToolbarProps) {
+export function EditorToolbar({ 
+  initialTitle = "Untitled Document", 
+  documentContent, 
+  sections, 
+  comments, 
+  onToggleComments,
+  onToggleAddResults
+}: EditorToolbarProps) {
   const [documentTitle, setDocumentTitle] = useState(initialTitle);
   const [saveStatus, setSaveStatus] = useState("Not saved");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -173,9 +181,9 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
 
           <Separator orientation="vertical" className="h-8 mx-2" />
           
-          <Button>
-            <Share2 className="mr-2 h-4 w-4" />
-            Share
+          <Button onClick={onToggleAddResults}>
+            <ClipboardPlus className="mr-2 h-4 w-4" />
+            Add Results
           </Button>
         </div>
       </header>

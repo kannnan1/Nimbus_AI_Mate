@@ -6,6 +6,7 @@ import { DocumentSidebar } from "@/components/document-sidebar";
 import { EditorToolbar } from "@/components/editor-toolbar";
 import { AiChatbot } from "@/components/ai-chatbot";
 import { CommentsSidebar, type Comment } from "@/components/comments-sidebar";
+import { AddResultsSidebar } from "@/components/add-results-sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { RichTextEditor } from "./rich-text-editor";
@@ -14,6 +15,7 @@ import { RenameSectionDialog } from "@/components/rename-section-dialog";
 import type { Section, SubSection } from "@/types/document";
 import { Button } from "./ui/button";
 import { Bot } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface EditorPageProps {
   initialTitle?: string;
@@ -31,6 +33,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [itemToRename, setItemToRename] = useState<{ id: string; currentTitle: string; type: 'section' | 'subsection', sectionId?: string } | null>(null);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [isAddResultsOpen, setIsAddResultsOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
@@ -156,6 +159,20 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     setSelectedText(null);
   };
 
+  const onToggleAddResults = () => {
+    setIsAddResultsOpen(!isAddResultsOpen);
+    if (!isAddResultsOpen) {
+      setIsCommentsOpen(false);
+    }
+  };
+
+  const onToggleComments = () => {
+    setIsCommentsOpen(!isCommentsOpen);
+     if (!isCommentsOpen) {
+      setIsAddResultsOpen(false);
+    }
+  };
+
   return (
     <div className="h-screen w-screen flex flex-col bg-accent/40 overflow-hidden">
       <EditorToolbar 
@@ -163,7 +180,8 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
         documentContent={documentContent} 
         sections={sections} 
         comments={comments}
-        onToggleComments={() => setIsCommentsOpen(!isCommentsOpen)}
+        onToggleComments={onToggleComments}
+        onToggleAddResults={onToggleAddResults}
       />
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full w-full">
@@ -180,7 +198,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={isCommentsOpen ? 60 : 80} minSize={40}>
+          <ResizablePanel defaultSize={isCommentsOpen || isAddResultsOpen ? 60 : 80} minSize={40}>
             <main className="h-full w-full p-4 flex flex-col">
               <Card className="flex-1 w-full shadow-inner relative">
                 <CardContent className="p-0 h-full">
@@ -200,20 +218,23 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             </main>
           </ResizablePanel>
           
-          {isCommentsOpen && (
-            <>
-              <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-                <CommentsSidebar 
-                  comments={comments}
-                  setComments={setComments}
-                  onAddComment={handleAddComment}
-                  selectedText={selectedText}
-                  onClearSelection={() => setSelectedText(null)}
-                />
-              </ResizablePanel>
-            </>
-          )}
+          <div className={cn("transition-all duration-300", (isCommentsOpen || isAddResultsOpen) ? "block" : "hidden")}>
+             <ResizableHandle withHandle />
+             <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+               {isCommentsOpen && (
+                  <CommentsSidebar 
+                    comments={comments}
+                    setComments={setComments}
+                    onAddComment={handleAddComment}
+                    selectedText={selectedText}
+                    onClearSelection={() => setSelectedText(null)}
+                  />
+               )}
+               {isAddResultsOpen && (
+                  <AddResultsSidebar onAddResult={(result) => setDocumentContent(prev => prev + `\n\n${result}`)} />
+               )}
+             </ResizablePanel>
+          </div>
         </ResizablePanelGroup>
       </div>
       
