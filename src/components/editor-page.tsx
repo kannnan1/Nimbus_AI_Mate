@@ -40,6 +40,13 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const dragStartPos = useRef({ x: 0, y: 0 });
   const hasSetInitialPosition = useRef(false);
 
+  useEffect(() => {
+    // If there are comments loaded with the document, open the sidebar automatically.
+    if (initialComments && initialComments.length > 0) {
+      setIsCommentsOpen(true);
+    }
+  }, [initialComments]);
+
 
   useEffect(() => {
     if (!hasSetInitialPosition.current) {
