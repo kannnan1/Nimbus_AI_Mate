@@ -28,7 +28,7 @@ interface CommentsSidebarProps {
   onClearSelection: () => void;
 }
 
-const teamMembers = ["Alice", "Bob", "Charlie", "David"];
+const teamMembers = ["Alex Doe", "Jane Smith", "Bob Johnson", "Alice Williams"];
 
 export function CommentsSidebar({ comments, selectedText, onAddComment, onClearSelection }: CommentsSidebarProps) {
   const [commentText, setCommentText] = useState("");
@@ -110,7 +110,7 @@ export function CommentsSidebar({ comments, selectedText, onAddComment, onClearS
             <div className="flex items-center gap-2">
                  <User className="w-4 h-4 text-muted-foreground" />
                  <Select value={assignedTo} onValueChange={setAssignedTo} disabled={!selectedText}>
-                    <SelectTrigger className="w-[120px] h-8">
+                    <SelectTrigger className="w-[140px] h-8">
                         <SelectValue placeholder="Assign to..." />
                     </SelectTrigger>
                     <SelectContent>

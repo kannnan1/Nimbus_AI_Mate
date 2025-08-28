@@ -29,19 +29,12 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [isAddSubsectionOpen, setIsAddSubsectionOpen] = useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [itemToRename, setItemToRename] = useState<{ id: string; currentTitle: string; type: 'section' | 'subsection', sectionId?: string } | null>(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   useEffect(() => {
-    // On initial load, if there's content, we don't want to immediately overwrite it.
-    if (isInitialLoad) {
-      setIsInitialLoad(false);
-      return;
-    }
-
     const generateMarkdownFromSections = (sections: Section[]): string => {
       return sections.map((section, secIndex) => {
         const sectionTitle = `# ${secIndex + 1}. ${section.title}\n\n`;
@@ -52,7 +45,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
       }).join('');
     };
     setDocumentContent(generateMarkdownFromSections(sections));
-  }, [sections, isInitialLoad]);
+  }, [sections]);
 
   const handleAddSection = (title: string) => {
     const newSection: Section = {
@@ -179,12 +172,15 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
         </div>
       )}
 
-      <Button 
-        className="absolute bottom-4 right-4 rounded-full w-14 h-14 shadow-lg"
-        onClick={() => setIsChatbotOpen(!isChatbotOpen)}
-      >
-        <Bot className="w-6 h-6" />
-      </Button>
+      {!isChatbotOpen && (
+        <Button 
+          className="absolute bottom-4 right-4 rounded-full w-14 h-14 shadow-lg"
+          onClick={() => setIsChatbotOpen(true)}
+        >
+          <Bot className="w-6 h-6" />
+        </Button>
+      )}
+
 
        <AddSectionDialog
         open={isAddSectionOpen}
