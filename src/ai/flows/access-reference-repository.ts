@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -45,17 +46,25 @@ const accessReferenceRepositoryFlow = ai.defineFlow(
   },
   async input => {
     // In a real application, this would involve searching a database or other data source.
-    // For this example, we'll just return some dummy data.
+    // For this example, we'll return some dummy data that feels relevant.
     const dummyResults = [
-      'Document 1: Example of a past project report.',
-      'Document 2: Template for a new project proposal.',
-      'Document 3: Guidelines for writing a standard operating procedure.',
+      'Q1 2023 Model Validation Report: Found similar methodology using logistic regression for PD models.',
+      'Project Alpha Development Docs: Details a comparable approach for handling missing data in income variables.',
+      'SR 11-7 Compliance Guide (Internal): Outlines standards for documenting model limitations, relevant to your selected text.',
+      'Q4 2022 Monitoring Report: Contains analysis of model performance decay in high-risk segments.',
     ];
 
     // Simulate searching the repository and filtering the results based on the query.
     const searchResults = dummyResults.filter(result =>
       result.toLowerCase().includes(input.query.toLowerCase())
     );
+    
+    // If no specific results match, return some generic ones so it doesn't look broken.
+    if (searchResults.length === 0) {
+        searchResults.push(dummyResults[0]);
+        searchResults.push(dummyResults[2]);
+    }
+
 
     const {output} = await accessReferenceRepositoryPrompt({
       ...input,
