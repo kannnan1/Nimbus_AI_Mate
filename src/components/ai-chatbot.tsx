@@ -14,6 +14,8 @@ import { insertSectionsFromPastDocuments } from "@/ai/flows/insert-sections-from
 import { automatedSectionQualityChecks } from "@/ai/flows/automated-section-quality-checks";
 import { cn } from "@/lib/utils";
 import { Textarea } from "./ui/textarea";
+import { Switch } from "./ui/switch";
+import { Label } from "./ui/label";
 
 type Message = {
   id: number;
@@ -27,14 +29,16 @@ interface AiChatbotProps {
   onInsertSection: () => void;
   onClose?: () => void;
   selectedText?: string | null;
+  onInsertTextAtCursor: (text: string) => void;
 }
 
-export function AiChatbot({ documentContent, setDocumentContent, onInsertSection, onClose, selectedText }: AiChatbotProps) {
+export function AiChatbot({ documentContent, setDocumentContent, onInsertSection, onClose, selectedText, onInsertTextAtCursor }: AiChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, role: "assistant", content: "Hello! I'm your Nimbus AI assistant. How can I help you with this document? You can select text to use it in your queries." },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [mode, setMode] = useState<"ask" | "agent">("ask");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,6 +52,9 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
 
   const addMessage = (role: "user" | "assistant", content: React.ReactNode) => {
     setMessages((prev) => [...prev, { id: Date.now(), role, content }]);
+    if (role === 'assistant' && mode === 'agent' && typeof content === 'string') {
+        onInsertTextAtCursor(`\n\n${content}\n\n`);
+    }
   };
 
   const handleSearchRepository = async () => {
@@ -64,14 +71,15 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
 
     try {
       const result = await accessReferenceRepository({ query: query });
-      addMessage("assistant", (
+      const responseContent = (
         <div>
           <p className="font-semibold mb-2">Found {result.results.length} relevant documents:</p>
           <ul className="list-disc pl-5 space-y-1">
             {result.results.map((doc, i) => <li key={i}>{doc}</li>)}
           </ul>
         </div>
-      ));
+      );
+      addMessage("assistant", responseContent);
     } catch (error) {
       addMessage("assistant", "Sorry, I couldn't access the repository at the moment.");
     }
@@ -85,13 +93,14 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     try {
       const pastStandards = "All project documents must include a 'Stakeholders' section and a 'Risk Assessment' section. The tone should be formal and objective.";
       const result = await documentAlignmentTool({ currentDocument: documentContent, pastDocumentStandards: pastStandards });
-      addMessage("assistant", (
+       const responseContent = (
         <div>
           <p className="font-semibold mb-2">Alignment Score: {result.alignmentScore}/100</p>
           <p className="font-semibold">Suggestions:</p>
           <p>{result.suggestions}</p>
         </div>
-      ));
+      );
+      addMessage("assistant", responseContent);
     } catch (error) {
       addMessage("assistant", "Sorry, I couldn't perform the alignment check.");
     }
@@ -120,7 +129,7 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     addMessage("user", `Perform a quality check on the ${selectedText ? 'selected text' : 'document'}.`);
     try {
       const result = await automatedSectionQualityChecks({ sectionContent: contentToCheck });
-      addMessage("assistant", (
+      const responseContent = (
         <div className="space-y-3">
             <div>
                 <p className="font-semibold mb-2">Quality Assessment:</p>
@@ -148,7 +157,8 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
                 <p>{result.overallFeedback}</p>
             </div>
         </div>
-      ));
+      );
+      addMessage("assistant", responseContent);
     } catch (error) {
       console.error(error);
       addMessage("assistant", "Sorry, I couldn't complete the quality check.");
@@ -170,7 +180,8 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
 
     // Mock response
     setTimeout(() => {
-      addMessage("assistant", "This is a mock response based on your query. For a full conversational experience, integrate a conversational AI model.");
+        const mockResponse = `This is a mock response based on your query: "${input}". In Agent mode, this text would also be added to your document.`;
+        addMessage("assistant", mockResponse);
     }, 500);
     
     setInput("");
@@ -267,7 +278,7 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={"Ask a follow-up question..."}
+            placeholder={selectedText ? "Ask about selected text..." : "Ask a follow-up question..."}
             disabled={isLoading}
             rows={2}
             className="min-h-0"
@@ -276,9 +287,13 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
             <Send className="h-4 w-4" />
           </Button>
         </form>
+
+        <div className="flex items-center space-x-2 w-full justify-end pt-2 border-t">
+          <Label htmlFor="agent-mode" className={cn("text-muted-foreground", mode === "ask" && "text-primary font-semibold")}>Ask</Label>
+          <Switch id="agent-mode" checked={mode === 'agent'} onCheckedChange={(checked) => setMode(checked ? 'agent' : 'ask')} />
+          <Label htmlFor="agent-mode" className={cn("text-muted-foreground", mode === "agent" && "text-primary font-semibold")}>Agent</Label>
+        </div>
       </CardFooter>
     </Card>
   );
 }
-
-    

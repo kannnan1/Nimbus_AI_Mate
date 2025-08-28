@@ -45,6 +45,8 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const hasSetInitialPosition = useRef(false);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+
 
   useEffect(() => {
     // If there are comments loaded with the document, open the sidebar automatically.
@@ -173,6 +175,26 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     }
   };
 
+  const handleInsertTextAtCursor = (text: string) => {
+    const textarea = editorRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentText = textarea.value;
+
+    const newText = currentText.substring(0, start) + text + currentText.substring(end);
+
+    setDocumentContent(newText);
+
+    // This is a bit of a hack to move the cursor after the inserted text.
+    // In a real rich text editor, the library would handle this.
+    setTimeout(() => {
+        textarea.selectionStart = start + text.length;
+        textarea.selectionEnd = start + text.length;
+    }, 0);
+  };
+
   const showRightPanel = isCommentsOpen || isAddResultsOpen || isPreviewOpen;
 
   return (
@@ -208,6 +230,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
               <Card className="flex-1 w-full shadow-inner relative">
                 <CardContent className="p-0 h-full">
                   <RichTextEditor
+                    ref={editorRef}
                     value={documentContent}
                     onChange={setDocumentContent}
                     placeholder="Start writing your document here..."
@@ -259,6 +282,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
               onInsertSection={() => setIsAddSectionOpen(true)}
               onClose={() => setIsChatbotOpen(false)}
               selectedText={selectedText}
+              onInsertTextAtCursor={handleInsertTextAtCursor}
             />
         </div>
       )}
