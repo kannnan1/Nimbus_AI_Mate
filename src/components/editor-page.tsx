@@ -212,7 +212,9 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
                     onChange={setDocumentContent}
                     placeholder="Start writing your document here..."
                     onSelectText={(text) => {
-                      setSelectedText(text);
+                      if (text) {
+                        setSelectedText(text);
+                      }
                     }}
                   />
                 </CardContent>
