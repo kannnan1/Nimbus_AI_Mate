@@ -134,9 +134,10 @@ const initialTemplates: Template[] = [
 interface TemplateSelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  documentTitle: string;
 }
 
-export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectionDialogProps) {
+export function TemplateSelectionDialog({ open, onOpenChange, documentTitle }: TemplateSelectionDialogProps) {
   const [templates, setTemplates] = useState<Template[]>(initialTemplates);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(templates[0]);
   const [isAddTemplateOpen, setIsAddTemplateOpen] = useState(false);
@@ -161,15 +162,16 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
   };
 
   const handleGoToEditor = () => {
-    if (!selectedTemplate) return;
+    if (!selectedTemplate || !documentTitle) return;
     
     setIsNavigating(true);
 
     const generatedContent = generateContentFromSections(selectedTemplate.sections);
 
     const newDoc = {
-      title: selectedTemplate.name,
+      title: documentTitle,
       lastModified: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       content: generatedContent,
       sections: selectedTemplate.sections,
       comments: [],
@@ -222,7 +224,7 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
             <div className="space-y-1.5">
                 <DialogTitle>Start with a Template</DialogTitle>
                 <DialogDescription>
-                    Select a template to kickstart your document creation process.
+                    Select a template to kickstart your document: '{documentTitle}'.
                 </DialogDescription>
             </div>
             <Button variant="outline" onClick={() => setIsAddTemplateOpen(true)}>

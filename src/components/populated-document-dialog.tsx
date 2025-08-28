@@ -163,9 +163,10 @@ Management agrees with the findings and recommendations presented in this report
 interface PopulatedDocumentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  documentTitle: string;
 }
 
-export function PopulatedDocumentDialog({ open, onOpenChange }: PopulatedDocumentDialogProps) {
+export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: PopulatedDocumentDialogProps) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
@@ -201,21 +202,23 @@ export function PopulatedDocumentDialog({ open, onOpenChange }: PopulatedDocumen
 
 
   const handleGoToEditor = () => {
+    if (!documentTitle) return;
     setIsNavigating(true);
     
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
     
-    let docTitle = populatedSR117ValidationReport.name;
+    let docTitle = documentTitle;
     let counter = 1;
     while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
-      docTitle = `${populatedSR117ValidationReport.name} (${counter})`;
+      docTitle = `${documentTitle} (${counter})`;
       counter++;
     }
 
     const newDoc = {
       title: docTitle,
       lastModified: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       content: populatedSR117ValidationReport.content,
       sections: populatedSR117ValidationReport.sections,
       comments: [],
@@ -237,7 +240,7 @@ export function PopulatedDocumentDialog({ open, onOpenChange }: PopulatedDocumen
         <DialogHeader>
             <DialogTitle>Start with a Populated Document</DialogTitle>
             <DialogDescription>
-                Select a project, pipeline, and version to start with a pre-filled draft.
+                Select a project, pipeline, and version to start with a pre-filled draft for '{documentTitle}'.
             </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

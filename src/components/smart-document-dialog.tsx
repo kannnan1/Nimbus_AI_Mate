@@ -195,9 +195,10 @@ const generationSteps = [
 interface SmartDocumentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  documentTitle: string;
 }
 
-export function SmartDocumentDialog({ open, onOpenChange }: SmartDocumentDialogProps) {
+export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: SmartDocumentDialogProps) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
@@ -257,22 +258,22 @@ export function SmartDocumentDialog({ open, onOpenChange }: SmartDocumentDialogP
   };
 
   const finishGeneration = () => {
+    if (!documentTitle) return;
+
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
     
-    const projectName = projects.find(p => p.id === selectedProjectId)?.name || "New Project";
-    const templateName = populatedSR117ValidationReport.name;
-    let baseDocTitle = `${projectName} - ${templateName}`;
-    let docTitle = baseDocTitle;
+    let docTitle = documentTitle;
     let counter = 1;
     while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
-      docTitle = `${baseDocTitle} (${counter})`;
+      docTitle = `${documentTitle} (${counter})`;
       counter++;
     }
 
     const newDoc = {
       title: docTitle,
       lastModified: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       content: populatedSR117ValidationReport.content,
       sections: populatedSR117ValidationReport.sections,
       comments: [],
@@ -300,7 +301,7 @@ export function SmartDocumentDialog({ open, onOpenChange }: SmartDocumentDialogP
         <DialogHeader>
             <DialogTitle>Smart Document Generation</DialogTitle>
             <DialogDescription>
-                Select your project, pipeline, and template to let the AI assistant create a draft for you.
+                Select your project, pipeline, and template to create a draft for '{documentTitle}'.
             </DialogDescription>
         </DialogHeader>
         {isGenerating ? (
