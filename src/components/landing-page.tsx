@@ -112,7 +112,7 @@ export function LandingPage() {
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-16 flex items-center" style={{ backgroundColor: '#272d55' }}>
         <Link href="#" className="flex items-center justify-center gap-2" prefetch={false}>
-          <Image src="https://i.imgur.com/gC2gS1z.png" alt="Nimbus Uno Logo" width={150} height={40} />
+          <Image src="https://i.imgur.com/gC2gS1z.png" alt="Nimbus Uno Application Logo" width={150} height={40} />
         </Link>
         <div className="ml-auto">
             <DropdownMenu>
