@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Loader2 } from "lucide-react";
+import { Loader2, FileText } from "lucide-react";
 import type { Section } from "@/types/document";
 import type { Template } from "./template-selection-dialog";
 
@@ -167,14 +167,22 @@ Management agrees with the findings and recommendations presented in this report
 };
 
 const generationSteps = [
-    "Initializing document generation...",
-    "Analyzing pipeline results...",
-    "Mapping results to template sections...",
-    "Searching reference documents for context...",
-    "Generating interpretations for charts and tables...",
-    "Checking document for quality and alignment...",
-    "Finalizing document assembly...",
-    "Almost there...",
+    { message: "Initializing document generation..." },
+    { message: "Analyzing pipeline results..." },
+    { message: "Mapping results to template sections..." },
+    { 
+      message: "Searching reference documents for context...",
+      details: [
+        "Q1 2023 Model Validation: Found similar methodology...",
+        "Project Alpha Docs: Details comparable data handling...",
+        "SR 11-7 Guide: Outlines standards for model limitations...",
+        "Q4 2022 Monitoring: Contains performance decay analysis...",
+      ]
+    },
+    { message: "Generating interpretations for charts and tables..." },
+    { message: "Checking document for quality and alignment..." },
+    { message: "Finalizing document assembly..." },
+    { message: "Almost there..." },
 ];
 
 
@@ -194,7 +202,7 @@ export function SmartDocumentDialog({ open, onOpenChange }: SmartDocumentDialogP
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [statusMessage, setStatusMessage] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
   
   const router = useRouter();
 
@@ -224,18 +232,19 @@ export function SmartDocumentDialog({ open, onOpenChange }: SmartDocumentDialogP
   const handleCreateDocument = () => {
     setIsGenerating(true);
     setProgress(0);
-    setStatusMessage(generationSteps[0]);
+    setCurrentStep(0);
 
     const interval = setInterval(() => {
       setProgress(prev => {
-        const nextProgress = prev + 10;
-        const stepIndex = Math.floor(nextProgress / (100 / generationSteps.length));
-        setStatusMessage(generationSteps[stepIndex] || generationSteps[generationSteps.length - 1]);
+        const nextProgress = prev + (100 / generationSteps.length);
         
         if (nextProgress >= 100) {
           clearInterval(interval);
           finishGeneration();
+          return 100;
         }
+        
+        setCurrentStep(prevStep => prevStep + 1);
         return nextProgress;
       });
     }, 1500);
@@ -245,10 +254,13 @@ export function SmartDocumentDialog({ open, onOpenChange }: SmartDocumentDialogP
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
     
-    let docTitle = populatedSR117ValidationReport.name;
+    const projectName = projects.find(p => p.id === selectedProjectId)?.name || "New Project";
+    const templateName = populatedSR117ValidationReport.name;
+    let baseDocTitle = `${projectName} - ${templateName}`;
+    let docTitle = baseDocTitle;
     let counter = 1;
     while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
-      docTitle = `${populatedSR117ValidationReport.name} (${counter})`;
+      docTitle = `${baseDocTitle} (${counter})`;
       counter++;
     }
 
@@ -269,10 +281,12 @@ export function SmartDocumentDialog({ open, onOpenChange }: SmartDocumentDialogP
         // Reset state for next time
         setIsGenerating(false);
         setProgress(0);
+        setCurrentStep(0);
     }, 500);
   };
 
   const isButtonDisabled = !selectedProjectId || !selectedPipelineId || !selectedVersion || !selectedTemplateId;
+  const currentStatus = generationSteps[currentStep] || generationSteps[generationSteps.length - 1];
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isGenerating && onOpenChange(isOpen)}>
@@ -288,8 +302,19 @@ export function SmartDocumentDialog({ open, onOpenChange }: SmartDocumentDialogP
                 <Progress value={progress} className="w-full" />
                 <div className="flex items-center justify-center text-sm text-muted-foreground">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    <p>{statusMessage}</p>
+                    <p>{currentStatus.message}</p>
                 </div>
+                {currentStatus.details && (
+                    <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-2 animate-in fade-in-50">
+                        <p className="text-sm font-semibold text-foreground">Sourcing from:</p>
+                        {currentStatus.details.map((detail, index) => (
+                           <div key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <FileText className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{detail}</span>
+                           </div>
+                        ))}
+                    </div>
+                )}
             </div>
         ) : (
           <>
