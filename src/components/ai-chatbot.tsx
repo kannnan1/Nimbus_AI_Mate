@@ -4,16 +4,16 @@
 import type { Dispatch, SetStateAction } from "react";
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Sparkles, Book, Scale, ClipboardPlus, CheckCircle, Bot, User, X } from "lucide-react";
+import { Send, Sparkles, Book, Scale, ClipboardPlus, CheckCircle, Bot, User, X, CornerDownLeft } from "lucide-react";
 import { accessReferenceRepository } from "@/ai/flows/access-reference-repository";
 import { documentAlignmentTool } from "@/ai/flows/document-alignment-tool";
 import { insertSectionsFromPastDocuments } from "@/ai/flows/insert-sections-from-past-documents";
 import { automatedSectionQualityChecks } from "@/ai/flows/automated-section-quality-checks";
 import { cn } from "@/lib/utils";
+import { Textarea } from "./ui/textarea";
 
 type Message = {
   id: number;
@@ -132,24 +132,18 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     }
     setIsLoading(false);
   };
+  
+  const handleUseSelectionAsContext = () => {
+    if (selectedText) {
+      setInput(prev => `Context from document:\n"""\n${selectedText}\n"""\n\nYour question:\n`);
+    }
+  };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
     
-    let userMessage: React.ReactNode = input;
-    if (selectedText) {
-      userMessage = (
-        <div>
-          <p className="italic bg-primary-foreground/10 p-2 rounded-md mb-2">
-            Context: "{selectedText}"
-          </p>
-          <p>{input}</p>
-        </div>
-      );
-    }
-    
-    addMessage("user", userMessage);
+    addMessage("user", input);
 
     // Mock response
     setTimeout(() => {
@@ -197,7 +191,7 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
                 )}
                 <div
                   className={cn(
-                    "p-3 rounded-lg max-w-xs lg:max-w-sm xl:max-w-md",
+                    "p-3 rounded-lg max-w-xs lg:max-w-sm xl:max-w-md whitespace-pre-wrap",
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-accent"
@@ -238,14 +232,24 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
                 </Button>
             ))}
         </div>
-        <form onSubmit={handleSendMessage} className="flex w-full space-x-2">
-          <Input
+        
+        {selectedText && (
+          <Button variant="outline" size="sm" onClick={handleUseSelectionAsContext} className="w-full">
+            <CornerDownLeft className="w-4 h-4 mr-2" />
+            Use Selection as Context
+          </Button>
+        )}
+
+        <form onSubmit={handleSendMessage} className="flex w-full space-x-2 items-start">
+          <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={selectedText ? "Ask about selected text..." : "Ask a follow-up question..."}
+            placeholder={"Ask a follow-up question..."}
             disabled={isLoading}
+            rows={2}
+            className="min-h-0"
           />
-          <Button type="submit" size="icon" disabled={isLoading}>
+          <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
             <Send className="h-4 w-4" />
           </Button>
         </form>
@@ -253,3 +257,5 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     </Card>
   );
 }
+
+    
