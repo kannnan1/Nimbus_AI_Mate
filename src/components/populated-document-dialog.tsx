@@ -202,16 +202,19 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
 
 
   const handleGoToEditor = () => {
-    if (!documentTitle) return;
+    if (!documentTitle || !selectedProjectId) return;
     setIsNavigating(true);
     
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
     
-    let docTitle = documentTitle;
+    const selectedProject = projects.find(p => p.id === selectedProjectId);
+    const projectName = selectedProject ? selectedProject.name : '';
+    let docTitle = `${projectName} - ${documentTitle}`;
+    
     let counter = 1;
     while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
-      docTitle = `${documentTitle} (${counter})`;
+      docTitle = `${projectName} - ${documentTitle} (${counter})`;
       counter++;
     }
 
@@ -222,6 +225,7 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
       content: populatedSR117ValidationReport.content,
       sections: populatedSR117ValidationReport.sections,
       comments: [],
+      documentType: "Populated Document",
     };
     
     storedDocs.unshift(newDoc);

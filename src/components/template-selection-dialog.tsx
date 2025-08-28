@@ -175,6 +175,7 @@ export function TemplateSelectionDialog({ open, onOpenChange, documentTitle }: T
       content: generatedContent,
       sections: selectedTemplate.sections,
       comments: [],
+      documentType: "From Template",
     };
     
     const storedDocsString = localStorage.getItem("myDocuments");

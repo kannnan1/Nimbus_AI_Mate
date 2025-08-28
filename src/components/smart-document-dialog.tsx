@@ -258,15 +258,18 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
   };
 
   const finishGeneration = () => {
-    if (!documentTitle) return;
+    if (!documentTitle || !selectedProjectId) return;
 
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
     
-    let docTitle = documentTitle;
+    const selectedProject = projects.find(p => p.id === selectedProjectId);
+    const projectName = selectedProject ? selectedProject.name : '';
+    let docTitle = `${projectName} - ${documentTitle}`;
+
     let counter = 1;
     while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
-      docTitle = `${documentTitle} (${counter})`;
+      docTitle = `${projectName} - ${documentTitle} (${counter})`;
       counter++;
     }
 
@@ -277,6 +280,7 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
       content: populatedSR117ValidationReport.content,
       sections: populatedSR117ValidationReport.sections,
       comments: [],
+      documentType: "Smart Generation",
     };
     
     storedDocs.unshift(newDoc);
