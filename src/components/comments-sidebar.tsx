@@ -8,10 +8,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquarePlus, User, X, CheckCircle2, CornerDownRight } from 'lucide-react';
+import { MessageSquarePlus, User, X, CheckCircle2, CornerDownRight, MessageSquare, ChevronDown } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 
 export type Reply = {
     id: string;
@@ -62,7 +64,7 @@ export function CommentsSidebar({ comments, setComments, selectedText, onAddComm
   };
 
   const handleToggleResolve = (commentId: string) => {
-    setComments(comments.map(c => c.id === commentId ? { ...c, resolved: !c.resolved } : c));
+    setComments(comments.map(c => c.id === commentId ? { ...c, resolved: !c, resolvedBy: !c.resolved ? "Alex Doe" : undefined } : c));
   };
 
   const handleAddReply = (commentId: string) => {
@@ -111,49 +113,58 @@ export function CommentsSidebar({ comments, setComments, selectedText, onAddComm
                      </div>
                    </div>
                    
-                   {/* Replies */}
-                   {comment.replies.map(reply => (
-                      <div key={reply.id} className="flex items-start gap-3 pl-8">
-                        <Avatar className="w-8 h-8">
-                          <AvatarFallback>{reply.author.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="bg-card p-3 rounded-lg flex-1 border">
-                           <div className="flex justify-between items-center mb-1">
-                             <span className="font-semibold text-sm">{reply.author}</span>
-                             <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(reply.timestamp), { addSuffix: true })}</span>
-                           </div>
-                           <p className="text-sm">{reply.text}</p>
-                        </div>
-                      </div>
-                   ))}
-
-                   {/* Reply Input & Actions */}
                    <div className="pl-11 pt-2">
-                        {replyingTo === comment.id ? (
-                            <div className="space-y-2">
-                                <Textarea 
-                                    value={replyText}
-                                    onChange={(e) => setReplyText(e.target.value)}
-                                    placeholder="Write a reply..."
-                                    rows={2}
-                                />
-                                <div className="flex justify-end gap-2">
-                                    <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>Cancel</Button>
-                                    <Button size="sm" onClick={() => handleAddReply(comment.id)}>Reply</Button>
-                                </div>
+                     <Collapsible>
+                       {comment.replies.length > 0 && (
+                          <CollapsibleTrigger asChild>
+                             <Button variant="ghost" size="sm" className="text-xs text-muted-foreground data-[state=open]:hidden">
+                                <MessageSquare className="w-3 h-3 mr-2" />
+                                {comment.replies.length} {comment.replies.length > 1 ? 'replies' : 'reply'}
+                             </Button>
+                          </CollapsibleTrigger>
+                       )}
+                       <CollapsibleContent className="space-y-3 pt-2">
+                         {comment.replies.map(reply => (
+                            <div key={reply.id} className="flex items-start gap-3">
+                              <Avatar className="w-8 h-8">
+                                <AvatarFallback>{reply.author.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div className="bg-card p-3 rounded-lg flex-1 border">
+                                 <div className="flex justify-between items-center mb-1">
+                                   <span className="font-semibold text-sm">{reply.author}</span>
+                                   <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(reply.timestamp), { addSuffix: true })}</span>
+                                 </div>
+                                 <p className="text-sm">{reply.text}</p>
+                              </div>
                             </div>
-                        ) : (
-                           <div className='flex items-center justify-between'>
-                               <Button variant="ghost" size="sm" onClick={() => setReplyingTo(comment.id)} disabled={comment.resolved}>
-                                   <CornerDownRight className="w-4 h-4 mr-2" />
-                                   Reply
-                               </Button>
-                               <Button variant={comment.resolved ? "secondary" : "ghost"} size="sm" onClick={() => handleToggleResolve(comment.id)}>
-                                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                                   {comment.resolved ? 'Re-open' : 'Resolve'}
-                               </Button>
+                         ))}
+                       </CollapsibleContent>
+                       {replyingTo === comment.id ? (
+                           <div className="space-y-2 mt-2">
+                               <Textarea 
+                                   value={replyText}
+                                   onChange={(e) => setReplyText(e.target.value)}
+                                   placeholder="Write a reply..."
+                                   rows={2}
+                               />
+                               <div className="flex justify-end gap-2">
+                                   <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>Cancel</Button>
+                                   <Button size="sm" onClick={() => handleAddReply(comment.id)}>Reply</Button>
+                               </div>
                            </div>
-                        )}
+                       ) : (
+                          <div className='flex items-center justify-between pt-2'>
+                              <Button variant="ghost" size="sm" onClick={() => setReplyingTo(comment.id)} disabled={comment.resolved}>
+                                  <CornerDownRight className="w-4 h-4 mr-2" />
+                                  Reply
+                              </Button>
+                              <Button variant={comment.resolved ? "secondary" : "ghost"} size="sm" onClick={() => handleToggleResolve(comment.id)}>
+                                   <CheckCircle2 className="w-4 h-4 mr-2" />
+                                  {comment.resolved ? 'Re-open' : 'Resolve'}
+                              </Button>
+                          </div>
+                       )}
+                     </Collapsible>
                    </div>
                 </div>
               ))}
