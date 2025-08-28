@@ -20,8 +20,8 @@ const DocumentAlignmentInputSchema = z.object({
 export type DocumentAlignmentInput = z.infer<typeof DocumentAlignmentInputSchema>;
 
 const DocumentAlignmentOutputSchema = z.object({
-  alignmentScore: z.number().describe('A numerical score indicating the alignment of the current document with past standards (0-100).'),
-  suggestions: z.string().describe('Suggestions for improving alignment with past documentation standards.'),
+  alignmentScore: z.number().describe('A numerical score from 0 to 100 indicating how well the document aligns with the standards. A higher score means better alignment.'),
+  suggestions: z.string().describe('Clear, actionable suggestions for how to improve the document to better meet the standards.'),
 });
 
 export type DocumentAlignmentOutput = z.infer<typeof DocumentAlignmentOutputSchema>;
@@ -34,19 +34,19 @@ const documentAlignmentPrompt = ai.definePrompt({
   name: 'documentAlignmentPrompt',
   input: {schema: DocumentAlignmentInputSchema},
   output: {schema: DocumentAlignmentOutputSchema},
-  prompt: `You are an expert documentation reviewer. Your task is to evaluate a document against a set of standards.
+  prompt: `As an expert documentation reviewer, evaluate the following document against the provided standards. 
 
-  Current Document:
+  **Current Document:**
   {{{currentDocument}}}
 
-  Documentation Standards:
+  ---
+
+  **Documentation Standards:**
   {{{pastDocumentStandards}}}
 
-  Please perform the following steps and provide a structured response:
-  1.  **Analyze Completeness**: Check if the document includes all the required sections and information mentioned in the standards.
-  2.  **Evaluate Other Dimensions**: Assess factors like tone, terminology, formatting, and content structure against the standards.
-  3.  **Calculate Score**: Provide an "alignmentScore" from 0 to 100, where 100 represents perfect alignment. Be critical and objective in your scoring. For example, if a required section is missing, the score should be significantly lower.
-  4.  **Provide Suggestions**: Offer clear, actionable "suggestions" for how to improve the document to better meet the standards.
+  ---
+
+  Based on your analysis, provide a strict but fair 'alignmentScore' from 0 to 100. If required sections are missing or the tone is completely off, the score should be low. Also, provide concrete 'suggestions' for improvement.
   `,
 });
 
