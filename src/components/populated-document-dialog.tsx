@@ -90,6 +90,8 @@ const populatedSR117ValidationReport: { name: string; sections: Section[]; conte
 ## 1.1. Validation Scope and Objectives
 This report documents the independent validation of the Retail Credit Risk Model (RCRM) version 1.2. The primary objective is to assess the model's conceptual soundness, evaluate its ongoing performance, and ensure it complies with SR 11-7 guidelines for model risk management. The validation covers model design, data integrity, processing, reporting, and governance.
 
+![Executive Summary Image](https://picsum.photos/800/200?random=10)
+
 ## 1.2. Overall Assessment and Rating
 The RCRM v1.2 is assessed as **Satisfactory**. The model is conceptually sound and demonstrates strong predictive power in line with its intended use. The performance metrics are stable and within acceptable thresholds. The model development and implementation processes are well-documented.
 
@@ -114,6 +116,8 @@ The logistic regression approach is appropriate for predicting the probability o
 
 ## 3.2. Evaluation of Assumptions and Limitations
 The model assumes a linear relationship between the log-odds of default and the predictor variables. This assumption was tested during development and confirmed during validation to be reasonable. A key limitation is the model's reliance on macroeconomic forecasts for stress testing, which carry inherent uncertainty.
+
+![Conceptual Soundness Image](https://picsum.photos/800/200?random=11)
 
 # 4. Data Verification and Quality Assessment
 

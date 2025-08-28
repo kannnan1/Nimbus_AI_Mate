@@ -17,6 +17,21 @@ export function PreviewSidebar({ title, content, onClose }: PreviewSidebarProps)
   // In a real app, you'd use a more robust library like 'marked' or 'react-markdown'.
   const createMarkup = (markdown: string) => {
     let html = markdown;
+    
+    // Process tables first
+    html = html.replace(
+      /\|(.+)\|\n\|(.+)\|\n((?:\|.*\|\n?)*)/g,
+      (match, header, separator, body) => {
+        const headers = header.split('|').slice(1, -1).map(h => h.trim());
+        const rows = body.split('\n').filter(r => r.trim()).map(r => r.split('|').slice(1, -1).map(c => c.trim()));
+        let tableHtml = '<table class="w-full my-4 border-collapse border">';
+        tableHtml += '<thead><tr>' + headers.map(h => `<th class="border p-2 text-left font-bold bg-muted">${h}</th>`).join('') + '</tr></thead>';
+        tableHtml += '<tbody>' + rows.map(row => '<tr>' + row.map(cell => `<td class="border p-2">${cell}</td>`).join('') + '</tr>').join('') + '</tbody>';
+        tableHtml += '</table>';
+        return tableHtml;
+      }
+    );
+    
     // Headers
     html = html.replace(/^# (.*$)/gim, '<h1 class="text-4xl font-bold mb-4 mt-6">$1</h1>');
     html = html.replace(/^## (.*$)/gim, '<h2 class="text-3xl font-bold mb-3 mt-5 border-b pb-2">$1</h2>');
@@ -29,9 +44,13 @@ export function PreviewSidebar({ title, content, onClose }: PreviewSidebarProps)
     html = html.replace(/^\s*[-*] (.*)/gim, '<li class="ml-6">$1</li>');
     html = html.replace(/(<li>.*<\/li>)/gis, '<ul>$1</ul>');
      // Replace placeholder images
-    html = html.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" class="my-4 rounded-lg shadow-md" />');
+    html = html.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" class="my-4 rounded-lg shadow-md max-w-full h-auto" />');
     // Line breaks
     html = html.replace(/\n/g, '<br />');
+
+    // Remove <br /> inside tables
+    html = html.replace(/<table[^>]*>[\s\S]*?<\/table>/g, (table) => table.replace(/<br \/>/g, ''));
+    
     return { __html: html };
   };
 
@@ -50,10 +69,9 @@ export function PreviewSidebar({ title, content, onClose }: PreviewSidebarProps)
       </CardHeader>
       <CardContent className="p-0 flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-            <div className="p-6">
+            <div className="p-6 prose prose-sm lg:prose-base max-w-none">
                 <h1 className="text-4xl font-extrabold mb-6 border-b pb-4">{title}</h1>
                  <div 
-                    className="prose prose-sm lg:prose-base max-w-none" 
                     dangerouslySetInnerHTML={createMarkup(content)} 
                  />
             </div>
