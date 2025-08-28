@@ -28,33 +28,13 @@ export async function accessReferenceRepository(
   return accessReferenceRepositoryFlow(input);
 }
 
-const accessReferenceRepositoryPrompt = ai.definePrompt({
-  name: 'accessReferenceRepositoryPrompt',
-  input: {schema: z.object({
-    query: AccessReferenceRepositoryInputSchema.shape.query,
-    retrievedDocs: z.array(z.string()),
-  })},
-  output: {schema: AccessReferenceRepositoryOutputSchema},
-  prompt: `You are a helpful assistant that accesses a reference repository of past documents.
-  Based on the retrieved documents, select the most relevant ones for the user's query and return them in the 'results' field.
-  
-  Query: {{{query}}}
-  
-  Retrieved Documents:
-  {{#each retrievedDocs}}
-  - {{{this}}}
-  {{/each}}
-  `,
-});
-
-
 const accessReferenceRepositoryFlow = ai.defineFlow(
   {
     name: 'accessReferenceRepositoryFlow',
     inputSchema: AccessReferenceRepositoryInputSchema,
     outputSchema: AccessReferenceRepositoryOutputSchema,
   },
-  async input => {
+  async (input, streamingCallback) => {
     // In a real application, this would involve searching a database or other data source.
     // For this example, we'll return some dummy data that feels relevant.
     const sampleDocuments = [
@@ -78,13 +58,6 @@ const accessReferenceRepositoryFlow = ai.defineFlow(
         );
     }
 
-    const {output} = await accessReferenceRepositoryPrompt({
-      ...input,
-      retrievedDocs,
-    });
-    
-    // The prompt is now responsible for the final filtering/selection.
-    // If the prompt somehow fails, fall back to the initially retrieved docs.
-    return output || { results: retrievedDocs };
+    return { results: retrievedDocs };
   }
 );
