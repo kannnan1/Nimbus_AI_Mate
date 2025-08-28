@@ -39,17 +39,17 @@ export function PreviewSidebar({ title, content, onClose }: PreviewSidebarProps)
     // Bold
     html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
     // Italic
-    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+    html = html.replace(/\*(.*?)\*/gim, '<em></em>');
+     // Replace placeholder images
+    html = html.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" class="my-4 rounded-lg shadow-md max-w-full h-auto" data-ai-hint="office business" />');
     // Lists (simple)
     html = html.replace(/^\s*[-*] (.*)/gim, '<li class="ml-6">$1</li>');
     html = html.replace(/(<li>.*<\/li>)/gis, '<ul>$1</ul>');
-     // Replace placeholder images
-    html = html.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" class="my-4 rounded-lg shadow-md max-w-full h-auto" />');
     // Line breaks
     html = html.replace(/\n/g, '<br />');
 
-    // Remove <br /> inside tables
-    html = html.replace(/<table[^>]*>[\s\S]*?<\/table>/g, (table) => table.replace(/<br \/>/g, ''));
+    // Remove <br /> inside tables and lists
+    html = html.replace(/<(table|ul|ol)[^>]*>[\s\S]*?<\/(table|ul|ol)>/g, (block) => block.replace(/<br \/>/g, ''));
     
     return { __html: html };
   };
@@ -67,7 +67,7 @@ export function PreviewSidebar({ title, content, onClose }: PreviewSidebarProps)
             </Button>
         )}
       </CardHeader>
-      <CardContent className="p-0 flex-1">
+      <CardContent className="p-0 flex-1 overflow-hidden">
         <ScrollArea className="h-full">
             <div className="p-6 prose-sm max-w-none lg:prose-base">
                 <h1 className="text-4xl font-extrabold mb-6 border-b pb-4">{title}</h1>
