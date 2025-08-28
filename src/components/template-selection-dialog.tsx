@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -75,6 +75,7 @@ interface TemplateSelectionDialogProps {
 export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectionDialogProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(templates[0]);
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleTemplateChange = (templateId: string) => {
     const template = templates.find(t => t.id === templateId) || null;
@@ -103,9 +104,23 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
     router.push(`/editor?title=${encodeURIComponent(selectedTemplate.name)}`);
   };
 
+  const handleAddTemplateClick = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      console.log("Selected file:", file.name);
+      // Here you would add logic to parse the .docx file and create a new template
+      // For now, we'll just log it.
+    }
+  };
+
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader className="flex-row items-center justify-between">
             <div className="space-y-1.5">
                 <DialogTitle>Start with a Template</DialogTitle>
@@ -113,10 +128,17 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
                     Select a template to kickstart your document creation process.
                 </DialogDescription>
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleAddTemplateClick}>
                 <FilePlus2 className="mr-2" />
                 Add Template
             </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".docx"
+              className="hidden"
+            />
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
           <div className="space-y-4">
