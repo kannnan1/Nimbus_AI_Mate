@@ -189,16 +189,20 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     if (mode === 'after') {
         newText = currentText.substring(0, end) + text + currentText.substring(end);
         newCursorPosition = end + text.length;
-    } else { // 'replace'
+    } else { // 'replace' mode, also used for insertion at cursor
         newText = currentText.substring(0, start) + text + currentText.substring(end);
         newCursorPosition = start + text.length;
     }
     
     setDocumentContent(newText);
 
+    // This is required to make sure the state update is rendered before we set the selection.
     setTimeout(() => {
-        textarea.selectionStart = newCursorPosition;
-        textarea.selectionEnd = newCursorPosition;
+        if (textarea) {
+          textarea.selectionStart = newCursorPosition;
+          textarea.selectionEnd = newCursorPosition;
+          textarea.focus();
+        }
     }, 0);
   };
 
@@ -234,7 +238,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={showRightPanel ? 60 : 80} minSize={40}>
             <main className="h-full w-full p-4 flex flex-col">
-              <Card className="flex-1 w-full shadow-inner relative">
+              <Card className="flex-1 w-full shadow-inner relative bg-card">
                 <CardContent className="p-0 h-full">
                   <RichTextEditor
                     ref={editorRef}
@@ -266,7 +270,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
                     />
                 )}
                 {isAddResultsOpen && (
-                    <AddResultsSidebar onAddResult={(result) => setDocumentContent(prev => prev + `\n\n${result}`)} />
+                    <AddResultsSidebar onAddResult={(result) => handleInsertText(result, 'replace')} />
                 )}
                 {isPreviewOpen && (
                     <PreviewSidebar 
@@ -339,5 +343,3 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     </div>
   );
 }
-
-    
