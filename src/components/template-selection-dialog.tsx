@@ -148,15 +148,29 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
     setSelectedTemplate(template);
   };
 
+  const generateContentFromSections = (sections: Section[]): string => {
+    return sections
+      .map(section => {
+        const mainSection = `# ${section.title}\n\n`;
+        const subSections = section.subsections
+          .map(sub => `## ${sub.title}\n\n`)
+          .join('');
+        return mainSection + subSections;
+      })
+      .join('');
+  };
+
   const handleGoToEditor = () => {
     if (!selectedTemplate) return;
     
     setIsNavigating(true);
 
+    const generatedContent = generateContentFromSections(selectedTemplate.sections);
+
     const newDoc = {
       title: selectedTemplate.name,
       lastModified: new Date().toISOString(),
-      content: "", // Content will be generated from sections on editor page
+      content: generatedContent,
       sections: selectedTemplate.sections,
       comments: [],
     };
@@ -164,11 +178,13 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
     
-    const existingDocIndex = storedDocs.findIndex((doc: { title: string }) => doc.title === newDoc.title);
-    if (existingDocIndex > -1) {
-        // To prevent creating duplicates, let's append a timestamp to the title
-        newDoc.title = `${selectedTemplate.name} (${new Date().toLocaleTimeString()})`;
+    let docTitle = newDoc.title;
+    let counter = 1;
+    while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
+      docTitle = `${newDoc.title} (${counter})`;
+      counter++;
     }
+    newDoc.title = docTitle;
     
     storedDocs.unshift(newDoc);
     localStorage.setItem("myDocuments", JSON.stringify(storedDocs));
