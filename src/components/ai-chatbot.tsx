@@ -102,13 +102,15 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     addMessage("user", `Interpret the selected ${selectionType}.`);
     try {
       const result = await interpretSelection({ selection: selectedText, contentType: selectionType });
-      addMessage("assistant", result.interpretation, 'after');
+      setTimeout(() => {
+        addMessage("assistant", result.interpretation, 'after');
+        setIsLoading(false);
+      }, 2000);
     } catch (error) {
       console.error(error);
       addMessage("assistant", `Sorry, I couldn't interpret the ${selectionType}.`);
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleAlignmentCheck = async () => {
