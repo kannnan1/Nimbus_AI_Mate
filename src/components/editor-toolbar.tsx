@@ -9,7 +9,7 @@ import { Feather, Save, History, MessageSquarePlus, Share2, ArrowLeft } from "lu
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { formatRelative } from "date-fns";
+import { format } from "date-fns";
 import type { Section } from "@/types/document";
 import { VersionHistoryDialog, type DocumentVersion } from "./version-history-dialog";
 
@@ -55,8 +55,8 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
     }
 
     const now = new Date();
-    const lastModified = formatRelative(now, new Date());
-    setSaveStatus(`Saved ${lastModified}`);
+    const lastModified = format(now, "MMM d, yyyy 'at' h:mm a");
+    setSaveStatus(`Saved ${format(now, "h:mm a")}`);
     
     // --- Update main document list ---
     const storedDocsString = localStorage.getItem("myDocuments");
