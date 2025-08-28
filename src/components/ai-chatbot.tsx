@@ -2,16 +2,17 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Sparkles, Book, Scale, ClipboardPlus, CheckCircle, Bot, User, X, CornerDownLeft } from "lucide-react";
+import { Send, Sparkles, Book, Scale, ClipboardPlus, CheckCircle, Bot, User, X, CornerDownLeft, BarChart, ImageIcon } from "lucide-react";
 import { accessReferenceRepository } from "@/ai/flows/access-reference-repository";
 import { documentAlignmentTool } from "@/ai/flows/document-alignment-tool";
 import { insertSectionsFromPastDocuments } from "@/ai/flows/insert-sections-from-past-documents";
 import { automatedSectionQualityChecks } from "@/ai/flows/automated-section-quality-checks";
+import { interpretSelection } from "@/ai/flows/interpret-selection";
 import { cn } from "@/lib/utils";
 import { Textarea } from "./ui/textarea";
 import { Switch } from "./ui/switch";
@@ -40,6 +41,13 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<"ask" | "agent">("ask");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const selectionType = useMemo(() => {
+    if (!selectedText) return 'text';
+    if (selectedText.includes('|') && selectedText.includes('---')) return 'table';
+    if (selectedText.startsWith('![')) return 'image';
+    return 'text';
+  }, [selectedText]);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -83,6 +91,22 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     } catch (error) {
       addMessage("assistant", "Sorry, I couldn't access the repository at the moment.");
     }
+    setIsLoading(false);
+  };
+  
+  const handleInterpretSelection = async () => {
+    if (isLoading || !selectedText) return;
+    setIsLoading(true);
+
+    addMessage("user", `Interpret the selected ${selectionType}.`);
+    try {
+      const result = await interpretSelection({ selection: selectedText, contentType: selectionType });
+      addMessage("assistant", result.interpretation);
+    } catch (error) {
+      console.error(error);
+      addMessage("assistant", `Sorry, I couldn't interpret the ${selectionType}.`);
+    }
+
     setIsLoading(false);
   };
 
@@ -188,10 +212,12 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
   }
 
   const aiActions = [
-    { label: "Search Repository", icon: Book, action: handleSearchRepository },
-    { label: "Check Alignment", icon: Scale, action: handleAlignmentCheck },
-    { label: "Insert Section", icon: ClipboardPlus, action: onInsertSection },
-    { label: "Quality Check", icon: CheckCircle, action: handleQualityCheck },
+    { label: "Search Repository", icon: Book, action: handleSearchRepository, show: true },
+    { label: "Check Alignment", icon: Scale, action: handleAlignmentCheck, show: true },
+    { label: "Insert Section", icon: ClipboardPlus, action: onInsertSection, show: selectionType === 'text' && !selectedText },
+    { label: "Interpret Table", icon: BarChart, action: handleInterpretSelection, show: selectionType === 'table' },
+    { label: "Interpret Image", icon: ImageIcon, action: handleInterpretSelection, show: selectionType === 'image' },
+    { label: "Quality Check", icon: CheckCircle, action: handleQualityCheck, show: true },
   ];
 
   return (
@@ -259,8 +285,8 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
       </CardContent>
       <CardFooter className="p-4 border-t flex-col items-start gap-4">
         <div className="grid grid-cols-2 gap-2 w-full">
-            {aiActions.map(({ label, icon: Icon, action}) => (
-                <Button key={label} variant="outline" size="sm" onClick={action} disabled={isLoading && label !== 'Insert Section'}>
+            {aiActions.filter(action => action.show).map(({ label, icon: Icon, action}) => (
+                <Button key={label} variant="outline" size="sm" onClick={action} disabled={isLoading}>
                     <Icon className="w-4 h-4 mr-2" />
                     {label}
                 </Button>
