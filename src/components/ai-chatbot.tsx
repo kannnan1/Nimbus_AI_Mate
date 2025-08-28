@@ -136,9 +136,26 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-    const fullQuery = selectedText ? `Based on the text "${selectedText}", ${input}` : input;
-    addMessage("user", fullQuery);
-    addMessage("assistant", "This is a mock response. For a full conversational experience, integrate a conversational AI model.");
+    
+    let userMessage: React.ReactNode = input;
+    if (selectedText) {
+      userMessage = (
+        <div>
+          <p className="italic bg-primary-foreground/10 p-2 rounded-md mb-2">
+            Context: "{selectedText}"
+          </p>
+          <p>{input}</p>
+        </div>
+      );
+    }
+    
+    addMessage("user", userMessage);
+
+    // Mock response
+    setTimeout(() => {
+      addMessage("assistant", "This is a mock response based on your query. For a full conversational experience, integrate a conversational AI model.");
+    }, 500);
+    
     setInput("");
   }
 
