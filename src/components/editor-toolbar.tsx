@@ -71,7 +71,6 @@ export function EditorToolbar({
     }
 
     const now = new Date();
-    const lastModified = format(now, "MMM d, yyyy 'at' h:mm a");
     setSaveStatus(`Saved ${format(now, "h:mm a")}`);
     
     // --- Update main document list ---
@@ -82,7 +81,7 @@ export function EditorToolbar({
     
     const newDocData = { 
       title: documentTitle, 
-      lastModified,
+      lastModified: now.toISOString(),
       content: documentContent,
       sections: sections,
       comments: comments,

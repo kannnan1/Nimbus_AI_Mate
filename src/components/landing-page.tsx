@@ -17,6 +17,7 @@ import type { Section } from "@/types/document";
 import { PopulatedDocumentDialog } from "./populated-document-dialog";
 import { SmartDocumentDialog } from "./smart-document-dialog";
 import { CreateDocumentDropdown } from "./create-document-dropdown";
+import { format } from "date-fns";
 
 type MyDocument = {
     title: string;
@@ -52,14 +53,18 @@ export function LandingPage() {
       const storedDocs: any[] = storedDocsString ? JSON.parse(storedDocsString) : [];
       
       // Add mock data to existing docs if they don't have it
-      const enhancedDocs = storedDocs.map(doc => ({
+      const enhancedDocs = storedDocs.map(doc => {
+        const lastModifiedDate = new Date(doc.lastModified);
+        const isValidDate = !isNaN(lastModifiedDate.getTime());
+
+        return {
         ...doc,
-        createdAt: doc.createdAt || new Date(new Date(doc.lastModified).getTime() - 86400000).toISOString(),
+        createdAt: doc.createdAt || (isValidDate ? new Date(lastModifiedDate.getTime() - 86400000).toISOString() : new Date().toISOString()),
         projectId: doc.projectId || Math.floor(1000 + Math.random() * 9000).toString(),
         datasetCount: doc.datasetCount || Math.floor(2 + Math.random() * 10),
         projectType: doc.projectType || "Model Validation",
         modelType: doc.modelType || "Classification",
-      }));
+      }});
 
       setMyDocuments(enhancedDocs);
     }
@@ -108,6 +113,14 @@ export function LandingPage() {
       handleDeleteDocument(doc.title);
     }
     // Handle other actions...
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+        return format(new Date(dateString), "MMM d, yyyy");
+    } catch (error) {
+        return "Invalid date";
+    }
   };
 
   return (
@@ -164,9 +177,9 @@ export function LandingPage() {
                                     <div className="font-medium text-muted-foreground">Dataset count</div>
                                     <div>{doc.datasetCount}</div>
                                     <div className="font-medium text-muted-foreground">Created at</div>
-                                    <div>{new Date(doc.createdAt).toLocaleDateString()}</div>
+                                    <div>{formatDate(doc.createdAt)}</div>
                                     <div className="font-medium text-muted-foreground">Updated at</div>
-                                    <div>{new Date(doc.lastModified).toLocaleDateString()}</div>
+                                    <div>{formatDate(doc.lastModified)}</div>
                                     <div className="font-medium text-muted-foreground">Project type</div>
                                     <div>{doc.projectType}</div>
                                     <div className="font-medium text-muted-foreground">Model type</div>
