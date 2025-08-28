@@ -55,7 +55,7 @@ const projects = [
 ];
 
 const populatedSR117ValidationReport: { name: string; sections: Section[]; content: string } = {
-  name: "SR11-7 Validation Report (Populated)",
+  name: "SR11-7 Validation Report",
   sections: [
     { id: "s1", title: "1. Executive Summary", subsections: [
         { id: "s1-1", title: "1.1. Validation Scope and Objectives" },
@@ -208,17 +208,24 @@ export function PopulatedDocumentDialog({ open, onOpenChange }: PopulatedDocumen
 
   const handleGoToEditor = () => {
     setIsNavigating(true);
+    
+    const storedDocsString = localStorage.getItem("myDocuments");
+    const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
+    
+    let docTitle = populatedSR117ValidationReport.name;
+    let counter = 1;
+    while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
+      docTitle = `${populatedSR117ValidationReport.name} (${counter})`;
+      counter++;
+    }
 
     const newDoc = {
-      title: `${populatedSR117ValidationReport.name} - ${new Date().toLocaleTimeString()}`,
+      title: docTitle,
       lastModified: new Date().toISOString(),
       content: populatedSR117ValidationReport.content,
       sections: populatedSR117ValidationReport.sections,
       comments: [],
     };
-    
-    const storedDocsString = localStorage.getItem("myDocuments");
-    const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
     
     storedDocs.unshift(newDoc);
     localStorage.setItem("myDocuments", JSON.stringify(storedDocs));
