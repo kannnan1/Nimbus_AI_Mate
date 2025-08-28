@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for automated section quality checks.
@@ -46,7 +47,26 @@ export type AutomatedSectionQualityChecksOutput = z.infer<
 export async function automatedSectionQualityChecks(
   input: AutomatedSectionQualityChecksInput
 ): Promise<AutomatedSectionQualityChecksOutput> {
-  return automatedSectionQualityChecksFlow(input);
+  // Return sample data instead of calling the AI flow.
+  return Promise.resolve({
+    clarity: {
+      score: 85,
+      reasoning: "The section is well-structured and uses clear headings, but some sentences are complex.",
+    },
+    conciseness: {
+      score: 78,
+      reasoning: "Contains some jargon that could be simplified for a broader audience.",
+    },
+    accuracy: {
+      score: 92,
+      reasoning: "The data and statements appear to be factually correct and align with industry standards.",
+    },
+    completeness: {
+      score: 88,
+      reasoning: "The section covers the main points well, but could benefit from an additional example.",
+    },
+    overallFeedback: "This is a strong section. To improve, simplify complex sentences and define key jargon on first use. Consider adding a real-world example to enhance reader understanding.",
+  });
 }
 
 const prompt = ai.definePrompt({

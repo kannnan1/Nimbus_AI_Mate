@@ -27,7 +27,11 @@ const DocumentAlignmentOutputSchema = z.object({
 export type DocumentAlignmentOutput = z.infer<typeof DocumentAlignmentOutputSchema>;
 
 export async function documentAlignmentTool(input: DocumentAlignmentInput): Promise<DocumentAlignmentOutput> {
-  return documentAlignmentFlow(input);
+  // Return sample data instead of calling the AI flow
+  return Promise.resolve({
+    alignmentScore: 75,
+    suggestions: "The document is well-structured but is missing a required 'Risk Assessment' section. The tone is mostly formal, but consider rephrasing the introduction to be more objective. Adding a 'Stakeholders' section would also improve alignment.",
+  });
 }
 
 const documentAlignmentPrompt = ai.definePrompt({
