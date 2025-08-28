@@ -103,18 +103,10 @@ const populatedSR117ValidationReport: { name: string; sections: Section[]; conte
   content: `# 1. Executive Summary
 
 ## 1.1. Validation Scope and Objectives
-This report documents the independent validation of the Retail Credit Risk Model (RCRM) version 1.2. The primary objective is to assess the model's conceptual soundness, evaluate its ongoing performance, and ensure it complies with SR 11-7 guidelines for model risk management. The validation covers model design, data integrity, processing, reporting, and governance.
-
-![Executive Summary Image](https://picsum.photos/800/200?random=10)
 
 ## 1.2. Overall Assessment and Rating
-The RCRM v1.2 is assessed as **Satisfactory**. The model is conceptually sound and demonstrates strong predictive power in line with its intended use. The performance metrics are stable and within acceptable thresholds. The model development and implementation processes are well-documented.
 
 ## 1.3. Summary of Findings and Recommendations
-- **Finding 1 (Minor)**: The model's performance on the out-of-time sample, while strong, showed a slight decay in the highest-risk decile.
-- **Finding 2 (Informational)**: Data quality for the 'annual_income' variable was found to have a high percentage of missing values (12%), which were handled by the development team via mean imputation.
-- **Recommendation 1**: Enhance model monitoring to include decile-level stability tracking for the primary performance metrics.
-- **Recommendation 2**: Explore more sophisticated imputation techniques for the 'annual_income' variable in the next model redevelopment cycle.
 
 # 2. Validation Process Overview
 
@@ -131,8 +123,6 @@ The logistic regression approach is appropriate for predicting the probability o
 
 ## 3.2. Evaluation of Assumptions and Limitations
 The model assumes a linear relationship between the log-odds of default and the predictor variables. This assumption was tested during development and confirmed during validation to be reasonable. A key limitation is the model's reliance on macroeconomic forecasts for stress testing, which carry inherent uncertainty.
-
-![Conceptual Soundness Image](https://picsum.photos/800/200?random=11)
 
 # 4. Data Verification and Quality Assessment
 
@@ -155,22 +145,11 @@ The model's predictive accuracy was tested on an out-of-time sample from Q1 2023
 
 ***Interpretation***: *The table shows a slight but acceptable degradation in model performance from development to the out-of-time validation sample. A Gini drop of 2.8 percentage points is within typical bounds, indicating the model is generalizing well to new data. The AUC of 0.877 signifies strong predictive accuracy.*
 
-![ROC Curve](https://picsum.photos/600/400?random=1)
-*Figure 1: ROC Curve on Out-of-Time Sample*
-
-***Interpretation***: *The ROC curve demonstrates strong model performance. The curve is positioned high in the upper-left corner, signifying a high true positive rate and a low false positive rate across all thresholds, which is indicative of a robust and accurate model.*
-
-
 ## 5.2. Benchmarking and Alternative Models
 A simple benchmark model (a reduced-form logistic regression) was developed. The current model significantly outperforms the benchmark, justifying its complexity.
 
 ## 5.3. Stress Testing and Sensitivity Analysis
 The model's sensitivity to key variables was tested. The 'debt_to_income_ratio' was identified as the most influential variable. The model was also subjected to stressed macroeconomic scenarios, and its response was directionally consistent with expectations.
-
-![Lift Chart](https://picsum.photos/600/400?random=2)
-*Figure 2: Lift Chart showing model performance by decile.*
-
-***Interpretation***: *The lift chart clearly shows that the model effectively rank-orders risk. The top deciles capture a significantly higher proportion of defaults than the lower deciles, confirming the model's utility in distinguishing between high-risk and low-risk populations.*
 
 # 6. Findings and Recommendations
 
