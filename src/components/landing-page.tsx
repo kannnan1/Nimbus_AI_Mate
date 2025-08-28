@@ -46,8 +46,8 @@ const options: {
   },
   {
     id: "auto",
-    title: "Select Auto Document",
-    description: "Combine a data pipeline and a template to generate a document automatically.",
+    title: "Smart Document Generation",
+    description: "Select your pipeline and template, and let the system map results, sections, and interpretations.",
     href: "/editor",
     Icon: Bot,
   },
