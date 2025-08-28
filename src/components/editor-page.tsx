@@ -89,19 +89,6 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     };
   };
 
-  useEffect(() => {
-    const generateMarkdownFromSections = (sections: Section[]): string => {
-      return sections.map((section) => {
-        const sectionTitle = `# ${section.title}\n\n`;
-        const subsectionsContent = section.subsections.map((subsection) => {
-          return `## ${subsection.title}\n\n`;
-        }).join('');
-        return sectionTitle + subsectionsContent;
-      }).join('');
-    };
-    setDocumentContent(generateMarkdownFromSections(sections));
-  }, [sections]);
-
   const handleAddSection = (title: string) => {
     const newSection: Section = {
       id: `sec-${Date.now()}`,
