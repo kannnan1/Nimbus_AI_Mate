@@ -42,10 +42,10 @@ const documentAlignmentPrompt = ai.definePrompt({
   Documentation Standards:
   {{{pastDocumentStandards}}}
 
-  Please perform the following:
+  Please perform the following steps and provide a structured response:
   1.  **Analyze Completeness**: Check if the document includes all the required sections and information mentioned in the standards.
-  2.  **Evaluate Other Dimensions**: Assess factors like tone, terminology, formatting, and content structure.
-  3.  **Calculate Score**: Provide an "alignmentScore" from 0 to 100, where 100 represents perfect alignment with the standards. Be critical and objective in your scoring.
+  2.  **Evaluate Other Dimensions**: Assess factors like tone, terminology, formatting, and content structure against the standards.
+  3.  **Calculate Score**: Provide an "alignmentScore" from 0 to 100, where 100 represents perfect alignment. Be critical and objective in your scoring. For example, if a required section is missing, the score should be significantly lower.
   4.  **Provide Suggestions**: Offer clear, actionable "suggestions" for how to improve the document to better meet the standards.
   `,
 });
