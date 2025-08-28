@@ -16,8 +16,10 @@ import { TemplateSelectionDialog } from "./template-selection-dialog";
 import type { Section } from "@/types/document";
 import { PopulatedDocumentDialog } from "./populated-document-dialog";
 import { SmartDocumentDialog } from "./smart-document-dialog";
-import { CreateDocumentDropdown } from "./create-document-dropdown";
+import { CreateDocumentDialog } from "./create-document-dialog";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 type MyDocument = {
     title: string;
@@ -42,9 +44,12 @@ export function LandingPage() {
   const [isTemplateModalOpen, setTemplateModalOpen] = useState(false);
   const [isPopulatedModalOpen, setIsPopulatedModalOpen] = useState(false);
   const [isSmartModalOpen, setIsSmartModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<MyDocument | null>(null);
   const [myDocuments, setMyDocuments] = useState<MyDocument[]>([]);
   const [newDocumentTitle, setNewDocumentTitle] = useState("");
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     // We need to check for `window` because this component is rendered on the server first.
@@ -52,7 +57,6 @@ export function LandingPage() {
       const storedDocsString = localStorage.getItem("myDocuments");
       const storedDocs: any[] = storedDocsString ? JSON.parse(storedDocsString) : [];
       
-      // Add mock data to existing docs if they don't have it
       const enhancedDocs = storedDocs.map(doc => {
         const lastModifiedDate = new Date(doc.lastModified);
         const isValidDate = !isNaN(lastModifiedDate.getTime());
@@ -82,16 +86,28 @@ export function LandingPage() {
     localStorage.removeItem(`doc-history-${docTitle}`);
   };
 
-  const handleOptionClick = (option: 'template' | 'populated' | 'auto', title: string) => {
-    setNewDocumentTitle(title); // Store the title
-    if (option === 'template') {
-      setTemplateModalOpen(true);
-    } else if (option === 'populated') {
-      setIsPopulatedModalOpen(true);
-    } else if (option === 'auto') {
-      setIsSmartModalOpen(true);
+  const handleOptionSelect = (option: 'blank' | 'template' | 'populated' | 'auto', title: string) => {
+    if (option === 'blank') {
+        const newDoc = {
+            title: title,
+            lastModified: new Date().toISOString(),
+            content: `# ${title}\n\n`,
+            sections: [],
+            comments: [],
+        };
+        const storedDocsString = localStorage.getItem("myDocuments");
+        const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
+        storedDocs.unshift(newDoc);
+        localStorage.setItem("myDocuments", JSON.stringify(storedDocs));
+        router.push(`/editor?title=${encodeURIComponent(newDoc.title)}`);
+    } else {
+        setNewDocumentTitle(title);
+        if (option === 'template') setTemplateModalOpen(true);
+        if (option === 'populated') setIsPopulatedModalOpen(true);
+        if (option === 'auto') setIsSmartModalOpen(true);
     }
   };
+
 
   const documentActions = [
     { icon: BarChart, tooltip: "View Analytics" },
@@ -131,7 +147,10 @@ export function LandingPage() {
           <Image src="https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/logo.png" alt="Nimbus Uno Application Logo" width={150} height={40} />
         </Link>
         <div className="ml-auto flex items-center gap-4">
-            <CreateDocumentDropdown onOptionSelect={handleOptionClick} />
+            <Button onClick={() => setIsCreateModalOpen(true)}>
+              <FilePlus2 className="mr-2 h-4 w-4" />
+              Create Document
+            </Button>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
@@ -250,6 +269,11 @@ export function LandingPage() {
         />
       )}
     </div>
+    <CreateDocumentDialog
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onOptionSelect={handleOptionSelect}
+    />
     <TemplateSelectionDialog 
         open={isTemplateModalOpen}
         onOpenChange={setTemplateModalOpen}
