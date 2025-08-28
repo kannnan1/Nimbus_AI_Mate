@@ -49,7 +49,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
       }).join('');
     };
     setDocumentContent(generateMarkdownFromSections(sections));
-  }, [sections]);
+  }, [sections, isInitialLoad]);
 
   const handleAddSection = (title: string) => {
     const newSection: Section = {
@@ -162,7 +162,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
               <ResizableHandle withHandle />
             </>
           )}
-          <ResizablePanel defaultSize={isCommentsOpen ? 24 : 30} minSize={20} maxSize={40}>
+          <ResizablePanel collapsible collapsedSize={4} defaultSize={isCommentsOpen ? 24 : 30} minSize={20} maxSize={40}>
             <AiChatbot
               documentContent={documentContent}
               setDocumentContent={setDocumentContent}
