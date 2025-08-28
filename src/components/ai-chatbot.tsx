@@ -125,11 +125,14 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
           <p>{result.suggestions}</p>
         </div>
       );
-      addMessage("assistant", responseContent);
+      setTimeout(() => {
+        addMessage("assistant", responseContent);
+        setIsLoading(false);
+      }, 2500);
     } catch (error) {
       addMessage("assistant", "Sorry, I couldn't perform the alignment check.");
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
   
   const handleInsertSectionFromPastDoc = async () => {
@@ -183,12 +186,15 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
             </div>
         </div>
       );
-      addMessage("assistant", responseContent);
+      setTimeout(() => {
+        addMessage("assistant", responseContent);
+        setIsLoading(false);
+      }, 2500);
     } catch (error) {
       console.error(error);
       addMessage("assistant", "Sorry, I couldn't complete the quality check.");
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
   
   const handleUseSelectionAsContext = () => {
