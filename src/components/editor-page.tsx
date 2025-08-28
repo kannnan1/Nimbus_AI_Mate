@@ -175,23 +175,30 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     }
   };
 
-  const handleInsertTextAtCursor = (text: string) => {
+  const handleInsertText = (text: string, mode: 'replace' | 'after' = 'replace') => {
     const textarea = editorRef.current;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const currentText = textarea.value;
+    
+    let newText;
+    let newCursorPosition;
 
-    const newText = currentText.substring(0, start) + text + currentText.substring(end);
-
+    if (mode === 'after') {
+        newText = currentText.substring(0, end) + text + currentText.substring(end);
+        newCursorPosition = end + text.length;
+    } else { // 'replace'
+        newText = currentText.substring(0, start) + text + currentText.substring(end);
+        newCursorPosition = start + text.length;
+    }
+    
     setDocumentContent(newText);
 
-    // This is a bit of a hack to move the cursor after the inserted text.
-    // In a real rich text editor, the library would handle this.
     setTimeout(() => {
-        textarea.selectionStart = start + text.length;
-        textarea.selectionEnd = start + text.length;
+        textarea.selectionStart = newCursorPosition;
+        textarea.selectionEnd = newCursorPosition;
     }, 0);
   };
 
@@ -282,7 +289,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
               onInsertSection={() => setIsAddSectionOpen(true)}
               onClose={() => setIsChatbotOpen(false)}
               selectedText={selectedText}
-              onInsertTextAtCursor={handleInsertTextAtCursor}
+              onInsertText={handleInsertText}
             />
         </div>
       )}
@@ -332,3 +339,5 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     </div>
   );
 }
+
+    

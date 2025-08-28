@@ -30,10 +30,10 @@ interface AiChatbotProps {
   onInsertSection: () => void;
   onClose?: () => void;
   selectedText?: string | null;
-  onInsertTextAtCursor: (text: string) => void;
+  onInsertText: (text: string, mode: 'replace' | 'after') => void;
 }
 
-export function AiChatbot({ documentContent, setDocumentContent, onInsertSection, onClose, selectedText, onInsertTextAtCursor }: AiChatbotProps) {
+export function AiChatbot({ documentContent, setDocumentContent, onInsertSection, onClose, selectedText, onInsertText }: AiChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, role: "assistant", content: "Hello! I'm your Nimbus AI assistant. How can I help you with this document? You can select text to use it in your queries." },
   ]);
@@ -58,10 +58,11 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     }
   }, [messages]);
 
-  const addMessage = (role: "user" | "assistant", content: React.ReactNode) => {
+  const addMessage = (role: "user" | "assistant", content: React.ReactNode, insertionMode: 'replace' | 'after' = 'replace') => {
     setMessages((prev) => [...prev, { id: Date.now(), role, content }]);
     if (role === 'assistant' && mode === 'agent' && typeof content === 'string') {
-        onInsertTextAtCursor(`\n\n${content}\n\n`);
+        const textToInsert = `\n\n${content}\n\n`;
+        onInsertText(textToInsert, insertionMode);
     }
   };
 
@@ -101,7 +102,7 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     addMessage("user", `Interpret the selected ${selectionType}.`);
     try {
       const result = await interpretSelection({ selection: selectedText, contentType: selectionType });
-      addMessage("assistant", result.interpretation);
+      addMessage("assistant", result.interpretation, 'after');
     } catch (error) {
       console.error(error);
       addMessage("assistant", `Sorry, I couldn't interpret the ${selectionType}.`);
@@ -323,3 +324,5 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     </Card>
   );
 }
+
+    
