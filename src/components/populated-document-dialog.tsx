@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,18 +19,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import type { Section } from "@/types/document";
 
-// Sample data for pipelines and versions
-const pipelines = [
-  { id: "pipe1", name: "Retail Credit Risk Q2 2024" },
-  { id: "pipe2", name: "Commercial Loan Portfolio Q1 2024" },
-];
-
-const documentVersions = [
-  { id: "ver1", name: "Version 1.0 (Latest)" },
-  { id: "ver2", name: "Version 0.9 (Draft)" },
+// Sample data for projects, pipelines, and versions
+const projects = [
+  {
+    id: "proj1",
+    name: "Retail Credit Risk",
+    pipelines: [
+      {
+        id: "pipe1",
+        uuid: "a4b1c2",
+        versions: ["Version 1.2 (Final)", "Version 1.1 (Archived)"],
+      },
+      {
+        id: "pipe2",
+        uuid: "d3e4f5",
+        versions: ["Version 1.3 (Draft)"],
+      },
+    ],
+  },
+  {
+    id: "proj2",
+    name: "Commercial Loan Portfolio",
+    pipelines: [
+      {
+        id: "pipe3",
+        uuid: "g6h7i8",
+        versions: ["Version 2.0 (Final)", "Version 1.9 (Review)"],
+      },
+    ],
+  },
 ];
 
 const populatedSR117ValidationReport: { name: string; sections: Section[]; content: string } = {
@@ -89,10 +110,39 @@ interface PopulatedDocumentDialogProps {
 }
 
 export function PopulatedDocumentDialog({ open, onOpenChange }: PopulatedDocumentDialogProps) {
-  const [selectedPipeline, setSelectedPipeline] = useState(pipelines[0].id);
-  const [selectedVersion, setSelectedVersion] = useState(documentVersions[0].id);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
+  
+  const [pipelines, setPipelines] = useState<{ id: string; uuid: string; versions: string[] }[]>([]);
+  const [versions, setVersions] = useState<string[]>([]);
+  
   const [isNavigating, setIsNavigating] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (selectedProjectId) {
+      const project = projects.find(p => p.id === selectedProjectId);
+      setPipelines(project?.pipelines || []);
+      setSelectedPipelineId(null);
+      setVersions([]);
+      setSelectedVersion(null);
+    } else {
+      setPipelines([]);
+      setVersions([]);
+    }
+  }, [selectedProjectId]);
+
+  useEffect(() => {
+    if (selectedPipelineId) {
+      const pipeline = pipelines.find(p => p.id === selectedPipelineId);
+      setVersions(pipeline?.versions || []);
+      setSelectedVersion(null);
+    } else {
+      setVersions([]);
+    }
+  }, [selectedPipelineId, pipelines]);
+
 
   const handleGoToEditor = () => {
     setIsNavigating(true);
@@ -124,35 +174,50 @@ export function PopulatedDocumentDialog({ open, onOpenChange }: PopulatedDocumen
         <DialogHeader>
             <DialogTitle>Start with a Populated Document</DialogTitle>
             <DialogDescription>
-                Select a pipeline and document version to start with a pre-filled draft.
+                Select a project, pipeline, and version to start with a pre-filled draft.
             </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="pipeline-select" className="text-right">Pipeline</label>
-            <Select value={selectedPipeline} onValueChange={setSelectedPipeline}>
-              <SelectTrigger id="pipeline-select" className="col-span-3">
-                <SelectValue placeholder="Select a pipeline..." />
+            <Label htmlFor="project-select" className="text-right">Project</Label>
+            <Select onValueChange={setSelectedProjectId}>
+              <SelectTrigger id="project-select" className="col-span-3">
+                <SelectValue placeholder="Select a project..." />
               </SelectTrigger>
               <SelectContent>
-                {pipelines.map((pipeline) => (
-                  <SelectItem key={pipeline.id} value={pipeline.id}>
-                    {pipeline.name}
+                {projects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-             <label htmlFor="version-select" className="text-right">Version</label>
-            <Select value={selectedVersion} onValueChange={setSelectedVersion}>
+            <Label htmlFor="pipeline-select" className="text-right">Pipeline ID</Label>
+            <Select onValueChange={setSelectedPipelineId} disabled={!selectedProjectId}>
+              <SelectTrigger id="pipeline-select" className="col-span-3">
+                <SelectValue placeholder="Select a pipeline..." />
+              </SelectTrigger>
+              <SelectContent>
+                {pipelines.map((pipeline) => (
+                  <SelectItem key={pipeline.id} value={pipeline.id}>
+                    {pipeline.uuid}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+             <Label htmlFor="version-select" className="text-right">Version</Label>
+            <Select onValueChange={setSelectedVersion} disabled={!selectedPipelineId}>
               <SelectTrigger id="version-select" className="col-span-3">
                 <SelectValue placeholder="Select a version..." />
               </SelectTrigger>
               <SelectContent>
-                {documentVersions.map((version) => (
-                  <SelectItem key={version.id} value={version.id}>
-                    {version.name}
+                {versions.map((version) => (
+                  <SelectItem key={version} value={version}>
+                    {version}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -161,7 +226,7 @@ export function PopulatedDocumentDialog({ open, onOpenChange }: PopulatedDocumen
         </div>
         <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button onClick={handleGoToEditor} disabled={isNavigating}>
+            <Button onClick={handleGoToEditor} disabled={isNavigating || !selectedVersion}>
                 {isNavigating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isNavigating ? 'Loading...' : 'Go to Editor'}
             </Button>
