@@ -16,6 +16,7 @@ import type { Section, SubSection } from "@/types/document";
 import { Button } from "./ui/button";
 import { Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PreviewDialog } from "./preview-dialog";
 
 interface EditorPageProps {
   initialTitle?: string;
@@ -26,6 +27,7 @@ interface EditorPageProps {
 
 export function EditorPage({ initialTitle = "Untitled Document", initialContent = "", initialSections = [], initialComments = [] }: EditorPageProps) {
   const [documentContent, setDocumentContent] = useState(initialContent);
+  const [documentTitle, setDocumentTitle] = useState(initialTitle);
   const [sections, setSections] = useState<Section[]>(initialSections);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
@@ -37,6 +39,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -164,6 +167,8 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     <div className="h-screen w-screen flex flex-col bg-accent/40 overflow-hidden">
       <EditorToolbar 
         initialTitle={initialTitle} 
+        documentTitle={documentTitle}
+        onDocumentTitleChange={setDocumentTitle}
         documentContent={documentContent} 
         sections={sections} 
         comments={comments}
@@ -199,6 +204,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
                         setSelectedText(text);
                       }
                     }}
+                    onPreview={() => setIsPreviewOpen(true)}
                   />
                 </CardContent>
               </Card>
@@ -278,6 +284,12 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
           currentTitle={itemToRename.currentTitle}
         />
       )}
+       <PreviewDialog
+        open={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+        title={documentTitle}
+        content={documentContent}
+      />
     </div>
   );
 }

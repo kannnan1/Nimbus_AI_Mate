@@ -17,6 +17,8 @@ import { PreviewDialog } from "./preview-dialog";
 
 interface EditorToolbarProps {
   initialTitle?: string;
+  documentTitle: string;
+  onDocumentTitleChange: (title: string) => void;
   documentContent: string;
   sections: Section[];
   comments: Comment[];
@@ -26,22 +28,22 @@ interface EditorToolbarProps {
 
 export function EditorToolbar({ 
   initialTitle = "Untitled Document", 
+  documentTitle,
+  onDocumentTitleChange,
   documentContent, 
   sections, 
   comments, 
   onToggleComments,
   onToggleAddResults
 }: EditorToolbarProps) {
-  const [documentTitle, setDocumentTitle] = useState(initialTitle);
   const [saveStatus, setSaveStatus] = useState("Not saved");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [versionHistory, setVersionHistory] = useState<DocumentVersion[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    setDocumentTitle(initialTitle);
-  }, [initialTitle]);
+    onDocumentTitleChange(initialTitle);
+  }, [initialTitle, onDocumentTitleChange]);
 
   const loadVersionHistory = () => {
     if (documentTitle && documentTitle !== "Untitled Document") {
@@ -116,7 +118,7 @@ export function EditorToolbar({
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDocumentTitle(e.target.value);
+    onDocumentTitleChange(e.target.value);
     setSaveStatus("Not saved");
   }
 
@@ -172,15 +174,6 @@ export function EditorToolbar({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => setIsPreviewOpen(true)}>
-                  <Eye className="h-4 w-4" />
-                  <span className="sr-only">Preview</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Preview</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" onClick={onToggleComments}>
                   <MessageSquarePlus className="h-4 w-4" />
                   <span className="sr-only">Comments</span>
@@ -202,12 +195,6 @@ export function EditorToolbar({
         open={isHistoryOpen} 
         onOpenChange={setIsHistoryOpen} 
         versions={versionHistory} 
-      />
-      <PreviewDialog
-        open={isPreviewOpen}
-        onOpenChange={setIsPreviewOpen}
-        title={documentTitle}
-        content={documentContent}
       />
     </>
   );
