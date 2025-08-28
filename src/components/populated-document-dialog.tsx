@@ -136,11 +136,17 @@ The model's predictive accuracy was tested on an out-of-time sample from Q1 2023
 
 ***Interpretation***: *The table shows a slight but acceptable degradation in model performance from development to the out-of-time validation sample. A Gini drop of 2.8 percentage points is within typical bounds, indicating the model is generalizing well to new data. The AUC of 0.877 signifies strong predictive accuracy.*
 
+![ROC Curve for Validation Sample](https://picsum.photos/600/400?random=1)
+***Interpretation***: *The ROC curve demonstrates strong model performance. The curve is positioned high in the upper-left corner, signifying a high true positive rate and a low false positive rate across all thresholds, which is indicative of a robust and accurate model.*
+
 ## 5.2. Benchmarking and Alternative Models
 A simple benchmark model (a reduced-form logistic regression) was developed. The current model significantly outperforms the benchmark, justifying its complexity.
 
 ## 5.3. Stress Testing and Sensitivity Analysis
 The model's sensitivity to key variables was tested. The 'debt_to_income_ratio' was identified as the most influential variable. The model was also subjected to stressed macroeconomic scenarios, and its response was directionally consistent with expectations.
+
+![Feature Importance Plot](https://picsum.photos/600/400?random=2)
+***Interpretation***: *The feature importance plot shows that 'debt_to_income_ratio' and 'credit_utilization' are the most significant predictors in the model. This aligns with financial theory and provides confidence in the model's design.*
 
 # 6. Findings and Recommendations
 
