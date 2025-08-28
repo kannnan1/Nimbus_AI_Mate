@@ -2,10 +2,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Feather, Save, History, MessageSquarePlus, ArrowLeft, ClipboardPlus, Eye } from "lucide-react";
+import { Save, History, MessageSquarePlus, ArrowLeft, ClipboardPlus, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -128,8 +129,7 @@ export function EditorToolbar({
       <header className="flex h-16 items-center border-b bg-card px-4 shrink-0">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2 text-primary font-semibold">
-            <Feather className="w-5 h-5" />
-            <span>Nimbus Uno</span>
+            <Image src="https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/logo.png" alt="Nimbus Uno Application Logo" width={150} height={40} />
           </Link>
           <Separator orientation="vertical" className="h-8" />
           <div>

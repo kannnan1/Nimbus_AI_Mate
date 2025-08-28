@@ -110,7 +110,7 @@ export function LandingPage() {
   return (
     <>
     <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-16 flex items-center" style={{ backgroundColor: '#272d55' }}>
+      <header className="px-4 lg:px-6 h-16 flex items-center border-b" style={{ backgroundColor: '#dfe9fe' }}>
         <Link href="#" className="flex items-center justify-center gap-2" prefetch={false}>
           <Image src="https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/logo.png" alt="Nimbus Uno Application Logo" width={150} height={40} />
         </Link>
@@ -118,7 +118,7 @@ export function LandingPage() {
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
-                        <User className="h-5 w-5 text-white" />
+                        <User className="h-5 w-5 text-primary" />
                         <span className="sr-only">User Menu</span>
                     </Button>
                 </DropdownMenuTrigger>
