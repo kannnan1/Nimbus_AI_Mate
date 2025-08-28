@@ -28,7 +28,7 @@ interface CommentsSidebarProps {
   onClearSelection: () => void;
 }
 
-const teamMembers = ["Alex Doe", "Jane Smith", "Bob Johnson", "Alice Williams"];
+const teamMembers = ["Me", "Alex Doe", "Jane Smith", "Bob Johnson", "Alice Williams"];
 
 export function CommentsSidebar({ comments, selectedText, onAddComment, onClearSelection }: CommentsSidebarProps) {
   const [commentText, setCommentText] = useState("");

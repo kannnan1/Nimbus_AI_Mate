@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DocumentSidebar } from "@/components/document-sidebar";
 import { EditorToolbar } from "@/components/editor-toolbar";
 import { AiChatbot } from "@/components/ai-chatbot";
@@ -33,6 +33,43 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [comments, setComments] = useState<Comment[]>([]);
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  
+  const [position, setPosition] = useState({ x: window.innerWidth - 80, y: window.innerHeight - 80 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartPos = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        setPosition({
+          x: e.clientX - dragStartPos.current.x,
+          y: e.clientY - dragStartPos.current.y,
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setIsDragging(true);
+    dragStartPos.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
+  };
 
   useEffect(() => {
     const generateMarkdownFromSections = (sections: Section[]): string => {
@@ -103,7 +140,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-accent/40">
+    <div className="h-screen w-screen flex flex-col bg-accent/40 overflow-hidden">
       <EditorToolbar 
         initialTitle={initialTitle} 
         documentContent={documentContent} 
@@ -173,9 +210,19 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
       )}
 
       {!isChatbotOpen && (
-        <Button 
-          className="absolute bottom-4 right-4 rounded-full w-14 h-14 shadow-lg"
-          onClick={() => setIsChatbotOpen(true)}
+        <Button
+          style={{ position: 'absolute', left: position.x, top: position.y }}
+          onMouseDown={handleMouseDown}
+          onClick={(e) => {
+            if (e.detail === 1) { // Prevents click from firing on drag end
+              const dx = e.clientX - dragStartPos.current.x - position.x;
+              const dy = e.clientY - dragStartPos.current.y - position.y;
+              if (dx * dx + dy * dy < 10) { // Simple drag threshold
+                 setIsChatbotOpen(true);
+              }
+            }
+          }}
+          className="rounded-full w-14 h-14 shadow-lg cursor-grab active:cursor-grabbing"
         >
           <Bot className="w-6 h-6" />
         </Button>
