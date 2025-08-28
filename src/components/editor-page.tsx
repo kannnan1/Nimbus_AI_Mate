@@ -19,9 +19,10 @@ interface EditorPageProps {
   initialTitle?: string;
   initialContent?: string;
   initialSections?: Section[];
+  initialComments?: Comment[];
 }
 
-export function EditorPage({ initialTitle = "Untitled Document", initialContent = "", initialSections = [] }: EditorPageProps) {
+export function EditorPage({ initialTitle = "Untitled Document", initialContent = "", initialSections = [], initialComments = [] }: EditorPageProps) {
   const [documentContent, setDocumentContent] = useState(initialContent);
   const [sections, setSections] = useState<Section[]>(initialSections);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [itemToRename, setItemToRename] = useState<{ id: string; currentTitle: string; type: 'section' | 'subsection', sectionId?: string } | null>(null);
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Comment[]>(initialComments);
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   
@@ -154,6 +155,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
         initialTitle={initialTitle} 
         documentContent={documentContent} 
         sections={sections} 
+        comments={comments}
         onToggleComments={() => setIsCommentsOpen(!isCommentsOpen)}
       />
       <div className="flex-1 overflow-hidden">

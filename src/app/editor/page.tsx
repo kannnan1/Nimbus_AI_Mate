@@ -12,6 +12,7 @@ function EditorContent() {
   const [initialContent, setInitialContent] = useState("");
   const [initialTitle, setInitialTitle] = useState("Untitled Document");
   const [initialSections, setInitialSections] = useState([]);
+  const [initialComments, setInitialComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,6 +24,7 @@ function EditorContent() {
         setInitialContent(docToOpen.content || "");
         setInitialTitle(docToOpen.title);
         setInitialSections(docToOpen.sections || []);
+        setInitialComments(docToOpen.comments || []);
       }
     }
     setLoading(false);
@@ -32,7 +34,7 @@ function EditorContent() {
     return <div>Loading...</div>;
   }
 
-  return <EditorPage initialTitle={initialTitle} initialContent={initialContent} initialSections={initialSections} />;
+  return <EditorPage initialTitle={initialTitle} initialContent={initialContent} initialSections={initialSections} initialComments={initialComments} />;
 }
 
 

@@ -12,15 +12,17 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { Section } from "@/types/document";
 import { VersionHistoryDialog, type DocumentVersion } from "./version-history-dialog";
+import type { Comment } from "./comments-sidebar";
 
 interface EditorToolbarProps {
   initialTitle?: string;
   documentContent: string;
   sections: Section[];
+  comments: Comment[];
   onToggleComments: () => void;
 }
 
-export function EditorToolbar({ initialTitle = "Untitled Document", documentContent, sections, onToggleComments }: EditorToolbarProps) {
+export function EditorToolbar({ initialTitle = "Untitled Document", documentContent, sections, comments, onToggleComments }: EditorToolbarProps) {
   const [documentTitle, setDocumentTitle] = useState(initialTitle);
   const [saveStatus, setSaveStatus] = useState("Not saved");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -69,6 +71,7 @@ export function EditorToolbar({ initialTitle = "Untitled Document", documentCont
       lastModified,
       content: documentContent,
       sections: sections,
+      comments: comments,
     };
 
     if (existingDocIndex > -1) {
