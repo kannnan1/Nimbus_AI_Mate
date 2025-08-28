@@ -173,6 +173,8 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     }
   };
 
+  const showRightPanel = isCommentsOpen || isAddResultsOpen || isPreviewOpen;
+
   return (
     <div className="h-screen w-screen flex flex-col bg-accent/40 overflow-hidden">
       <EditorToolbar 
@@ -201,7 +203,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={isCommentsOpen || isAddResultsOpen || isPreviewOpen ? 60 : 80} minSize={40}>
+          <ResizablePanel defaultSize={showRightPanel ? 60 : 80} minSize={40}>
             <main className="h-full w-full p-4 flex flex-col">
               <Card className="flex-1 w-full shadow-inner relative">
                 <CardContent className="p-0 h-full">
@@ -218,30 +220,32 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             </main>
           </ResizablePanel>
           
-          <div className={cn("transition-all duration-300", (isCommentsOpen || isAddResultsOpen || isPreviewOpen) ? "block" : "hidden")}>
-             <ResizableHandle withHandle />
-             <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-               {isCommentsOpen && (
-                  <CommentsSidebar 
-                    comments={comments}
-                    setComments={setComments}
-                    onAddComment={handleAddComment}
-                    selectedText={selectedText}
-                    onClearSelection={() => setSelectedText(null)}
-                  />
-               )}
-               {isAddResultsOpen && (
-                  <AddResultsSidebar onAddResult={(result) => setDocumentContent(prev => prev + `\n\n${result}`)} />
-               )}
-               {isPreviewOpen && (
-                  <PreviewSidebar 
-                    title={documentTitle} 
-                    content={documentContent} 
-                    onClose={() => setIsPreviewOpen(false)}
-                  />
-               )}
-             </ResizablePanel>
-          </div>
+          {showRightPanel && (
+            <>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+                {isCommentsOpen && (
+                    <CommentsSidebar 
+                      comments={comments}
+                      setComments={setComments}
+                      onAddComment={handleAddComment}
+                      selectedText={selectedText}
+                      onClearSelection={() => setSelectedText(null)}
+                    />
+                )}
+                {isAddResultsOpen && (
+                    <AddResultsSidebar onAddResult={(result) => setDocumentContent(prev => prev + `\n\n${result}`)} />
+                )}
+                {isPreviewOpen && (
+                    <PreviewSidebar 
+                      title={documentTitle} 
+                      content={documentContent} 
+                      onClose={() => setIsPreviewOpen(false)}
+                    />
+                )}
+              </ResizablePanel>
+            </>
+          )}
         </ResizablePanelGroup>
       </div>
       
