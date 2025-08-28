@@ -30,13 +30,21 @@ export async function accessReferenceRepository(
 
 const accessReferenceRepositoryPrompt = ai.definePrompt({
   name: 'accessReferenceRepositoryPrompt',
-  input: {schema: AccessReferenceRepositoryInputSchema},
+  input: {schema: z.object({
+    query: AccessReferenceRepositoryInputSchema.shape.query,
+    retrievedDocs: z.array(z.string()),
+  })},
   output: {schema: AccessReferenceRepositoryOutputSchema},
   prompt: `You are a helpful assistant that accesses a reference repository of past documents.
   The user will provide a query, and you should search the repository and return the results.
   Query: {{{query}}}
-  Results: {{results}}`,
+  Retrieved Documents:
+  {{#each retrievedDocs}}
+  - {{{this}}}
+  {{/each}}
+  `,
 });
+
 
 const accessReferenceRepositoryFlow = ai.defineFlow(
   {
@@ -47,32 +55,34 @@ const accessReferenceRepositoryFlow = ai.defineFlow(
   async input => {
     // In a real application, this would involve searching a database or other data source.
     // For this example, we'll return some dummy data that feels relevant.
-    const dummyResults = [
-      'Q1 2023 Model Validation Report: Found similar methodology using logistic regression for PD models.',
-      'Project Alpha Development Docs: Details a comparable approach for handling missing data in income variables.',
-      'SR 11-7 Compliance Guide (Internal): Outlines standards for documenting model limitations, relevant to your selected text.',
-      'Q4 2022 Monitoring Report: Contains analysis of model performance decay in high-risk segments.',
+    const sampleDocuments = [
+        'Q1 2023 Model Validation Report: Found similar methodology using logistic regression for PD models.',
+        'Project Alpha Development Docs: Details a comparable approach for handling missing data in income variables.',
+        'SR 11-7 Compliance Guide (Internal): Outlines standards for documenting model limitations, relevant to your selected text.',
+        'Q4 2022 Monitoring Report: Contains analysis of model performance decay in high-risk segments.',
+        'Market Risk Model Methodology (2022): Describes the use of VAR models for assessing market risk.',
+        'Operational Risk Framework: Details the process for identifying and mitigating operational risks.',
     ];
 
     // Simulate searching the repository and filtering the results based on the query.
-    const searchResults = dummyResults.filter(result =>
-      result.toLowerCase().includes(input.query.toLowerCase())
+    const retrievedDocs = sampleDocuments.filter(doc =>
+      doc.toLowerCase().includes(input.query.toLowerCase())
     );
     
     // If no specific results match, return some generic ones so it doesn't look broken.
-    if (searchResults.length === 0) {
-        searchResults.push(dummyResults[0]);
-        searchResults.push(dummyResults[2]);
+    if (retrievedDocs.length === 0) {
+        retrievedDocs.push(sampleDocuments[0]);
+        retrievedDocs.push(sampleDocuments[2]);
     }
 
 
     const {output} = await accessReferenceRepositoryPrompt({
       ...input,
-      results: searchResults,
+      retrievedDocs,
     });
 
     return {
-      results: searchResults,
+      results: retrievedDocs,
     };
   }
 );
