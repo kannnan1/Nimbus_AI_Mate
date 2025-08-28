@@ -64,7 +64,7 @@ export function CommentsSidebar({ comments, setComments, selectedText, onAddComm
   };
 
   const handleToggleResolve = (commentId: string) => {
-    setComments(comments.map(c => c.id === commentId ? { ...c, resolved: !c, resolvedBy: !c.resolved ? "Alex Doe" : undefined } : c));
+    setComments(comments.map(c => c.id === commentId ? { ...c, resolved: !c.resolved } : c));
   };
 
   const handleAddReply = (commentId: string) => {
@@ -98,7 +98,14 @@ export function CommentsSidebar({ comments, setComments, selectedText, onAddComm
             <div className="divide-y">
               {comments.map(comment => (
                 <div key={comment.id} className={cn("p-4 space-y-2", comment.resolved && "bg-muted/50")}>
-                   <p className="text-sm italic text-muted-foreground border-l-4 pl-2">"{comment.quotedText}"</p>
+                   <div className="flex justify-between items-start">
+                     <p className="text-sm italic text-muted-foreground border-l-4 pl-2">"{comment.quotedText}"</p>
+                      <Button variant={comment.resolved ? "secondary" : "ghost"} size="sm" onClick={() => handleToggleResolve(comment.id)} className="shrink-0 ml-2">
+                           <CheckCircle2 className="w-4 h-4 mr-2" />
+                          {comment.resolved ? 'Re-open' : 'Resolve'}
+                      </Button>
+                   </div>
+
                    <div className="flex items-start gap-3">
                      <Avatar className="w-8 h-8">
                        <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
@@ -120,6 +127,7 @@ export function CommentsSidebar({ comments, setComments, selectedText, onAddComm
                              <Button variant="ghost" size="sm" className="text-xs text-muted-foreground data-[state=open]:hidden">
                                 <MessageSquare className="w-3 h-3 mr-2" />
                                 {comment.replies.length} {comment.replies.length > 1 ? 'replies' : 'reply'}
+                                <ChevronDown className="w-3 h-3 ml-1" />
                              </Button>
                           </CollapsibleTrigger>
                        )}
@@ -157,10 +165,6 @@ export function CommentsSidebar({ comments, setComments, selectedText, onAddComm
                               <Button variant="ghost" size="sm" onClick={() => setReplyingTo(comment.id)} disabled={comment.resolved}>
                                   <CornerDownRight className="w-4 h-4 mr-2" />
                                   Reply
-                              </Button>
-                              <Button variant={comment.resolved ? "secondary" : "ghost"} size="sm" onClick={() => handleToggleResolve(comment.id)}>
-                                   <CheckCircle2 className="w-4 h-4 mr-2" />
-                                  {comment.resolved ? 'Re-open' : 'Resolve'}
                               </Button>
                           </div>
                        )}
