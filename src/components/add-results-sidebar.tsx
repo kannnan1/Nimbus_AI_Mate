@@ -2,15 +2,19 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { TableProperties, BarChart, Table as TableIcon } from "lucide-react";
+import { TableProperties, BarChart, Table as TableIcon, Info } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "./ui/scroll-area";
 import { Checkbox } from "./ui/checkbox";
 import { Separator } from "./ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 
 interface AddResultsSidebarProps {
   onAddResult: (resultText: string) => void;
@@ -25,28 +29,67 @@ const modules = {
 
 type Module = keyof typeof modules;
 
-type ResultItem = {
+type ChartItem = {
     id: string;
     name: string;
+    type: 'chart';
+    imageUrl: string;
 }
 
+type TableItem = {
+    id: string;
+    name: string;
+    type: 'table';
+    data: {
+        headers: string[];
+        rows: (string | number)[][];
+    }
+}
+
+type ResultItem = ChartItem | TableItem;
+
 // Mock data for charts and tables
-const resultsData: Record<string, Record<string, { charts: ResultItem[], tables: ResultItem[] }>> = {
+const resultsData: Record<string, { charts: ChartItem[], tables: TableItem[] }> = {
   "Univariate Analysis": {
     charts: [
-      { id: "uni_chart_1", name: "Age Distribution Histogram" },
-      { id: "uni_chart_2", name: "Income Box Plot" },
+      { id: "uni_chart_1", name: "Age Distribution Histogram", type: 'chart', imageUrl: "https://picsum.photos/400/300?random=1" },
+      { id: "uni_chart_2", name: "Income Box Plot", type: 'chart', imageUrl: "https://picsum.photos/400/300?random=2" },
     ],
     tables: [
-      { id: "uni_table_1", name: "Descriptive Statistics" },
+      { 
+        id: "uni_table_1", 
+        name: "Descriptive Statistics", 
+        type: 'table',
+        data: {
+            headers: ["Statistic", "Value"],
+            rows: [
+                ["Mean Age", 35.4],
+                ["Median Income", "S$65,000"],
+                ["Std Dev Age", 8.2],
+                ["Sample Size", 1024],
+            ]
+        }
+      },
     ],
   },
   "Correlation Matrix": {
     charts: [
-        { id: "corr_chart_1", name: "Correlation Heatmap" },
+        { id: "corr_chart_1", name: "Correlation Heatmap", type: 'chart', imageUrl: "https://picsum.photos/400/300?random=3" },
     ],
     tables: [
-        { id: "corr_table_1", name: "Correlation Coefficients" },
+        { 
+            id: "corr_table_1", 
+            name: "Correlation Coefficients",
+            type: 'table',
+            data: {
+                headers: ["Variable 1", "Variable 2", "Coefficient"],
+                rows: [
+                    ["Age", "Income", 0.45],
+                    ["Age", "Spending", 0.21],
+                    ["Income", "Spending", 0.88],
+                ]
+            }
+        },
     ],
   },
   // Add more mock data for other submodules as needed...
@@ -75,12 +118,12 @@ export function AddResultsSidebar({ onAddResult }: AddResultsSidebarProps) {
     setSelectedItems({});
   };
 
-  const handleItemSelection = (item: ResultItem, type: 'chart' | 'table') => {
+  const handleItemSelection = (item: ResultItem) => {
     const newSelectedItems = { ...selectedItems };
     if (newSelectedItems[item.id]) {
         delete newSelectedItems[item.id];
     } else {
-        newSelectedItems[item.id] = { ...item, type };
+        newSelectedItems[item.id] = item;
     }
     setSelectedItems(newSelectedItems);
   };
@@ -95,19 +138,47 @@ export function AddResultsSidebar({ onAddResult }: AddResultsSidebarProps) {
     }
   };
 
-  const renderResultList = (items: ResultItem[], type: 'chart' | 'table') => (
+  const renderResultList = (items: ResultItem[]) => (
     <div className="space-y-2">
       {items.length > 0 ? items.map(item => (
         <div key={item.id} className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent">
           <Checkbox 
             id={item.id} 
             checked={!!selectedItems[item.id]} 
-            onCheckedChange={() => handleItemSelection(item, type)}
+            onCheckedChange={() => handleItemSelection(item)}
           />
           <Label htmlFor={item.id} className="flex-1 cursor-pointer">{item.name}</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-6 w-6"><Info className="w-4 h-4 text-muted-foreground" /></Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto">
+              <div className="p-2">
+                <p className="font-semibold text-center mb-2">{item.name}</p>
+                {item.type === 'chart' ? (
+                  <Image src={item.imageUrl} alt={item.name} width={400} height={300} className="rounded-md" />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {item.data.headers.map(header => <TableHead key={header}>{header}</TableHead>)}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {item.data.rows.map((row, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                          {row.map((cell, cellIndex) => <TableCell key={cellIndex}>{cell}</TableCell>)}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       )) : (
-        <p className="text-sm text-muted-foreground text-center p-4">No {type}s available.</p>
+        <p className="text-sm text-muted-foreground text-center p-4">No results available.</p>
       )}
     </div>
   );
@@ -164,10 +235,10 @@ export function AddResultsSidebar({ onAddResult }: AddResultsSidebarProps) {
               <ScrollArea className="flex-1 mt-2 -mx-4">
                 <div className="px-4">
                     <TabsContent value="charts">
-                       {renderResultList(availableResults.charts, 'chart')}
+                       {renderResultList(availableResults.charts)}
                     </TabsContent>
                     <TabsContent value="tables">
-                       {renderResultList(availableResults.tables, 'table')}
+                       {renderResultList(availableResults.tables)}
                     </TabsContent>
                 </div>
               </ScrollArea>
