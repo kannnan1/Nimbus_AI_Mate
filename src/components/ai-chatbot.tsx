@@ -26,11 +26,12 @@ interface AiChatbotProps {
   setDocumentContent: Dispatch<SetStateAction<string>>;
   onInsertSection: () => void;
   onClose?: () => void;
+  selectedText?: string | null;
 }
 
-export function AiChatbot({ documentContent, setDocumentContent, onInsertSection, onClose }: AiChatbotProps) {
+export function AiChatbot({ documentContent, setDocumentContent, onInsertSection, onClose, selectedText }: AiChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, role: "assistant", content: "Hello! I'm your Nimbus AI assistant. How can I help you with this document?" },
+    { id: 1, role: "assistant", content: "Hello! I'm your Nimbus AI assistant. How can I help you with this document? You can select text to use it in your queries." },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -52,9 +53,17 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
   const handleSearchRepository = async () => {
     if (isLoading) return;
     setIsLoading(true);
-    addMessage("user", "Search the reference repository for 'project proposal'.");
+    const query = selectedText || "project proposal";
+    
+    addMessage("user", (
+      <div>
+        <p>Search repository for:</p>
+        <p className="italic bg-primary-foreground/10 p-2 rounded-md mt-1">"{query}"</p>
+      </div>
+    ));
+
     try {
-      const result = await accessReferenceRepository({ query: "project proposal" });
+      const result = await accessReferenceRepository({ query: query });
       addMessage("assistant", (
         <div>
           <p className="font-semibold mb-2">Found {result.results.length} relevant documents:</p>
@@ -107,9 +116,10 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
   const handleQualityCheck = async () => {
     if (isLoading) return;
     setIsLoading(true);
-    addMessage("user", "Perform a quality check on this document.");
+    const contentToCheck = selectedText || documentContent;
+    addMessage("user", `Perform a quality check on the ${selectedText ? 'selected text' : 'document'}.`);
     try {
-      const result = await automatedSectionQualityChecks({ sectionContent: documentContent });
+      const result = await automatedSectionQualityChecks({ sectionContent: contentToCheck });
       addMessage("assistant", (
         <div>
           <p className="font-semibold mb-2">Quality Score: {result.qualityScore}/100</p>
@@ -126,7 +136,8 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-    addMessage("user", input);
+    const fullQuery = selectedText ? `Based on the text "${selectedText}", ${input}` : input;
+    addMessage("user", fullQuery);
     addMessage("assistant", "This is a mock response. For a full conversational experience, integrate a conversational AI model.");
     setInput("");
   }
@@ -214,7 +225,7 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a follow-up question..."
+            placeholder={selectedText ? "Ask about selected text..." : "Ask a follow-up question..."}
             disabled={isLoading}
           />
           <Button type="submit" size="icon" disabled={isLoading}>

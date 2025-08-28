@@ -210,9 +210,9 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
                     onChange={setDocumentContent}
                     placeholder="Start writing your document here..."
                     onSelectText={(text) => {
+                      setSelectedText(text);
                       if (text) {
                         setIsCommentsOpen(true);
-                        setSelectedText(text);
                       }
                     }}
                   />
@@ -255,6 +255,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
               setDocumentContent={setDocumentContent}
               onInsertSection={() => setIsAddSectionOpen(true)}
               onClose={() => setIsChatbotOpen(false)}
+              selectedText={selectedText}
             />
         </div>
       )}

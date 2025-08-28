@@ -23,15 +23,16 @@ export function RichTextEditor({ value, onChange, placeholder, onSelectText }: R
     // A real implementation would manipulate the editor's state.
   };
 
-  const handleAddComment = () => {
+  const handleSelection = () => {
     const selection = window.getSelection()?.toString().trim();
     if (selection) {
       onSelectText(selection);
-    } else {
-      // If no text is selected, you could prompt the user or handle it differently.
-      // For now, we'll only allow comments on selected text.
-      alert("Please select text to comment on.");
     }
+  };
+  
+  const handleAddComment = () => {
+    const selection = window.getSelection()?.toString().trim();
+    onSelectText(selection || null); // Pass null if selection is empty
   };
   
   return (
@@ -62,6 +63,7 @@ export function RichTextEditor({ value, onChange, placeholder, onSelectText }: R
             ref={editorRef}
             value={value}
             onChange={(e) => onChange(e.target.value)}
+            onSelect={handleSelection}
             className="h-full w-full resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base"
             placeholder={placeholder}
         />
