@@ -36,8 +36,10 @@ const accessReferenceRepositoryPrompt = ai.definePrompt({
   })},
   output: {schema: AccessReferenceRepositoryOutputSchema},
   prompt: `You are a helpful assistant that accesses a reference repository of past documents.
-  The user will provide a query, and you should search the repository and return the results.
+  Based on the retrieved documents, select the most relevant ones for the user's query and return them in the 'results' field.
+  
   Query: {{{query}}}
+  
   Retrieved Documents:
   {{#each retrievedDocs}}
   - {{{this}}}
@@ -65,24 +67,24 @@ const accessReferenceRepositoryFlow = ai.defineFlow(
     ];
 
     // Simulate searching the repository and filtering the results based on the query.
-    const retrievedDocs = sampleDocuments.filter(doc =>
+    let retrievedDocs = sampleDocuments.filter(doc =>
       doc.toLowerCase().includes(input.query.toLowerCase())
     );
     
     // If no specific results match, return some generic ones so it doesn't look broken.
     if (retrievedDocs.length === 0) {
-        retrievedDocs.push(sampleDocuments[0]);
-        retrievedDocs.push(sampleDocuments[2]);
+        retrievedDocs = sampleDocuments.filter(doc => 
+          doc.toLowerCase().includes('model') || doc.toLowerCase().includes('risk')
+        );
     }
-
 
     const {output} = await accessReferenceRepositoryPrompt({
       ...input,
       retrievedDocs,
     });
-
-    return {
-      results: retrievedDocs,
-    };
+    
+    // The prompt is now responsible for the final filtering/selection.
+    // If the prompt somehow fails, fall back to the initially retrieved docs.
+    return output || { results: retrievedDocs };
   }
 );
