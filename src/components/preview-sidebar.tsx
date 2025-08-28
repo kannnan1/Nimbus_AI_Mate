@@ -67,9 +67,9 @@ export function PreviewSidebar({ title, content, onClose }: PreviewSidebarProps)
             </Button>
         )}
       </CardHeader>
-      <CardContent className="p-0 flex-1 overflow-hidden">
+      <CardContent className="p-0 flex-1">
         <ScrollArea className="h-full">
-            <div className="p-6 prose prose-sm lg:prose-base max-w-none">
+            <div className="p-6 prose-sm max-w-none lg:prose-base">
                 <h1 className="text-4xl font-extrabold mb-6 border-b pb-4">{title}</h1>
                  <div 
                     dangerouslySetInnerHTML={createMarkup(content)} 
