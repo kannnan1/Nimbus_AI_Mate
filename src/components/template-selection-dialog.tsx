@@ -23,15 +23,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FilePlus2 } from "lucide-react";
 import type { Section } from "@/types/document";
+import { AddTemplateDialog } from "./add-template-dialog";
 
-interface Template {
+export interface Template {
   id: string;
   name: string;
   description: string;
   sections: Section[];
 }
 
-const templates: Template[] = [
+const initialTemplates: Template[] = [
   {
     id: "model-dev",
     name: "Model Development Report",
@@ -73,9 +74,10 @@ interface TemplateSelectionDialogProps {
 }
 
 export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectionDialogProps) {
+  const [templates, setTemplates] = useState<Template[]>(initialTemplates);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(templates[0]);
+  const [isAddTemplateOpen, setIsAddTemplateOpen] = useState(false);
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleTemplateChange = (templateId: string) => {
     const template = templates.find(t => t.id === templateId) || null;
@@ -104,23 +106,29 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
     router.push(`/editor?title=${encodeURIComponent(selectedTemplate.name)}`);
   };
 
-  const handleAddTemplateClick = () => {
-    fileInputRef.current?.click();
-  };
-  
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      console.log("Selected file:", file.name);
-      // Here you would add logic to parse the .docx file and create a new template
-      // For now, we'll just log it.
-    }
+  const handleAddTemplate = (name: string, file: File) => {
+    // In a real application, you would parse the .docx file content.
+    // For this example, we'll create a dummy template.
+    const newTemplate: Template = {
+      id: `template-${Date.now()}`,
+      name: name,
+      description: `Custom template uploaded from ${file.name}`,
+      sections: [
+        { id: "custom-s1", title: "Uploaded Section 1", subsections: [] },
+        { id: "custom-s2", title: "Uploaded Section 2", subsections: [] },
+      ],
+    };
+
+    const newTemplates = [...templates, newTemplate];
+    setTemplates(newTemplates);
+    setSelectedTemplate(newTemplate);
   };
 
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-5xl">
         <DialogHeader className="flex-row items-center justify-between">
             <div className="space-y-1.5">
                 <DialogTitle>Start with a Template</DialogTitle>
@@ -128,23 +136,16 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
                     Select a template to kickstart your document creation process.
                 </DialogDescription>
             </div>
-            <Button variant="outline" onClick={handleAddTemplateClick}>
+            <Button variant="outline" onClick={() => setIsAddTemplateOpen(true)}>
                 <FilePlus2 className="mr-2" />
                 Add Template
             </Button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept=".docx"
-              className="hidden"
-            />
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
           <div className="space-y-4">
             <Select
               onValueChange={handleTemplateChange}
-              defaultValue={selectedTemplate?.id}
+              value={selectedTemplate?.id}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a template..." />
@@ -195,5 +196,11 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <AddTemplateDialog 
+      open={isAddTemplateOpen} 
+      onOpenChange={setIsAddTemplateOpen}
+      onAddTemplate={handleAddTemplate}
+    />
+    </>
   );
 }
