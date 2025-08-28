@@ -153,8 +153,13 @@ The model's predictive accuracy was tested on an out-of-time sample from Q1 2023
 | KS Statistic        | 55.1%       | 52.8%                  |
 | Area Under ROC (AUC)| 0.891       | 0.877                  |
 
+***Interpretation***: *The table shows a slight but acceptable degradation in model performance from development to the out-of-time validation sample. A Gini drop of 2.8 percentage points is within typical bounds, indicating the model is generalizing well to new data. The AUC of 0.877 signifies strong predictive accuracy.*
+
 ![ROC Curve](https://picsum.photos/600/400?random=1)
 *Figure 1: ROC Curve on Out-of-Time Sample*
+
+***Interpretation***: *The ROC curve demonstrates strong model performance. The curve is positioned high in the upper-left corner, signifying a high true positive rate and a low false positive rate across all thresholds, which is indicative of a robust and accurate model.*
+
 
 ## 5.2. Benchmarking and Alternative Models
 A simple benchmark model (a reduced-form logistic regression) was developed. The current model significantly outperforms the benchmark, justifying its complexity.
@@ -164,6 +169,8 @@ The model's sensitivity to key variables was tested. The 'debt_to_income_ratio' 
 
 ![Lift Chart](https://picsum.photos/600/400?random=2)
 *Figure 2: Lift Chart showing model performance by decile.*
+
+***Interpretation***: *The lift chart clearly shows that the model effectively rank-orders risk. The top deciles capture a significantly higher proportion of defaults than the lower deciles, confirming the model's utility in distinguishing between high-risk and low-risk populations.*
 
 # 6. Findings and Recommendations
 
@@ -252,7 +259,7 @@ export function SmartDocumentDialog({ open, onOpenChange }: SmartDocumentDialogP
         }
         return nextProgress;
       });
-    }, 500);
+    }, 1500);
   };
 
   const finishGeneration = () => {
