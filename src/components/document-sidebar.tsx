@@ -106,7 +106,7 @@ export function DocumentSidebar({
                   )}
                   onClick={() => setSelectedSectionId(section.id)}
                 >
-                  <span className="font-semibold text-sm truncate">{secIndex + 1}. {section.title}</span>
+                  <span className="font-semibold text-sm truncate">{section.title}</span>
                   <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleOpenRenameDialog(section, 'section')}}>
                       <Pencil className="w-3 h-3" />
@@ -123,7 +123,7 @@ export function DocumentSidebar({
                    <div className="pl-6 mt-1 space-y-1">
                       {section.subsections.map((subsection, subIndex) => (
                           <div key={subsection.id} className="group flex items-center justify-between p-2 rounded-md hover:bg-accent/50">
-                             <span className="text-sm truncate">{secIndex + 1}.{subIndex + 1}. {subsection.title}</span>
+                             <span className="text-sm truncate">{subsection.title}</span>
                              <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); handleOpenRenameDialog(subsection, 'subsection', section.id)}}>
                                   <Pencil className="w-3 h-3" />

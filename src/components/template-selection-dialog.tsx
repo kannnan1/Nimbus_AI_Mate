@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FilePlus2 } from "lucide-react";
+import { FilePlus2, Loader2 } from "lucide-react";
 import type { Section } from "@/types/document";
 import { AddTemplateDialog } from "./add-template-dialog";
 
@@ -140,6 +140,7 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
   const [templates, setTemplates] = useState<Template[]>(initialTemplates);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(templates[0]);
   const [isAddTemplateOpen, setIsAddTemplateOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const router = useRouter();
 
   const handleTemplateChange = (templateId: string) => {
@@ -150,6 +151,8 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
   const handleGoToEditor = () => {
     if (!selectedTemplate) return;
     
+    setIsNavigating(true);
+
     const newDoc = {
       title: selectedTemplate.name,
       lastModified: new Date().toISOString(),
@@ -158,27 +161,34 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
       comments: [],
     };
     
-    // In a real app, you might create this record in a database.
-    // Here we save it to localStorage to be picked up by the editor page.
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
-    storedDocs.push(newDoc);
+    
+    const existingDocIndex = storedDocs.findIndex((doc: { title: string }) => doc.title === newDoc.title);
+    if (existingDocIndex > -1) {
+        // To prevent creating duplicates, let's append a timestamp to the title
+        newDoc.title = `${selectedTemplate.name} (${new Date().toLocaleTimeString()})`;
+    }
+    
+    storedDocs.unshift(newDoc);
     localStorage.setItem("myDocuments", JSON.stringify(storedDocs));
 
-    onOpenChange(false);
-    router.push(`/editor?title=${encodeURIComponent(selectedTemplate.name)}`);
+    // A small delay to show the loading state
+    setTimeout(() => {
+        onOpenChange(false);
+        router.push(`/editor?title=${encodeURIComponent(newDoc.title)}`);
+        setIsNavigating(false);
+    }, 500);
   };
 
   const handleAddTemplate = (name: string, file: File) => {
-    // In a real application, you would parse the .docx file content.
-    // For this example, we'll create a dummy template.
     const newTemplate: Template = {
       id: `template-${Date.now()}`,
       name: name,
       description: `Custom template uploaded from ${file.name}`,
       sections: [
-        { id: "custom-s1", title: "Uploaded Section 1", subsections: [] },
-        { id: "custom-s2", title: "Uploaded Section 2", subsections: [] },
+        { id: "custom-s1", title: "1. Uploaded Section 1", subsections: [] },
+        { id: "custom-s2", title: "2. Uploaded Section 2", subsections: [] },
       ],
     };
 
@@ -255,7 +265,10 @@ export function TemplateSelectionDialog({ open, onOpenChange }: TemplateSelectio
         </div>
         <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button onClick={handleGoToEditor} disabled={!selectedTemplate}>Go to Editor</Button>
+            <Button onClick={handleGoToEditor} disabled={!selectedTemplate || isNavigating}>
+                {isNavigating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isNavigating ? 'Loading...' : 'Go to Editor'}
+            </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
