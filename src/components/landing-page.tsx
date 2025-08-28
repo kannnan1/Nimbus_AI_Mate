@@ -103,7 +103,7 @@ export function LandingPage() {
     { icon: FileText, tooltip: "Generate Report" },
     { icon: Share2, tooltip: "Share" },
     { icon: Monitor, tooltip: "Deploy" },
-    { icon: Trash2, tooltip: "Delete", variant: 'destructive' as const },
+    { icon: Trash2, tooltip: "Delete" },
   ];
   
   const handleActionClick = (doc: MyDocument, action: string) => {
@@ -187,11 +187,11 @@ export function LandingPage() {
                                 </CardContent>
                                 <div className="p-2 border-t flex flex-wrap justify-center gap-1">
                                     <TooltipProvider>
-                                    {documentActions.map(({ icon: Icon, tooltip, variant }) => (
+                                    {documentActions.map(({ icon: Icon, tooltip }) => (
                                         <Tooltip key={tooltip}>
                                             <TooltipTrigger asChild>
                                                 <Button 
-                                                    variant={variant || "ghost"} 
+                                                    variant="ghost" 
                                                     size="icon" 
                                                     className="h-8 w-8"
                                                     onClick={() => handleActionClick(doc, tooltip)}
