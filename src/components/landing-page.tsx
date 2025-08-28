@@ -15,6 +15,7 @@ import { ShareDialog } from "@/components/share-dialog";
 import { TemplateSelectionDialog } from "./template-selection-dialog";
 import type { Section } from "@/types/document";
 import { PopulatedDocumentDialog } from "./populated-document-dialog";
+import { SmartDocumentDialog } from "./smart-document-dialog";
 
 
 const options: {
@@ -49,7 +50,7 @@ const options: {
     id: "auto",
     title: "Smart Document Generation",
     description: "Select your pipeline and template, and let the system map results, sections, and interpretations.",
-    href: "/editor",
+    href: "#",
     Icon: Bot,
   },
 ];
@@ -71,6 +72,7 @@ export function LandingPage() {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   const [isTemplateModalOpen, setTemplateModalOpen] = useState(false);
   const [isPopulatedModalOpen, setIsPopulatedModalOpen] = useState(false);
+  const [isSmartModalOpen, setIsSmartModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<{ title: string } | null>(null);
   const [myDocuments, setMyDocuments] = useState<MyDocument[]>([]);
 
@@ -104,6 +106,10 @@ export function LandingPage() {
     if (optionId === 'populated') {
       e.preventDefault();
       setIsPopulatedModalOpen(true);
+    }
+     if (optionId === 'auto') {
+      e.preventDefault();
+      setIsSmartModalOpen(true);
     }
   };
 
@@ -271,6 +277,10 @@ export function LandingPage() {
     <PopulatedDocumentDialog
         open={isPopulatedModalOpen}
         onOpenChange={setIsPopulatedModalOpen}
+    />
+    <SmartDocumentDialog
+        open={isSmartModalOpen}
+        onOpenChange={setIsSmartModalOpen}
     />
     </>
   );
