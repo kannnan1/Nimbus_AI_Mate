@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Sparkles, Book, Scale, ClipboardPlus, CheckCircle, Bot, User } from "lucide-react";
+import { Send, Sparkles, Book, Scale, ClipboardPlus, CheckCircle, Bot, User, X } from "lucide-react";
 import { accessReferenceRepository } from "@/ai/flows/access-reference-repository";
 import { documentAlignmentTool } from "@/ai/flows/document-alignment-tool";
 import { insertSectionsFromPastDocuments } from "@/ai/flows/insert-sections-from-past-documents";
@@ -25,9 +25,10 @@ interface AiChatbotProps {
   documentContent: string;
   setDocumentContent: Dispatch<SetStateAction<string>>;
   onInsertSection: () => void;
+  onClose?: () => void;
 }
 
-export function AiChatbot({ documentContent, setDocumentContent, onInsertSection }: AiChatbotProps) {
+export function AiChatbot({ documentContent, setDocumentContent, onInsertSection, onClose }: AiChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, role: "assistant", content: "Hello! I'm your Nimbus AI assistant. How can I help you with this document?" },
   ]);
@@ -138,12 +139,17 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
   ];
 
   return (
-    <Card className="h-full flex flex-col border-l rounded-none shadow-none">
-      <CardHeader className="border-b">
-        <CardTitle className="flex items-center gap-2">
+    <Card className="h-full flex flex-col shadow-none rounded-lg border-2 border-primary/20">
+      <CardHeader className="border-b bg-primary/5 flex items-center justify-between flex-row py-3">
+        <CardTitle className="flex items-center gap-2 text-base">
           <Sparkles className="text-primary" />
           <span>AI Assistant</span>
         </CardTitle>
+        {onClose && (
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
+                <X className="w-4 h-4" />
+            </Button>
+        )}
       </CardHeader>
       <CardContent className="p-0 flex-1 overflow-hidden">
         <ScrollArea className="h-full" ref={scrollAreaRef}>

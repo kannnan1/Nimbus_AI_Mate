@@ -12,6 +12,8 @@ import { RichTextEditor } from "./rich-text-editor";
 import { AddSectionDialog } from "@/components/add-section-dialog";
 import { RenameSectionDialog } from "@/components/rename-section-dialog";
 import type { Section, SubSection } from "@/types/document";
+import { Button } from "./ui/button";
+import { Bot } from "lucide-react";
 
 interface EditorPageProps {
   initialTitle?: string;
@@ -31,6 +33,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [selectedText, setSelectedText] = useState<string | null>(null);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   useEffect(() => {
     // On initial load, if there's content, we don't want to immediately overwrite it.
@@ -116,7 +119,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
       />
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full w-full">
-          <ResizablePanel defaultSize={18} minSize={15} maxSize={25}>
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
             <DocumentSidebar
               sections={sections}
               setSections={setSections}
@@ -129,7 +132,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={isCommentsOpen ? 38 : 52} minSize={30}>
+          <ResizablePanel defaultSize={isCommentsOpen ? 60 : 80} minSize={40}>
             <main className="h-full w-full p-4 flex flex-col">
               <Card className="flex-1 w-full shadow-inner relative">
                 <CardContent className="p-0 h-full">
@@ -148,9 +151,10 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
               </Card>
             </main>
           </ResizablePanel>
-          <ResizableHandle withHandle />
+          
           {isCommentsOpen && (
             <>
+              <ResizableHandle withHandle />
               <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
                 <CommentsSidebar 
                   comments={comments} 
@@ -159,18 +163,29 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
                   onClearSelection={() => setSelectedText(null)}
                 />
               </ResizablePanel>
-              <ResizableHandle withHandle />
             </>
           )}
-          <ResizablePanel collapsible collapsedSize={4} defaultSize={isCommentsOpen ? 24 : 30} minSize={20} maxSize={40}>
-            <AiChatbot
+        </ResizablePanelGroup>
+      </div>
+      
+      {isChatbotOpen && (
+        <div className="absolute bottom-20 right-4 z-10 w-[400px] h-[600px] shadow-2xl rounded-lg">
+           <AiChatbot
               documentContent={documentContent}
               setDocumentContent={setDocumentContent}
               onInsertSection={() => setIsAddSectionOpen(true)}
+              onClose={() => setIsChatbotOpen(false)}
             />
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </div>
+        </div>
+      )}
+
+      <Button 
+        className="absolute bottom-4 right-4 rounded-full w-14 h-14 shadow-lg"
+        onClick={() => setIsChatbotOpen(!isChatbotOpen)}
+      >
+        <Bot className="w-6 h-6" />
+      </Button>
+
        <AddSectionDialog
         open={isAddSectionOpen}
         onOpenChange={setIsAddSectionOpen}
