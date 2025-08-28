@@ -8,9 +8,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquarePlus, User, X } from 'lucide-react';
+import { MessageSquarePlus, User, X, CheckCircle2, CornerDownRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Separator } from './ui/separator';
+import { cn } from '@/lib/utils';
+
+export type Reply = {
+    id: string;
+    author: string;
+    timestamp: string;
+    text: string;
+};
 
 export type Comment = {
   id: string;
@@ -19,10 +27,13 @@ export type Comment = {
   text: string;
   quotedText: string;
   assignedTo?: string;
+  resolved: boolean;
+  replies: Reply[];
 };
 
 interface CommentsSidebarProps {
   comments: Comment[];
+  setComments: React.Dispatch<React.SetStateAction<Comment[]>>;
   selectedText: string | null;
   onAddComment: (commentText: string, assignedTo: string) => void;
   onClearSelection: () => void;
@@ -30,9 +41,11 @@ interface CommentsSidebarProps {
 
 const teamMembers = ["Me", "Alex Doe", "Jane Smith", "Bob Johnson", "Alice Williams"];
 
-export function CommentsSidebar({ comments, selectedText, onAddComment, onClearSelection }: CommentsSidebarProps) {
+export function CommentsSidebar({ comments, setComments, selectedText, onAddComment, onClearSelection }: CommentsSidebarProps) {
   const [commentText, setCommentText] = useState("");
   const [assignedTo, setAssignedTo] = useState(teamMembers[0]);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
   const commentInputRef = React.useRef<HTMLTextAreaElement>(null);
   
   useEffect(() => {
@@ -48,6 +61,27 @@ export function CommentsSidebar({ comments, selectedText, onAddComment, onClearS
     }
   };
 
+  const handleToggleResolve = (commentId: string) => {
+    setComments(comments.map(c => c.id === commentId ? { ...c, resolved: !c.resolved } : c));
+  };
+
+  const handleAddReply = (commentId: string) => {
+    if (!replyText.trim()) return;
+
+    const newReply: Reply = {
+        id: `reply-${Date.now()}`,
+        author: "Alex Doe",
+        timestamp: new Date().toISOString(),
+        text: replyText,
+    };
+
+    setComments(comments.map(c => 
+        c.id === commentId ? { ...c, replies: [...c.replies, newReply] } : c
+    ));
+    setReplyText("");
+    setReplyingTo(null);
+  };
+
   return (
     <Card className="h-full flex flex-col border-l rounded-none shadow-none">
       <CardHeader className="border-b">
@@ -59,9 +93,9 @@ export function CommentsSidebar({ comments, selectedText, onAddComment, onClearS
       <CardContent className="p-0 flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           {comments.length > 0 ? (
-            <div className="p-4 space-y-4">
+            <div className="divide-y">
               {comments.map(comment => (
-                <div key={comment.id} className="space-y-2">
+                <div key={comment.id} className={cn("p-4 space-y-2", comment.resolved && "bg-muted/50")}>
                    <p className="text-sm italic text-muted-foreground border-l-4 pl-2">"{comment.quotedText}"</p>
                    <div className="flex items-start gap-3">
                      <Avatar className="w-8 h-8">
@@ -75,6 +109,51 @@ export function CommentsSidebar({ comments, selectedText, onAddComment, onClearS
                        <p className="text-sm">{comment.text}</p>
                        {comment.assignedTo && <p className="text-xs mt-2 text-primary font-semibold">Assigned to: {comment.assignedTo}</p>}
                      </div>
+                   </div>
+                   
+                   {/* Replies */}
+                   {comment.replies.map(reply => (
+                      <div key={reply.id} className="flex items-start gap-3 pl-8">
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback>{reply.author.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="bg-card p-3 rounded-lg flex-1 border">
+                           <div className="flex justify-between items-center mb-1">
+                             <span className="font-semibold text-sm">{reply.author}</span>
+                             <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(reply.timestamp), { addSuffix: true })}</span>
+                           </div>
+                           <p className="text-sm">{reply.text}</p>
+                        </div>
+                      </div>
+                   ))}
+
+                   {/* Reply Input & Actions */}
+                   <div className="pl-11 pt-2">
+                        {replyingTo === comment.id ? (
+                            <div className="space-y-2">
+                                <Textarea 
+                                    value={replyText}
+                                    onChange={(e) => setReplyText(e.target.value)}
+                                    placeholder="Write a reply..."
+                                    rows={2}
+                                />
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>Cancel</Button>
+                                    <Button size="sm" onClick={() => handleAddReply(comment.id)}>Reply</Button>
+                                </div>
+                            </div>
+                        ) : (
+                           <div className='flex items-center justify-between'>
+                               <Button variant="ghost" size="sm" onClick={() => setReplyingTo(comment.id)} disabled={comment.resolved}>
+                                   <CornerDownRight className="w-4 h-4 mr-2" />
+                                   Reply
+                               </Button>
+                               <Button variant={comment.resolved ? "secondary" : "ghost"} size="sm" onClick={() => handleToggleResolve(comment.id)}>
+                                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                                   {comment.resolved ? 'Re-open' : 'Resolve'}
+                               </Button>
+                           </div>
+                        )}
                    </div>
                 </div>
               ))}

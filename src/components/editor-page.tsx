@@ -34,11 +34,18 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   
-  const [position, setPosition] = useState({ x: window.innerWidth - 80, y: window.innerHeight - 80 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
+  const hasSetInitialPosition = useRef(false);
+
 
   useEffect(() => {
+    if (!hasSetInitialPosition.current) {
+       setPosition({ x: window.innerWidth - 80, y: window.innerHeight - 80 });
+       hasSetInitialPosition.current = true;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         setPosition({
@@ -134,6 +141,8 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
       text: commentText,
       quotedText: selectedText,
       assignedTo: assignedTo,
+      resolved: false,
+      replies: [],
     };
     setComments([...comments, newComment]);
     setSelectedText(null);
@@ -187,7 +196,8 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
                 <CommentsSidebar 
-                  comments={comments} 
+                  comments={comments}
+                  setComments={setComments}
                   onAddComment={handleAddComment}
                   selectedText={selectedText}
                   onClearSelection={() => setSelectedText(null)}
@@ -222,7 +232,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
               }
             }
           }}
-          className="rounded-full w-14 h-14 shadow-lg cursor-grab active:cursor-grabbing"
+          className="rounded-full w-14 h-14 shadow-lg cursor-grab active:cursor-grabbing z-20"
         >
           <Bot className="w-6 h-6" />
         </Button>
