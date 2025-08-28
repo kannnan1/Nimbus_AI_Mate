@@ -1,6 +1,6 @@
 
 import React, { useRef } from 'react';
-import { Bold, Italic, Underline, Strikethrough, List, ListOrdered, Heading1, Heading2, Heading3, AlignLeft, AlignCenter, AlignRight, Code, MessageSquarePlus, Eye } from 'lucide-react';
+import { Bold, Italic, Underline, Strikethrough, List, ListOrdered, Heading1, Heading2, Heading3, AlignLeft, AlignCenter, AlignRight, Code, MessageSquarePlus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 
@@ -9,10 +9,9 @@ interface RichTextEditorProps {
   onChange: (value: string) => void;
   placeholder?: string;
   onSelectText: (text: string | null) => void;
-  onPreview: () => void;
 }
 
-export function RichTextEditor({ value, onChange, placeholder, onSelectText, onPreview }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, placeholder, onSelectText }: RichTextEditorProps) {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   
   // In a real application, you would use a library like TipTap, Slate.js, or Quill.
@@ -57,9 +56,6 @@ export function RichTextEditor({ value, onChange, placeholder, onSelectText, onP
         <Separator orientation="vertical" className="h-6 mx-1" />
         <Button variant="ghost" size="icon" onClick={handleAddComment} title="Add Comment">
             <MessageSquarePlus className="w-4 h-4"/>
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onPreview} title="Preview Document">
-            <Eye className="w-4 h-4"/>
         </Button>
       </div>
         <textarea

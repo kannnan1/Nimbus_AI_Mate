@@ -13,7 +13,6 @@ import { format } from "date-fns";
 import type { Section } from "@/types/document";
 import { VersionHistoryDialog, type DocumentVersion } from "./version-history-dialog";
 import type { Comment } from "./comments-sidebar";
-import { PreviewDialog } from "./preview-dialog";
 
 interface EditorToolbarProps {
   initialTitle?: string;
@@ -24,6 +23,7 @@ interface EditorToolbarProps {
   comments: Comment[];
   onToggleComments: () => void;
   onToggleAddResults: () => void;
+  onTogglePreview: () => void;
 }
 
 export function EditorToolbar({ 
@@ -34,7 +34,8 @@ export function EditorToolbar({
   sections, 
   comments, 
   onToggleComments,
-  onToggleAddResults
+  onToggleAddResults,
+  onTogglePreview
 }: EditorToolbarProps) {
   const [saveStatus, setSaveStatus] = useState("Not saved");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -185,6 +186,11 @@ export function EditorToolbar({
 
           <Separator orientation="vertical" className="h-8 mx-2" />
           
+          <Button variant="outline" onClick={onTogglePreview}>
+            <Eye className="mr-2 h-4 w-4" />
+            Preview Document
+          </Button>
+
           <Button onClick={onToggleAddResults}>
             <ClipboardPlus className="mr-2 h-4 w-4" />
             Add Results

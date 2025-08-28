@@ -16,7 +16,7 @@ import type { Section, SubSection } from "@/types/document";
 import { Button } from "./ui/button";
 import { Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PreviewDialog } from "./preview-dialog";
+import { PreviewSidebar } from "./preview-sidebar";
 
 interface EditorPageProps {
   initialTitle?: string;
@@ -153,6 +153,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     setIsAddResultsOpen(!isAddResultsOpen);
     if (!isAddResultsOpen) {
       setIsCommentsOpen(false);
+      setIsPreviewOpen(false);
     }
   };
 
@@ -160,6 +161,15 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     setIsCommentsOpen(!isCommentsOpen);
      if (!isCommentsOpen) {
       setIsAddResultsOpen(false);
+      setIsPreviewOpen(false);
+    }
+  };
+  
+  const onTogglePreview = () => {
+    setIsPreviewOpen(!isPreviewOpen);
+    if (!isPreviewOpen) {
+        setIsCommentsOpen(false);
+        setIsAddResultsOpen(false);
     }
   };
 
@@ -174,6 +184,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
         comments={comments}
         onToggleComments={onToggleComments}
         onToggleAddResults={onToggleAddResults}
+        onTogglePreview={onTogglePreview}
       />
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full w-full">
@@ -190,7 +201,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={isCommentsOpen || isAddResultsOpen ? 60 : 80} minSize={40}>
+          <ResizablePanel defaultSize={isCommentsOpen || isAddResultsOpen || isPreviewOpen ? 60 : 80} minSize={40}>
             <main className="h-full w-full p-4 flex flex-col">
               <Card className="flex-1 w-full shadow-inner relative">
                 <CardContent className="p-0 h-full">
@@ -204,14 +215,13 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
                         setSelectedText(text);
                       }
                     }}
-                    onPreview={() => setIsPreviewOpen(true)}
                   />
                 </CardContent>
               </Card>
             </main>
           </ResizablePanel>
           
-          <div className={cn("transition-all duration-300", (isCommentsOpen || isAddResultsOpen) ? "block" : "hidden")}>
+          <div className={cn("transition-all duration-300", (isCommentsOpen || isAddResultsOpen || isPreviewOpen) ? "block" : "hidden")}>
              <ResizableHandle withHandle />
              <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
                {isCommentsOpen && (
@@ -225,6 +235,9 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
                )}
                {isAddResultsOpen && (
                   <AddResultsSidebar onAddResult={(result) => setDocumentContent(prev => prev + `\n\n${result}`)} />
+               )}
+               {isPreviewOpen && (
+                  <PreviewSidebar title={documentTitle} content={documentContent} />
                )}
              </ResizablePanel>
           </div>
@@ -284,12 +297,6 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
           currentTitle={itemToRename.currentTitle}
         />
       )}
-       <PreviewDialog
-        open={isPreviewOpen}
-        onOpenChange={setIsPreviewOpen}
-        title={documentTitle}
-        content={documentContent}
-      />
     </div>
   );
 }
