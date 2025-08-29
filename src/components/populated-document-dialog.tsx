@@ -22,9 +22,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
-import type { Section } from "@/types/document";
-import { fetchAndProcessDocx } from "@/ai/flows/fetch-and-process-docx";
-import { correctTables } from "@/ai/flows/correct-tables-flow";
+import mammoth from "mammoth";
 import { useToast } from "@/hooks/use-toast";
 
 // Sample data for projects, pipelines, and versions
@@ -120,13 +118,27 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
     setIsNavigating(true);
     
     try {
-        const initialResult = await fetchAndProcessDocx({ url: documentUrl });
-        
-        if (initialResult.html.includes("Error processing document")) {
-            throw new Error(initialResult.html);
+        const response = await fetch(documentUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        const arrayBuffer = await response.arrayBuffer();
 
-        const { correctedHtml } = await correctTables({ htmlContent: initialResult.html });
+        const mammothOptions = {
+            convertImage: mammoth.images.imgElement(function(image) {
+                return image.read("base64").then(function(imageBuffer) {
+                    return {
+                        src: "data:" + image.contentType + ";base64," + imageBuffer
+                    };
+                });
+            }),
+            styleMap: [
+                "p[style-name='Table'] => table > tr > td:fresh",
+            ]
+        };
+
+        const result = await mammoth.convertToHtml({ arrayBuffer }, mammothOptions);
+        const htmlContent = result.value;
 
         const storedDocsString = localStorage.getItem("myDocuments");
         const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
@@ -135,7 +147,7 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
           title: documentTitle,
           lastModified: new Date().toISOString(),
           createdAt: new Date().toISOString(),
-          content: correctedHtml,
+          content: htmlContent,
           sections: [], // Sections would need to be parsed from the HTML or handled differently
           comments: [],
           documentType: "Populated Document",
@@ -149,7 +161,7 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
         router.push(`/editor?title=${encodeURIComponent(newDoc.title)}`);
 
     } catch (error: any) {
-        console.error(error);
+        console.error("Failed to load or convert document:", error);
         toast({
             title: "Error",
             description: `Could not load the document. ${error.message}`,
