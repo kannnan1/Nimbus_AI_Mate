@@ -41,7 +41,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [isOutlineCollapsed, setIsOutlineCollapsed] = useState(false);
+  const [isOutlineCollapsed, setIsOutlineCollapsed] = useState(true);
   
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -261,7 +261,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
                 }
             }}
         >
-          <ResizablePanel defaultSize={20} minSize={15} maxSize={30} collapsible collapsedSize={0}>
+          <ResizablePanel defaultSize={0} minSize={15} maxSize={30} collapsible collapsedSize={0}>
             <DocumentSidebar
               sections={sections}
               setSections={setSections}
@@ -274,7 +274,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={showRightPanel ? 60 : 80} minSize={40}>
+          <ResizablePanel defaultSize={showRightPanel ? 80 : 100} minSize={40}>
             <main className="h-full w-full p-4 flex flex-col">
               <Card className="h-full w-full shadow-inner relative bg-card">
                 <CardContent className="p-0 h-full">
