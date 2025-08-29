@@ -43,8 +43,18 @@ const fetchAndProcessDocxFlow = ai.defineFlow(
       }
       
       const arrayBuffer = await response.arrayBuffer();
-      // Pass the arrayBuffer directly to convertToHtml
-      const result = await mammoth.convertToHtml({ buffer: arrayBuffer as Buffer });
+
+      const mammothOptions = {
+        convertImage: mammoth.images.imgElement(function(image) {
+            return image.read("base64").then(function(imageBuffer) {
+                return {
+                    src: "data:" + image.contentType + ";base64," + imageBuffer
+                };
+            });
+        })
+      };
+
+      const result = await mammoth.convertToHtml({ buffer: arrayBuffer as Buffer }, mammothOptions);
       
       return { html: result.value };
 
