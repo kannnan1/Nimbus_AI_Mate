@@ -25,17 +25,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { KnowledgeUploadDialog, type UploadMetadata } from './knowledge-upload-dialog';
 import { Progress } from './ui/progress';
-import { pdfjs } from 'react-pdf';
 
 // Dynamically import the dialog to prevent SSR issues with react-pdf
 const KnowledgeDocumentDialog = dynamic(() => import('./knowledge-document-dialog').then(mod => mod.KnowledgeDocumentDialog), {
   ssr: false,
   loading: () => <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>
 });
-
-
-// PDF.js worker configuration
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 
 type KnowledgeDocument = ProcessDocumentOutput & {
@@ -50,7 +45,7 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "SR11-7_Compliance_Guide.pdf",
     title: "SR 11-7 Compliance Guide (Internal)",
-    summary: "This guide provides a detailed framework for ensuring adherence to the Federal Reserve's SR 11-7 guidance on model risk management. It outlines standards for documenting model design, theory, and limitations. The document serves as a critical resource for validation teams, developers, and stakeholders, covering best practices for validation, monitoring, and governance. Key sections address independent review, conceptual soundness, data verification, and outcomes analysis. This guide is essential for mitigating model risk and ensuring regulatory compliance for all models throughout their lifecycle.",
+    summary: "This guide provides a detailed framework for ensuring adherence to the Federal Reserve's SR 11-7 guidance on model risk management. It outlines standards for documenting model design, theory, and limitations. The document serves as a critical resource for validation teams, developers, and stakeholders, covering best practices for validation, monitoring, and governance. Key sections address independent review, conceptual soundness, data verification, and outcomes analysis. This guide is essential for mitigating model risk and ensuring regulatory compliance.",
     metadata: {
       keyTopics: ["Compliance", "SR 11-7", "Risk Management", "Validation", "Governance", "Model Theory", "Data Quality"],
       wordCount: 3450,
@@ -156,6 +151,9 @@ export function KnowledgeStorePage() {
             // Step 1: Count Pages
             let numPages = 0;
             if (file.type === 'application/pdf') {
+                const { pdfjs } = await import('react-pdf');
+                pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
                 setProcessingStatus("Reading PDF metadata...");
                 setProcessingProgress(10);
                 const pdf = await pdfjs.getDocument(arrayBuffer).promise;
