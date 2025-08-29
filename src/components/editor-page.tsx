@@ -48,7 +48,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const dragStartPos = useRef({ x: 0, y: 0 });
   const hasSetInitialPosition = useRef(false);
   const editorRef = useRef<HTMLDivElement>(null);
-  const layoutRef = useRef<(PanelGroup | null)>(null);
+  const layoutRef = useRef<PanelGroup>(null);
 
 
   useEffect(() => {
@@ -190,15 +190,13 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   };
 
   const onToggleOutline = () => {
-    const panel = layoutRef.current?.getPanel(0);
-    if (panel) {
-        if (panel.isCollapsed()) {
-            panel.expand();
-        } else {
-            panel.collapse();
-        }
+    const layout = layoutRef.current?.getLayout();
+    if (layout) {
+      const newLayout = isOutlineCollapsed ? [20, 80] : [0, 100];
+      layoutRef.current?.setLayout(newLayout);
     }
   };
+
 
   const handleInsertText = (text: string, mode: 'replace' | 'after' = 'replace') => {
     const editor = editorRef.current;
@@ -249,9 +247,9 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             className="h-full w-full"
             ref={layoutRef}
             onLayout={(sizes: number[]) => {
-                if (sizes[0] === 0) {
+                if (sizes.length === 2 && sizes[0] === 0) {
                     setIsOutlineCollapsed(true);
-                } else {
+                } else if (sizes.length === 2 && sizes[0] > 0) {
                     setIsOutlineCollapsed(false);
                 }
             }}
