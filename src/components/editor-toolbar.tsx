@@ -101,13 +101,22 @@ export function EditorToolbar({
     // --- Update version history ---
     const historyKey = `doc-history-${documentTitle}`;
     const historyString = localStorage.getItem(historyKey);
-    const history = historyString ? JSON.parse(historyString) : [];
+    const history: DocumentVersion[] = historyString ? JSON.parse(historyString) : [];
+
+    const saveSummaries = [
+      "Modified Section Executive summary",
+      "Added image and interpretation",
+      "Added interpretation of table",
+    ];
+    
+    // Determine which summary to use based on the number of existing versions
+    const summary = saveSummaries[history.length] || `Document update #${history.length + 1}`;
 
     const newVersion: DocumentVersion = {
       timestamp: now.toISOString(),
       content: documentContent,
       sections: sections,
-      summary: "Updated 'Introduction' section and added a new subsection 'Project Goals'.",
+      summary: summary,
     };
 
     history.unshift(newVersion); // Add new version to the beginning
