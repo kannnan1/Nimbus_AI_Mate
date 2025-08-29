@@ -88,18 +88,28 @@ body {
 }
 
 /* Add table borders for Quill editor */
-.ql-editor table {
+.ql-editor table,
+.prose table {
   width: 100%;
   border-collapse: collapse;
 }
 
 .ql-editor th,
-.ql-editor td {
+.ql-editor td,
+.prose th,
+.prose td {
   border: 1px solid #ccc;
   padding: 8px;
 }
 
-.ql-editor th {
+.ql-editor th,
+.prose th {
   background-color: #f2f2f2;
   font-weight: bold;
+}
+
+/* Custom styles for section headings in the editor */
+.prose h1 {
+  font-size: 1.5em; /* Approximately 24px if base is 16px */
+  font-weight: 700;
 }
