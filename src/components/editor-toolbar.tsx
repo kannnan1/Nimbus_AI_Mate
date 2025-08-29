@@ -203,7 +203,7 @@ export function EditorToolbar({
                      <span className="sr-only">Toggle Outline</span>
                     </Button>
                 </TooltipTrigger>
-                <TooltipContent>Toggle Outline</TooltipContent>
+                <TooltipContent>{isOutlineCollapsed ? 'Show Outline' : 'Hide Outline'}</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                 <TooltipTrigger asChild>

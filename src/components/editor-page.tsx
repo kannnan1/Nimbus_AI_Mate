@@ -192,8 +192,15 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const onToggleOutline = () => {
     const layout = layoutRef.current?.getLayout();
     if (layout) {
-      const newLayout = isOutlineCollapsed ? [20, 80] : [0, 100];
-      layoutRef.current?.setLayout(newLayout);
+      if (layout.length === 3) {
+        // Handle 3-panel layout
+        const newLayout = isOutlineCollapsed ? [20, 60, 20] : [0, 80, 20];
+        layoutRef.current?.setLayout(newLayout);
+      } else if (layout.length === 2) {
+        // Handle 2-panel layout
+        const newLayout = isOutlineCollapsed ? [20, 80] : [0, 100];
+        layoutRef.current?.setLayout(newLayout);
+      }
     }
   };
 
@@ -247,9 +254,9 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             className="h-full w-full"
             ref={layoutRef}
             onLayout={(sizes: number[]) => {
-                if (sizes.length === 2 && sizes[0] === 0) {
+                if (sizes[0] === 0) {
                     setIsOutlineCollapsed(true);
-                } else if (sizes.length === 2 && sizes[0] > 0) {
+                } else if (sizes[0] > 0) {
                     setIsOutlineCollapsed(false);
                 }
             }}
