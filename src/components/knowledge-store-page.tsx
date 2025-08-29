@@ -20,16 +20,23 @@ import {
   SidebarProvider
 } from "@/components/ui/sidebar";
 import { LayoutDashboard, Users, Settings, FolderKanban } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { KnowledgeDocumentDialog } from './knowledge-document-dialog';
 
 
 type KnowledgeDocument = ProcessDocumentOutput & {
   fileName: string;
   createdAt: string;
+  documentContent: string;
 };
 
 export function KnowledgeStorePage() {
   const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<KnowledgeDocument | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
   const handleFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
@@ -50,10 +57,10 @@ export function KnowledgeStorePage() {
 
   const handleFileUpload = (file: File) => {
     const validTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'text/markdown'];
-    if (!validTypes.includes(file.type)) {
+    if (!validTypes.includes(file.type) && !file.name.endsWith('.md') && !file.name.endsWith('.txt')) {
       toast({
         title: "Unsupported File Type",
-        description: `Please upload a .docx, .txt, or .md file. You provided a ${file.type} file.`,
+        description: `Please upload a .docx, .txt, or .md file. You provided a ${file.type || 'file with no type'}.`,
         variant: "destructive",
       });
       return;
@@ -70,6 +77,7 @@ export function KnowledgeStorePage() {
                     ...result,
                     fileName: file.name,
                     createdAt: new Date().toISOString(),
+                    documentContent: content,
                 };
                 setDocuments(prev => [newDocument, ...prev]);
                 toast({
@@ -94,9 +102,15 @@ export function KnowledgeStorePage() {
   const triggerFileInput = () => {
     document.getElementById('file-input')?.click();
   };
+
+  const handleRowClick = (doc: KnowledgeDocument) => {
+    setSelectedDocument(doc);
+    setIsModalOpen(true);
+  };
   
 
   return (
+    <>
      <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
@@ -107,7 +121,7 @@ export function KnowledgeStorePage() {
         <SidebarContent>
           <SidebarMenu>
              <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild isActive>
                 <Link href="/knowledge-store">
                   <FolderKanban />
                   Knowledge Store
@@ -141,71 +155,99 @@ export function KnowledgeStorePage() {
         <div className="flex flex-col min-h-screen bg-muted/20 p-4 sm:p-8">
            <header className="mb-8">
               <h1 className="text-3xl font-bold tracking-tight">Knowledge Store</h1>
-              <p className="text-muted-foreground">Upload documents to build your organization's knowledge base for the AI Mate.</p>
+              <p className="text-muted-foreground">Upload and manage documents to build your organization's knowledge base for the AI Mate.</p>
            </header>
           
-          <main className="flex-1 space-y-8">
-            <Card 
-              className="border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 transition-colors"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleFileDrop}
-            >
-              <CardContent className="p-10 text-center">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="bg-primary/10 p-4 rounded-full">
-                    <UploadCloud className="w-10 h-10 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground">
-                    Drag & drop your files here or <span className="text-primary font-semibold cursor-pointer" onClick={triggerFileInput}>browse</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground/80">Supports: .docx, .txt, .md</p>
-                  <input id="file-input" type="file" className="hidden" onChange={handleFileSelect} accept=".docx,.txt,.md" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {isProcessing && (
-                <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Processing document...</span>
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {documents.map((doc, index) => (
-                <Card key={index} className="flex flex-col">
-                  <CardHeader>
-                    <CardTitle className="flex items-start gap-3">
-                        <FileText className="w-6 h-6 text-primary shrink-0 mt-1" />
-                        <span className="truncate">{doc.title}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-1 space-y-4">
-                    <div>
-                        <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><BrainCircuit className="w-4 h-4 text-muted-foreground" />Summary</h4>
-                        <p className="text-sm text-muted-foreground line-clamp-4">{doc.summary}</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><Tag className="w-4 h-4 text-muted-foreground" />Key Topics</h4>
-                        <div className="flex flex-wrap gap-2">
-                           {doc.metadata.keyTopics.map(topic => (
-                               <span key={topic} className="px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">{topic}</span>
-                           ))}
+          <main className="flex-1">
+            <Tabs defaultValue="upload">
+                <TabsList>
+                    <TabsTrigger value="upload">Upload Document</TabsTrigger>
+                    <TabsTrigger value="repository">Repository</TabsTrigger>
+                </TabsList>
+                <TabsContent value="upload" className="mt-6">
+                    <Card 
+                      className="border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 transition-colors"
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={handleFileDrop}
+                    >
+                      <CardContent className="p-10 text-center">
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="bg-primary/10 p-4 rounded-full">
+                            <UploadCloud className="w-10 h-10 text-primary" />
+                          </div>
+                          <p className="text-muted-foreground">
+                            Drag & drop your files here or <span className="text-primary font-semibold cursor-pointer" onClick={triggerFileInput}>browse</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground/80">Supports: .docx, .txt, .md</p>
+                          <input id="file-input" type="file" className="hidden" onChange={handleFileSelect} accept=".docx,.txt,.md,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
                         </div>
-                    </div>
-                     <div>
-                        <h4 className="font-semibold text-sm mb-2 flex items-center gap-2"><WholeWord className="w-4 h-4 text-muted-foreground" />Metadata</h4>
-                        <p className="text-sm text-muted-foreground">
-                           Word Count: {doc.metadata.wordCount} | Vectorization: <span className="text-green-600 font-semibold">{doc.vectorizationStatus}</span>
-                        </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      </CardContent>
+                    </Card>
+                    {isProcessing && (
+                        <div className="flex items-center justify-center gap-2 text-muted-foreground mt-4">
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>Processing document...</span>
+                        </div>
+                    )}
+                </TabsContent>
+                <TabsContent value="repository" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Document Repository</CardTitle>
+                            <CardDescription>Browse and manage all uploaded documents.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Title</TableHead>
+                                        <TableHead>Key Topics</TableHead>
+                                        <TableHead>Word Count</TableHead>
+                                        <TableHead>Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {documents.length > 0 ? documents.map((doc) => (
+                                        <TableRow key={doc.fileName} onClick={() => handleRowClick(doc)} className="cursor-pointer">
+                                            <TableCell className="font-medium">{doc.title}</TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {doc.metadata.keyTopics.map(topic => (
+                                                        <Badge key={topic} variant="secondary">{topic}</Badge>
+                                                    ))}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{doc.metadata.wordCount}</TableCell>
+                                            <TableCell>
+                                                 <Badge className={doc.vectorizationStatus === 'Completed' ? 'bg-green-100 text-green-800' : ''}>
+                                                    {doc.vectorizationStatus}
+                                                </Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="h-24 text-center">
+                                                No documents uploaded yet.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
           </main>
         </div>
       </SidebarInset>
      </SidebarProvider>
+     {selectedDocument && (
+        <KnowledgeDocumentDialog
+            open={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            document={selectedDocument}
+        />
+     )}
+    </>
   );
 }
