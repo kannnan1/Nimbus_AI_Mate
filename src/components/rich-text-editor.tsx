@@ -73,18 +73,18 @@ export const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorPro
           </div>
             <div
                 ref={node => {
-                    contentEditableRef.current = node;
                     if (typeof ref === 'function') {
                         ref(node);
                     } else if (ref) {
                         ref.current = node;
                     }
+                    (contentEditableRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
                 }}
                 contentEditable
                 onInput={handleInput}
                 onMouseUp={handleSelection}
                 onKeyUp={handleSelection}
-                className="prose max-w-none h-full w-full resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base"
+                className="prose max-w-none h-full w-full resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base overflow-y-auto bg-white"
                 dangerouslySetInnerHTML={{ __html: value }}
                 placeholder={placeholder}
             />
