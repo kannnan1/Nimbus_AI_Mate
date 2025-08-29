@@ -304,9 +304,6 @@ export function LandingPage() {
                 </Tabs>
             </div>
           </main>
-          <footer className="flex items-center justify-center py-4 border-t bg-card">
-            <p className="text-sm text-muted-foreground">© 2024 Nimbus Uno. All rights reserved.</p>
-          </footer>
         </div>
       </SidebarInset>
 
