@@ -54,7 +54,7 @@ const interpretSelectionFlow = ai.defineFlow(
     }
     if (input.contentType === 'image') {
        return {
-        interpretation: "The ROC curve demonstrates strong model performance. The curve is positioned high in the upper-left corner, signifying a high true positive rate and a low false positive rate across all thresholds, which is indicative of a robust and accurate model.",
+        interpretation: "The differenced Log GDP series illustrates the year-on-year changes in the logarithm of GDP, providing a view of the underlying growth rate dynamics. The plot shows that the values fluctuate around zero without exhibiting a persistent upward or downward trend, indicating the absence of non-stationary behavior. This stability suggests that the transformation and differencing have rendered the series approximately stationary, which is a critical requirement for robust time series modeling approaches such as ARIMA.",
       };
     }
     // Fallback for general text
