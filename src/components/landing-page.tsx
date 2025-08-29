@@ -153,7 +153,6 @@ export function LandingPage() {
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Image src="https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/logo.png" alt="Nimbus Uno Application Logo" width={100} height={26} />
-            <h2 className="text-lg font-semibold tracking-tight">AI Mate</h2>
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -161,7 +160,7 @@ export function LandingPage() {
             <SidebarMenuItem>
               <SidebarMenuButton isActive>
                 <LayoutDashboard />
-                Dashboard
+                AI Mate
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
