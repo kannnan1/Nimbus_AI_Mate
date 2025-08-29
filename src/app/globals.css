@@ -86,3 +86,20 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Add table borders for Quill editor */
+.ql-editor table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ql-editor th,
+.ql-editor td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+.ql-editor th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
