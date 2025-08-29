@@ -43,12 +43,13 @@ const fetchAndProcessDocxFlow = ai.defineFlow(
       }
       
       const arrayBuffer = await response.arrayBuffer();
-      const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+      // Pass the arrayBuffer directly to convertToHtml
+      const result = await mammoth.convertToHtml({ buffer: arrayBuffer as Buffer });
       
       return { html: result.value };
 
     } catch (error: any) {
-      console.error("Error processing DOCX file:", error);
+      console.error("Error processing DOCX file:", error.message, error.stack);
       // In case of an error, return a user-friendly message in HTML format.
       return { html: `<p>Error processing document: ${error.message}</p>` };
     }
