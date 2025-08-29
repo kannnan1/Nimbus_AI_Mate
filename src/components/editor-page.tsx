@@ -248,7 +248,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={showRightPanel ? 60 : 80} minSize={40}>
             <main className="h-full w-full p-4 flex flex-col">
-              <Card className="flex-1 w-full shadow-inner relative bg-card">
+              <Card className="h-full w-full shadow-inner relative bg-card">
                 <CardContent className="p-0 h-full">
                   {documentContent ? (
                     <RichTextEditor
