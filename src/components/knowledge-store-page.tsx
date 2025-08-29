@@ -45,21 +45,21 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "SR11-7_Compliance_Guide.pdf",
     title: "SR 11-7 Compliance Guide (Internal)",
-    summary: "This guide provides a detailed framework for ensuring adherence to the Federal Reserve's SR 11-7 guidance on model risk management. It outlines standards for documenting model design, theory, and limitations. The document serves as a critical resource for validation teams, developers, and stakeholders, covering best practices for validation, monitoring, and governance. Key sections address independent review, conceptual soundness, data verification, and outcomes analysis. This guide is essential for mitigating model risk and ensuring regulatory compliance.",
+    summary: "This guide outlines standards for documenting model design, theory, and limitations. The document serves as a critical resource for validation teams, developers, and stakeholders, covering best practices for validation, monitoring, and governance. Key sections address independent review, conceptual soundness, data verification, and outcomes analysis. This guide is essential for mitigating model risk and ensuring regulatory compliance.",
     metadata: {
       keyTopics: ["Compliance", "SR 11-7", "Risk Management", "Validation", "Governance", "Model Theory", "Data Quality"],
       wordCount: 3450,
     },
     vectorizationStatus: "Completed",
     createdAt: "2024-07-21T10:00:00Z",
-    documentContent: "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/sr1107.pdf", // Using a sample PDF URL
+    documentContent: "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/sr1107.pdf",
     documentType: "Internal Policy",
     sourceProject: "Regulatory Compliance",
   },
   {
     fileName: "Project_Alpha_Methodology.txt",
     title: "Project Alpha Development Methodology",
-    summary: "This document details the technical methodology for Project Alpha's predictive model, a logistic regression for assessing probability of default (PD). It explores the data handling strategy, focusing on k-NN imputation for missing income variables. The report covers the variable selection process, outlining the statistical tests and business logic behind each predictor. It also presents a comprehensive breakdown of the model's performance metrics, including Gini, AUC, and KS statistics from training and validation samples, ensuring transparent and replicable model construction.",
+    summary: "This document details the technical methodology for Project Alpha's predictive model. It explores the data handling strategy, focusing on k-NN imputation for missing income variables. The report covers the variable selection process, outlining the statistical tests and business logic behind each predictor. It also presents a comprehensive breakdown of the model's performance metrics, ensuring transparent and replicable model construction.",
     metadata: {
       keyTopics: ["Project Alpha", "Methodology", "Data Handling", "Logistic Regression", "PD Models", "Imputation"],
       wordCount: 5210,
@@ -73,7 +73,7 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "Q2_2024_Monitoring_Report.txt",
     title: "Q2 2024 Model Monitoring Report",
-    summary: "This report analyzes production model performance for Q2 2024, focusing on performance decay in high-risk segments. It presents key metrics like the Gini coefficient, KS statistic, and Population Stability Index (PSI), comparing them against established thresholds. Findings indicate a moderate drift in the underlying population and a slight degradation in the model's discriminatory power. The report concludes with a recommendation to trigger a model recalibration cycle to ensure the model remains accurate, reliable, and fit for purpose.",
+    summary: "This report analyzes production model performance for Q2 2024, focusing on performance decay in high-risk segments. It presents key metrics like the Gini coefficient, KS statistic, and Population Stability Index (PSI). Findings indicate a moderate drift in the underlying population and a slight degradation in the model's discriminatory power. The report concludes with a recommendation to trigger a model recalibration cycle.",
     metadata: {
       keyTopics: ["Monitoring", "Q2 2024", "Performance Decay", "PSI", "Recalibration", "Model Risk"],
       wordCount: 2100,
@@ -147,67 +147,54 @@ export function KnowledgeStorePage() {
              return;
         }
 
-        try {
-            // Step 1: Count Pages
-            let numPages = 0;
-            if (file.type === 'application/pdf') {
-                const { pdfjs } = await import('react-pdf');
-                pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+        let numPages = 0;
+        if (file.type === 'application/pdf') {
+            const { pdfjs } = await import('react-pdf');
+            pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-                setProcessingStatus("Reading PDF metadata...");
-                setProcessingProgress(10);
-                const pdf = await pdfjs.getDocument(arrayBuffer).promise;
-                numPages = pdf.numPages;
-                setProcessingStatus(`Processing ${numPages} pages...`);
-            } else {
-                setProcessingStatus(`Processing document...`);
-            }
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Step 2: Generate Embeddings
-            setProcessingProgress(40);
-            setProcessingStatus("Generating embeddings...");
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Step 3: Store in Vector DB
-            setProcessingProgress(75);
-            setProcessingStatus("Storing chunks in Vector DB...");
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Step 4: Call Genkit for Summary/Metadata
-            const content = `Simulated content for ${file.name}. Actual content would be extracted here.`;
-            const result = await processDocument({ fileName: file.name, documentContent: content });
-            
-            const newDocument: KnowledgeDocument = {
-                ...result,
-                fileName: file.name,
-                createdAt: new Date().toISOString(),
-                documentContent: file.type === 'application/pdf' ? URL.createObjectURL(file) : content,
-                documentType: metadata.documentType,
-                sourceProject: metadata.sourceProject,
-            };
-            setDocuments(prev => [newDocument, ...prev]);
-            
-            setProcessingProgress(100);
-            setProcessingStatus("Processing complete!");
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            toast({
-                title: "Document Processed Successfully",
-                description: "Please see the repository for your uploaded document.",
-            });
-        } catch (error) {
-            console.error(error);
-            toast({
-                title: "Processing Failed",
-                description: "There was an error processing your document.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsProcessing(false);
-            setProcessingProgress(0);
-            setProcessingStatus("");
+            setProcessingStatus("Reading PDF metadata...");
+            setProcessingProgress(10);
+            const pdf = await pdfjs.getDocument(arrayBuffer).promise;
+            numPages = pdf.numPages;
+            setProcessingStatus(`Processing ${numPages} pages...`);
+        } else {
+            setProcessingStatus(`Processing document...`);
         }
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        setProcessingProgress(40);
+        setProcessingStatus("Generating embeddings...");
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        setProcessingProgress(75);
+        setProcessingStatus("Storing chunks in Vector DB...");
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const content = `Simulated content for ${file.name}. Actual content would be extracted here.`;
+        const result = await processDocument({ fileName: file.name, documentContent: content });
+        
+        const newDocument: KnowledgeDocument = {
+            ...result,
+            fileName: file.name,
+            createdAt: new Date().toISOString(),
+            documentContent: file.type === 'application/pdf' ? URL.createObjectURL(file) : content,
+            documentType: metadata.documentType,
+            sourceProject: metadata.sourceProject,
+        };
+        setDocuments(prev => [newDocument, ...prev]);
+        
+        setProcessingProgress(100);
+        setProcessingStatus("Processing complete!");
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        toast({
+            title: "Document Processed Successfully",
+            description: "Please see the repository for your uploaded document.",
+        });
+
+        setIsProcessing(false);
+        setProcessingProgress(0);
+        setProcessingStatus("");
     };
   };
 
