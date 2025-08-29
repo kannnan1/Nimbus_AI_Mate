@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { Textarea } from "./ui/textarea";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 type Message = {
   id: number;
@@ -45,9 +46,11 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
 
   const selectionType = useMemo(() => {
     if (!selectedText) return 'text';
+    // Simplified logic: If any text is selected, interpretation options will be available.
+    // More specific logic can be re-introduced if needed.
     if (selectedText.includes('|') && selectedText.includes('---')) return 'table';
     if (selectedText.startsWith('![')) return 'image';
-    return 'text';
+    return 'text'; // Default to text, but UI will show options for table/image
   }, [selectedText]);
 
   useEffect(() => {
@@ -96,20 +99,20 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     setIsLoading(false);
   };
   
-  const handleInterpretSelection = async () => {
+  const handleInterpretSelection = async (type: 'table' | 'image' | 'text') => {
     if (isLoading || !selectedText) return;
     setIsLoading(true);
 
-    addMessage("user", `Interpret the selected ${selectionType}.`);
+    addMessage("user", `Interpret the selected ${type}.`);
     try {
-      const result = await interpretSelection({ selection: selectedText, contentType: selectionType });
+      const result = await interpretSelection({ selection: selectedText, contentType: type });
       setTimeout(() => {
         addMessage("assistant", result.interpretation, 'after');
         setIsLoading(false);
       }, 2000);
     } catch (error) {
       console.error(error);
-      addMessage("assistant", `Sorry, I couldn't interpret the ${selectionType}.`);
+      addMessage("assistant", `Sorry, I couldn't interpret the ${type}.`);
       setIsLoading(false);
     }
   };
@@ -134,8 +137,8 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
       }, 2500);
     } catch (error) {
       addMessage("assistant", "Sorry, I couldn't perform the alignment check.");
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
   
   const handleInsertSectionFromPastDoc = async () => {
@@ -263,19 +266,15 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
         addMessage("user", query);
     }
     
-    // In a real scenario, you would call a general-purpose chat flow here.
-    // For now, we just clear the input.
     setInput("");
   }
 
   const aiActions = [
     { label: "Search Repository", icon: Book, action: handleSearchRepository, show: true },
-    { label: "Check Alignment", icon: Scale, action: handleAlignmentCheck, show: true },
-    { label: "Insert Section", icon: ClipboardPlus, action: onInsertSection, show: selectionType === 'text' && !selectedText },
+    { label: "Insert Section", icon: ClipboardPlus, action: onInsertSection, show: !selectedText },
     { label: "Rephrase Text", icon: RefreshCw, action: handleRephrase, show: !!selectedText },
-    { label: "Interpret Table", icon: BarChart, action: handleInterpretSelection, show: selectionType === 'table' },
-    { label: "Interpret Image", icon: ImageIcon, action: handleInterpretSelection, show: selectionType === 'image' },
-    { label: "Quality Check", icon: CheckCircle, action: handleQualityCheck, show: true },
+    { label: "Interpret Table", icon: BarChart, action: () => handleInterpretSelection('table'), show: !!selectedText },
+    { label: "Interpret Image", icon: ImageIcon, action: () => handleInterpretSelection('image'), show: !!selectedText },
   ];
 
   return (
@@ -285,11 +284,32 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
           <Sparkles className="text-primary" />
           <span>AI Assistant</span>
         </CardTitle>
-        {onClose && (
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
-                <X className="w-4 h-4" />
-            </Button>
-        )}
+        <div className="flex items-center">
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleAlignmentCheck} disabled={isLoading}>
+                            <Scale className="w-4 h-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Check Alignment</p></TooltipContent>
+                </Tooltip>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleQualityCheck} disabled={isLoading}>
+                            <CheckCircle className="w-4 h-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Quality Check</p></TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+
+            {onClose && (
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
+                    <X className="w-4 h-4" />
+                </Button>
+            )}
+        </div>
       </CardHeader>
       <CardContent className="p-0 flex-1 overflow-hidden">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
@@ -374,4 +394,3 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     </Card>
   );
 }
- 
