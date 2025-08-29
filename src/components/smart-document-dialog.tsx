@@ -25,6 +25,8 @@ import { Progress } from "@/components/ui/progress";
 import { Loader2, FileText } from "lucide-react";
 import type { Section } from "@/types/document";
 import type { Template } from "./template-selection-dialog";
+import mammoth from "mammoth";
+import { useToast } from "@/hooks/use-toast";
 
 // Sample data for projects, pipelines, and versions
 const projects = [
@@ -75,109 +77,6 @@ const templates: Omit<Template, 'description'>[] = [
   },
 ];
 
-const populatedSR117ValidationReport: { name: string; sections: Section[]; content: string } = {
-  name: "SR11-7 Validation Report",
-  sections: [
-    { id: "s1", title: "1. Executive Summary", subsections: [
-        { id: "s1-1", title: "1.1. Validation Scope and Objectives" },
-        { id: "s1-2", title: "1.2. Overall Assessment and Rating" },
-        { id: "s1-3", title: "1.3. Summary of Findings and Recommendations" },
-    ]},
-    { id: "s2", title: "2. Validation Process Overview", subsections: [
-        { id: "s2-1", title: "2.1. Validation Team and Independence" },
-        { id: "s2-2", title: "2.2. Previous Validation Findings" },
-    ]},
-    { id: "s3", title: "3. Conceptual Soundness Evaluation", subsections: [
-        { id: "s3-1", title: "3.1. Review of Model Theory and Design" },
-        { id: "s3-2", title: "3.2. Evaluation of Assumptions and Limitations" },
-    ]},
-    { id: "s4", title: "4. Data Verification and Quality Assessment", subsections: [
-        { id: "s4-1", title: "4.1. Data Input Verification" },
-        { id: "s4-2", title: "4.2. Representativeness of Data" },
-    ]},
-    { id: "s5", title: "5. Independent Testing and Analysis", subsections: [
-        { id: "s5-1", title: "5.1. Outcomes Analysis (Backtesting)" },
-        { id: "s5-2", title: "5.2. Benchmarking and Alternative Models" },
-        { id: "s5-3", title: "5.3. Stress Testing and Sensitivity Analysis" },
-    ]},
-    { id: "s6", title: "6. Findings and Recommendations", subsections: [
-        { id: "s6-1", title: "6.1. Detailed Findings" },
-        { id: "s6-2", title: "6.2. Actionable Recommendations" },
-        { id: "s6-3", title: "6.3. Management Response" },
-    ]},
-  ],
-  content: `# 1. Executive Summary
-
-## 1.1. Validation Scope and Objectives
-
-## 1.2. Overall Assessment and Rating
-
-## 1.3. Summary of Findings and Recommendations
-
-# 2. Validation Process Overview
-
-## 2.1. Validation Team and Independence
-The validation was conducted by the independent Model Risk Management (MRM) group, which has no involvement in the model development process, ensuring objectivity and compliance with SR 11-7.
-
-## 2.2. Previous Validation Findings
-The previous validation of RCRM v1.1 identified one minor finding related to the documentation of variable selection, which has been adequately addressed by the development team in this version's documentation.
-
-# 3. Conceptual Soundness Evaluation
-
-## 3.1. Review of Model Theory and Design
-The logistic regression approach is appropriate for predicting the probability of default (PD) for this portfolio. The choice of predictor variables is well-justified, supported by business logic, and aligns with industry best practices for credit risk modeling.
-
-## 3.2. Evaluation of Assumptions and Limitations
-The model assumes a linear relationship between the log-odds of default and the predictor variables. This assumption was tested during development and confirmed during validation to be reasonable. A key limitation is the model's reliance on macroeconomic forecasts for stress testing, which carry inherent uncertainty.
-
-# 4. Data Verification and Quality Assessment
-
-## 4.1. Data Input Verification
-The validation team independently sourced and replicated the development dataset from the source systems. All variables were successfully matched, and transformations were replicated with no discrepancies.
-
-## 4.2. Representativeness of Data
-The development data, covering the period from 2018 to 2022, is deemed sufficiently representative of the current portfolio. The validation team performed a population stability analysis and found no significant population drift.
-
-# 5. Independent Testing and Analysis
-
-## 5.1. Outcomes Analysis (Backtesting)
-The model's predictive accuracy was tested on an out-of-time sample from Q1 2023 - Q4 2023. The model's rank-ordering ability remains strong.
-
-| Metric              | Development | Out-of-Time Validation |
-| ------------------- | ----------- | ---------------------- |
-| Gini Coefficient    | 78.2%       | 75.4%                  |
-| KS Statistic        | 55.1%       | 52.8%                  |
-| Area Under ROC (AUC)| 0.891       | 0.877                  |
-
-***Interpretation***: *The table shows a slight but acceptable degradation in model performance from development to the out-of-time validation sample. A Gini drop of 2.8 percentage points is within typical bounds, indicating the model is generalizing well to new data. The AUC of 0.877 signifies strong predictive accuracy.*
-
-![ROC Curve for Validation Sample](https://picsum.photos/600/400?random=1)
-***Interpretation***: *The ROC curve demonstrates strong model performance. The curve is positioned high in the upper-left corner, signifying a high true positive rate and a low false positive rate across all thresholds, which is indicative of a robust and accurate model.*
-
-## 5.2. Benchmarking and Alternative Models
-A simple benchmark model (a reduced-form logistic regression) was developed. The current model significantly outperforms the benchmark, justifying its complexity.
-
-## 5.3. Stress Testing and Sensitivity Analysis
-The model's sensitivity to key variables was tested. The 'debt_to_income_ratio' was identified as the most influential variable. The model was also subjected to stressed macroeconomic scenarios, and its response was directionally consistent with expectations.
-
-![Feature Importance Plot](https://picsum.photos/600/400?random=2)
-***Interpretation***: *The feature importance plot shows that 'debt_to_income_ratio' and 'credit_utilization' are the most significant predictors in the model. This aligns with financial theory and provides confidence in the model's design.*
-
-# 6. Findings and Recommendations
-
-## 6.1. Detailed Findings
-- **Finding 1 (Minor)**: Backtesting revealed a 4% under-prediction of defaults in the highest-risk decile compared to the observed default rate. While the overall calibration is acceptable, this points to a minor model weakness in a critical segment.
-- **Finding 2 (Informational)**: The use of mean imputation for the 'annual_income' variable is a simple and acceptable approach. However, it may not be optimal and could be improved.
-
-## 6.2. Actionable Recommendations
-- **Recommendation 1**: The monitoring plan for RCRM v1.2 should be updated to include tracking of actual vs. expected defaults at a decile level. Any deviation beyond 5% should trigger a formal review. (Severity: Minor, Owner: Model Monitoring Team, Due: Q3 2024)
-- **Recommendation 2**: For the next planned redevelopment of the model, the development team should investigate alternative imputation methods like k-Nearest Neighbors (k-NN) or regression-based imputation for the 'annual_income' variable. (Severity: Informational, Owner: Model Development Team, Due: Q2 2025)
-
-## 6.3. Management Response
-Management agrees with the findings and recommendations presented in this report. The Model Monitoring Team and Model Development Team will take the necessary actions to address them by the specified due dates.
-`
-};
-
 const generationSteps = [
     { message: "Initializing document generation..." },
     { message: "Analyzing pipeline results..." },
@@ -219,6 +118,7 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
   const [currentStep, setCurrentStep] = useState(0);
   
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (selectedProjectId) {
@@ -272,39 +172,79 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
     const finalProjectName = selectedProjectId === 'other' ? otherProjectName.trim() : projects.find(p => p.id === selectedProjectId)?.name;
     if (!documentTitle || !finalProjectName) return;
     
-    const storedDocsString = localStorage.getItem("myDocuments");
-    const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
-    
-    let docTitle = documentTitle;
+    // The URL for the .docx file
+    const docxUrl = "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/Retail%20Application%20Scorecard%20Development.docx";
 
-    let counter = 1;
-    while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
-      docTitle = `${documentTitle} (${counter})`;
-      counter++;
-    }
+    try {
+        const response = await fetch(docxUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
 
-    const newDoc = {
-      title: docTitle,
-      lastModified: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      content: populatedSR117ValidationReport.content,
-      sections: populatedSR117ValidationReport.sections,
-      comments: [],
-      documentType: "Smart Generation",
-      projectId: finalProjectName,
-    };
-    
-    storedDocs.unshift(newDoc);
-    localStorage.setItem("myDocuments", JSON.stringify(storedDocs));
+        const mammothOptions = {
+            convertImage: mammoth.images.imgElement(function(image) {
+                return image.read("base64").then(function(imageBuffer) {
+                    return {
+                        src: "data:" + image.contentType + ";base64," + imageBuffer
+                    };
+                });
+            }),
+            styleMap: [
+                "p[style-name='Table'] => table > tr > td:fresh",
+            ]
+        };
 
-    setTimeout(() => {
+        const result = await mammoth.convertToHtml({ arrayBuffer }, mammothOptions);
+        const htmlContent = result.value;
+
+        const storedDocsString = localStorage.getItem("myDocuments");
+        const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
+        
+        let docTitle = documentTitle;
+        let counter = 1;
+        while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
+          docTitle = `${documentTitle} (${counter})`;
+          counter++;
+        }
+
+        const newDoc = {
+          title: docTitle,
+          lastModified: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          content: htmlContent,
+          sections: [], // Sections are part of the HTML content, can be parsed later if needed
+          comments: [],
+          documentType: "Smart Generation",
+          projectId: finalProjectName,
+        };
+        
+        storedDocs.unshift(newDoc);
+        localStorage.setItem("myDocuments", JSON.stringify(storedDocs));
+        
         onOpenChange(false);
+        const state = { 
+            title: newDoc.title, 
+            content: newDoc.content, 
+            sections: newDoc.sections,
+            comments: newDoc.comments
+        };
+        window.history.replaceState({ ...window.history.state, ...state }, '');
         router.push(`/editor?title=${encodeURIComponent(newDoc.title)}`);
+
+    } catch (error: any) {
+        console.error("Failed to load or convert document for smart generation:", error);
+        toast({
+            title: "Error",
+            description: `Could not load the smart document. ${error.message}`,
+            variant: "destructive",
+        });
+    } finally {
         // Reset state for next time
         setIsGenerating(false);
         setProgress(0);
         setCurrentStep(0);
-    }, 500);
+    }
   };
 
   const isButtonDisabled = (!selectedProjectId || (selectedProjectId !== 'other' && (!selectedPipelineId || !selectedVersion)) || (selectedProjectId === 'other' && !otherProjectName) || !selectedTemplateId);
