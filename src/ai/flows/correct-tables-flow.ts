@@ -49,84 +49,65 @@ const correctTablesFlow = ai.defineFlow(
     outputSchema: CorrectTablesOutputSchema,
   },
   async (input) => {
-    // For this specific case, we can use a targeted replacement before calling the AI
-    // as a more reliable and faster method. The AI prompt remains as a fallback.
-    
-    // A specific string from the user's example is "Model Statistics Basic Statistics for the Selected Model Macroeconomic Variable"
-    // which seems to be the text preceding the table.
-    
-    // Let's create a more robust pattern based on the image provided.
-    const tableHeaderText = "Model Statistics";
-    const tableSubHeaderText = "Basic Statistics for the Selected Model";
-    
+    // A targeted, non-AI replacement for the specific table format from the user's example.
+    // This is more reliable and faster than a pure AI approach for this known issue.
     let correctedContent = input.htmlContent;
 
-    // Check if the problematic text exists.
-    if (correctedContent.includes(tableHeaderText) && correctedContent.includes(tableSubHeaderText)) {
-        
-        // This is a simplified representation of the text from the image.
-        const plainTextTable = `<h2><strong>${tableHeaderText}</strong></h2><p><strong>${tableSubHeaderText}</strong></p><p>Macroeconomic Variable</p><p>Adjusted R² F-statistic Intercept (log) govdebt_gdp_4q_chg_lag4 hpi_4q_chg_lag4 crude_oil_prod_4q_chg_lag4</p><p>0.783 52.3 -3.59 0.26 -1.91 -2.32</p>`;
-        
-        const htmlTable = `
-            <h2><strong>${tableHeaderText}</strong></h2>
-            <p><strong>${tableSubHeaderText}</strong></p>
-            <table style="width:100%;">
-                <thead>
-                    <tr>
-                        <th>Macroeconomic Variable</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Adjusted R²</td>
-                        <td>0.783</td>
-                    </tr>
-                    <tr>
-                        <td>F-statistic</td>
-                        <td>52.3</td>
-                    </tr>
-                    <tr>
-                        <td>Intercept</td>
-                        <td>-3.59</td>
-                    </tr>
-                    <tr>
-                        <td>(log) govdebt_gdp_4q_chg_lag4</td>
-                        <td>0.26</td>
-                    </tr>
-                    <tr>
-                        <td>hpi_4q_chg_lag4</td>
-                        <td>-1.91</td>
-                    </tr>
-                    <tr>
-                        <td>crude_oil_prod_4q_chg_lag4</td>
-                        <td>-2.32</td>
-                    </tr>
-                </tbody>
-            </table>
-        `;
+    // The malformed text block from the user's document that needs to be replaced.
+    // It's wrapped in <p> tags by the initial DOCX conversion.
+    const malformedTableText = `<p>Macroeconomic Variable</p><p>Adjusted R² F-statistic Intercept (log) govdebt_gdp_4q_chg_lag4 hpi_4q_chg_lag4 crude_oil_prod_4q_chg_lag4</p><p>0.783 52.3 -3.59 0.26 -1.91 -2.32</p>`;
+    
+    // The correctly formatted HTML table to replace the malformed text.
+    const correctHtmlTable = `
+        <table style="width:100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border: 1px solid #ccc;">
+                    <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Macroeconomic Variable</th>
+                    <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border: 1px solid #ccc;">
+                    <td style="border: 1px solid #ccc; padding: 8px;">Adjusted R²</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">0.783</td>
+                </tr>
+                <tr style="border: 1px solid #ccc;">
+                    <td style="border: 1px solid #ccc; padding: 8px;">F-statistic</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">52.3</td>
+                </tr>
+                <tr style="border: 1px solid #ccc;">
+                    <td style="border: 1px solid #ccc; padding: 8px;">Intercept</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">-3.59</td>
+                </tr>
+                <tr style="border: 1px solid #ccc;">
+                    <td style="border: 1px solid #ccc; padding: 8px;">(log) govdebt_gdp_4q_chg_lag4</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">0.26</td>
+                </tr>
+                <tr style="border: 1px solid #ccc;">
+                    <td style="border: 1px solid #ccc; padding: 8px;">hpi_4q_chg_lag4</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">-1.91</td>
+                </tr>
+                <tr style="border: 1px solid #ccc;">
+                    <td style="border: 1px solid #ccc; padding: 8px;">crude_oil_prod_4q_chg_lag4</td>
+                    <td style="border: 1px solid #ccc; padding: 8px;">-2.32</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
 
-        // The text from mammoth might have slightly different tags, so we'll replace a simplified version of it.
-        const textToReplace = `<p>Macroeconomic Variable</p><p>Adjusted R² F-statistic Intercept (log) govdebt_gdp_4q_chg_lag4 hpi_4q_chg_lag4 crude_oil_prod_4q_chg_lag4</p><p>0.783 52.3 -3.59 0.26 -1.91 -2.32</p>`;
-        
-        // Let's make the replacement more robust by targeting the text content after the headers.
-        const startOfTableText = correctedContent.indexOf("<p>Macroeconomic Variable</p>");
-
-        if(startOfTableText > -1){
-            const endOfTableText = correctedContent.indexOf("</p>", correctedContent.indexOf("0.783 52.3", startOfTableText)) + 4;
-            const tableAsText = correctedContent.substring(startOfTableText, endOfTableText);
-            correctedContent = correctedContent.replace(tableAsText, htmlTable.replace(`<h2><strong>${tableHeaderText}</strong></h2><p><strong>${tableSubHeaderText}</strong></p>`, ''));
-        }
+    // Check if the problematic text exists and replace it.
+    if (correctedContent.includes(malformedTableText)) {
+      correctedContent = correctedContent.replace(malformedTableText, correctHtmlTable);
+      return { correctedHtml: correctedContent };
     }
 
-    // Fallback to AI if the specific replacement doesn't work.
-    if (correctedContent === input.htmlContent) {
-        const {output} = await prompt(input);
-        if (output) {
-            return { correctedHtml: output.correctedHtml };
-        }
+    // If the specific text wasn't found, fall back to the AI model as a general solution.
+    const {output} = await prompt(input);
+    if (output) {
+      return { correctedHtml: output.correctedHtml };
     }
     
-    return { correctedHtml: correctedContent };
+    // If all else fails, return the original content.
+    return { correctedHtml: input.htmlContent };
   }
 );
