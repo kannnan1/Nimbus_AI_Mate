@@ -54,6 +54,8 @@ const resultsData: Record<string, { charts: ChartItem[], tables: TableItem[] }> 
     charts: [
       { id: "uni_chart_1", name: "Age Distribution Histogram", type: 'chart', imageUrl: "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/Hist.png" },
       { id: "uni_chart_2", name: "Income Box Plot", type: 'chart', imageUrl: "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/box.png" },
+      { id: "uni_chart_3", name: "GDP Time Series", type: 'chart', imageUrl: "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/GDP.png" },
+      { id: "uni_chart_4", name: "Difference of Log GDP", type: 'chart', imageUrl: "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/diff%20GDP.png" },
     ],
     tables: [
       { 
