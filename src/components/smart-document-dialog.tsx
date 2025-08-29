@@ -173,7 +173,7 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
     if (!documentTitle || !finalProjectName) return;
     
     // The URL for the .docx file
-    const docxUrl = "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/Retail%20Application%20Scorecard%20Development.docx";
+    const docxUrl = "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/Risl%20Model.docx";
 
     try {
         const response = await fetch(docxUrl);
