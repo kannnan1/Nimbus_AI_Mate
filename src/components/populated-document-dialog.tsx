@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import type { Section } from "@/types/document";
 import { fetchAndProcessDocx } from "@/ai/flows/fetch-and-process-docx";
@@ -54,6 +55,11 @@ const projects = [
       },
     ],
   },
+  {
+    id: "other",
+    name: "Other",
+    pipelines: [],
+  }
 ];
 
 const documentUrl = "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/document_example.docx";
@@ -67,6 +73,7 @@ interface PopulatedDocumentDialogProps {
 
 export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: PopulatedDocumentDialogProps) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [otherProjectName, setOtherProjectName] = useState("");
   const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   
@@ -79,8 +86,12 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
 
   useEffect(() => {
     if (selectedProjectId) {
-      const project = projects.find(p => p.id === selectedProjectId);
-      setPipelines(project?.pipelines || []);
+      if (selectedProjectId === 'other') {
+          setPipelines([]); // Or you could have some default pipelines for 'Other'
+      } else {
+        const project = projects.find(p => p.id === selectedProjectId);
+        setPipelines(project?.pipelines || []);
+      }
       setSelectedPipelineId(null);
       setVersions([]);
       setSelectedVersion(null);
@@ -102,7 +113,9 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
 
 
   const handleGoToEditor = async () => {
-    if (!documentTitle || !selectedProjectId) return;
+    const finalProjectName = selectedProjectId === 'other' ? otherProjectName.trim() : projects.find(p => p.id === selectedProjectId)?.name;
+    if (!documentTitle || !finalProjectName) return;
+
     setIsNavigating(true);
     
     try {
@@ -115,13 +128,11 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
         const storedDocsString = localStorage.getItem("myDocuments");
         const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
         
-        const selectedProject = projects.find(p => p.id === selectedProjectId);
-        const projectName = selectedProject ? selectedProject.name : '';
-        let docTitle = `${projectName} - ${documentTitle}`;
+        let docTitle = documentTitle;
         
         let counter = 1;
         while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
-          docTitle = `${projectName} - ${documentTitle} (${counter})`;
+          docTitle = `${documentTitle} (${counter})`;
           counter++;
         }
 
@@ -133,6 +144,7 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
           sections: [], // Sections would need to be parsed from the HTML or handled differently
           comments: [],
           documentType: "Populated Document",
+          projectId: finalProjectName,
         };
         
         storedDocs.unshift(newDoc);
@@ -178,9 +190,21 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
               </SelectContent>
             </Select>
           </div>
+           {selectedProjectId === 'other' && (
+             <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="other-project" className="text-right">Project Name</Label>
+                <Input
+                    id="other-project"
+                    value={otherProjectName}
+                    onChange={(e) => setOtherProjectName(e.target.value)}
+                    className="col-span-3"
+                    placeholder="Enter custom project name"
+                />
+             </div>
+           )}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="pipeline-select" className="text-right">Pipeline ID</Label>
-            <Select onValueChange={setSelectedPipelineId} disabled={!selectedProjectId}>
+            <Select onValueChange={setSelectedPipelineId} disabled={!selectedProjectId || selectedProjectId === 'other'}>
               <SelectTrigger id="pipeline-select" className="col-span-3">
                 <SelectValue placeholder="Select a pipeline..." />
               </SelectTrigger>
@@ -195,7 +219,7 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
              <Label htmlFor="version-select" className="text-right">Version</Label>
-            <Select onValueChange={setSelectedVersion} disabled={!selectedPipelineId}>
+            <Select onValueChange={setSelectedVersion} disabled={!selectedPipelineId || selectedProjectId === 'other'}>
               <SelectTrigger id="version-select" className="col-span-3">
                 <SelectValue placeholder="Select a version..." />
               </SelectTrigger>
@@ -211,7 +235,7 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
         </div>
         <DialogFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button onClick={handleGoToEditor} disabled={isNavigating || !selectedVersion}>
+            <Button onClick={handleGoToEditor} disabled={isNavigating || (selectedProjectId !== 'other' && !selectedVersion) || (selectedProjectId === 'other' && !otherProjectName) }>
                 {isNavigating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isNavigating ? 'Loading...' : 'Go to Editor'}
             </Button>

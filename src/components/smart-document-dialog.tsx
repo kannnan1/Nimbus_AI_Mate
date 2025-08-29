@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Loader2, FileText } from "lucide-react";
 import type { Section } from "@/types/document";
@@ -54,6 +55,11 @@ const projects = [
       },
     ],
   },
+  {
+    id: "other",
+    name: "Other",
+    pipelines: [],
+  }
 ];
 
 const templates: Omit<Template, 'description'>[] = [
@@ -200,6 +206,7 @@ interface SmartDocumentDialogProps {
 
 export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: SmartDocumentDialogProps) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [otherProjectName, setOtherProjectName] = useState("");
   const [selectedPipelineId, setSelectedPipelineId] = useState<string | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
@@ -215,8 +222,12 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
 
   useEffect(() => {
     if (selectedProjectId) {
-      const project = projects.find(p => p.id === selectedProjectId);
-      setPipelines(project?.pipelines || []);
+      if (selectedProjectId === 'other') {
+        setPipelines([]);
+      } else {
+        const project = projects.find(p => p.id === selectedProjectId);
+        setPipelines(project?.pipelines || []);
+      }
       setSelectedPipelineId(null);
       setVersions([]);
       setSelectedVersion(null);
@@ -258,18 +269,17 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
   };
 
   const finishGeneration = () => {
-    if (!documentTitle || !selectedProjectId) return;
+    const finalProjectName = selectedProjectId === 'other' ? otherProjectName.trim() : projects.find(p => p.id === selectedProjectId)?.name;
+    if (!documentTitle || !finalProjectName) return;
 
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
     
-    const selectedProject = projects.find(p => p.id === selectedProjectId);
-    const projectName = selectedProject ? selectedProject.name : '';
-    let docTitle = `${projectName} - ${documentTitle}`;
+    let docTitle = documentTitle;
 
     let counter = 1;
     while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
-      docTitle = `${projectName} - ${documentTitle} (${counter})`;
+      docTitle = `${documentTitle} (${counter})`;
       counter++;
     }
 
@@ -281,6 +291,7 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
       sections: populatedSR117ValidationReport.sections,
       comments: [],
       documentType: "Smart Generation",
+      projectId: finalProjectName,
     };
     
     storedDocs.unshift(newDoc);
@@ -296,7 +307,7 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
     }, 500);
   };
 
-  const isButtonDisabled = !selectedProjectId || !selectedPipelineId || !selectedVersion || !selectedTemplateId;
+  const isButtonDisabled = (!selectedProjectId || (selectedProjectId !== 'other' && (!selectedPipelineId || !selectedVersion)) || (selectedProjectId === 'other' && !otherProjectName) || !selectedTemplateId);
   const currentStatus = generationSteps[currentStep] || generationSteps[generationSteps.length - 1];
 
   return (
@@ -345,9 +356,21 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
                   </SelectContent>
                 </Select>
               </div>
+              {selectedProjectId === 'other' && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="other-project" className="text-right">Project Name</Label>
+                    <Input
+                        id="other-project"
+                        value={otherProjectName}
+                        onChange={(e) => setOtherProjectName(e.target.value)}
+                        className="col-span-3"
+                        placeholder="Enter custom project name"
+                    />
+                </div>
+              )}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="pipeline-select" className="text-right">Pipeline ID</Label>
-                <Select onValueChange={setSelectedPipelineId} disabled={!selectedProjectId}>
+                <Select onValueChange={setSelectedPipelineId} disabled={!selectedProjectId || selectedProjectId === 'other'}>
                   <SelectTrigger id="pipeline-select" className="col-span-3">
                     <SelectValue placeholder="Select a pipeline..." />
                   </SelectTrigger>
@@ -362,7 +385,7 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                  <Label htmlFor="version-select" className="text-right">Version</Label>
-                <Select onValueChange={setSelectedVersion} disabled={!selectedPipelineId}>
+                <Select onValueChange={setSelectedVersion} disabled={!selectedPipelineId || selectedProjectId === 'other'}>
                   <SelectTrigger id="version-select" className="col-span-3">
                     <SelectValue placeholder="Select a version..." />
                   </SelectTrigger>
@@ -377,7 +400,7 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
               </div>
                <div className="grid grid-cols-4 items-center gap-4">
                  <Label htmlFor="template-select" className="text-right">Template</Label>
-                <Select onValueChange={setSelectedTemplateId} disabled={!selectedVersion}>
+                <Select onValueChange={setSelectedTemplateId} disabled={selectedProjectId === 'other' ? !otherProjectName : !selectedVersion}>
                   <SelectTrigger id="template-select" className="col-span-3">
                     <SelectValue placeholder="Select a template..." />
                   </SelectTrigger>
