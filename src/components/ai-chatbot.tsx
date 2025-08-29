@@ -250,25 +250,21 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
 
     setIsLoading(false);
   };
-  
-  const handleUseSelectionAsContext = () => {
-    if (selectedText) {
-      setInput(prev => `Context from document:\n"""\n${selectedText}\n"""\n\nYour question:\n`);
-    }
-  };
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
-    
-    addMessage("user", input);
+    let query = input.trim();
+    if (!query || isLoading) return;
 
-    // Mock response
-    setTimeout(() => {
-        const mockResponse = `This is a mock response based on your query: "${input}". In Agent mode, this text would also be added to your document.`;
-        addMessage("assistant", mockResponse);
-    }, 500);
+    if (selectedText) {
+        const context = `Context from document:\n"""\n${selectedText}\n"""\n\nMy question:\n${query}`;
+        addMessage("user", context);
+    } else {
+        addMessage("user", query);
+    }
     
+    // In a real scenario, you would call a general-purpose chat flow here.
+    // For now, we just clear the input.
     setInput("");
   }
 
@@ -355,13 +351,6 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
             ))}
         </div>
         
-        {selectedText && (
-          <Button variant="outline" size="sm" onClick={handleUseSelectionAsContext} className="w-full">
-            <CornerDownLeft className="w-4 h-4 mr-2" />
-            Use Selection as Context
-          </Button>
-        )}
-
         <form onSubmit={handleSendMessage} className="flex w-full space-x-2 items-start">
           <Textarea
             value={input}
@@ -385,3 +374,4 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     </Card>
   );
 }
+ 
