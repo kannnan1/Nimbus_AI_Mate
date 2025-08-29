@@ -49,7 +49,7 @@ const interpretSelectionFlow = ai.defineFlow(
     // For now, we return sample data based on the content type.
     if (input.contentType === 'table') {
       return {
-        interpretation: "The table shows strong model performance, with a Gini coefficient of 75.4% and an AUC of 0.877 on the out-of-time validation sample. This indicates excellent predictive accuracy and rank-ordering ability, validating the model's effectiveness.",
+        interpretation: "The model demonstrates strong explanatory power, with an adjusted R² of 78.3% and a significant F-statistic of 52.3, indicating robustness. The intercept sets the baseline at –3.59. Government debt-to-GDP (log) has a positive and significant effect (0.26), suggesting rising debt increases the dependent variable. In contrast, the lagged four-quarter change in the House Price Index (–1.91) and crude oil production growth lagged four quarters (–2.32) both exert significant negative effects. Together, these results imply fiscal pressures drive the variable upward, while housing dynamics and energy output exert dampening effects, highlighting meaningful macroeconomic linkages and predictive strength.",
       };
     }
     if (input.contentType === 'image') {
