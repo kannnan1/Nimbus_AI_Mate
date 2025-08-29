@@ -54,7 +54,7 @@ const fetchAndProcessDocxFlow = ai.defineFlow(
         })
       };
 
-      const result = await mammoth.convertToHtml({ buffer: arrayBuffer as Buffer }, mammothOptions);
+      const result = await mammoth.convertToHtml({ buffer: Buffer.from(arrayBuffer) }, mammothOptions);
       
       return { html: result.value };
 
