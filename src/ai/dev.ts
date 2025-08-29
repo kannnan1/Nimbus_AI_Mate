@@ -8,3 +8,4 @@ import '@/ai/flows/automated-section-quality-checks.ts';
 import '@/ai/flows/interpret-selection.ts';
 import '@/ai/flows/process-document.ts';
 import '@/ai/flows/fetch-and-process-docx.ts';
+import '@/ai/flows/rephrase-text.ts';

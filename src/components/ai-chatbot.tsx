@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Sparkles, Book, Scale, ClipboardPlus, CheckCircle, Bot, User, X, CornerDownLeft, BarChart, ImageIcon } from "lucide-react";
+import { Send, Sparkles, Book, Scale, ClipboardPlus, CheckCircle, Bot, User, X, CornerDownLeft, BarChart, ImageIcon, RefreshCw, PencilRuler } from "lucide-react";
 import { accessReferenceRepository } from "@/ai/flows/access-reference-repository";
 import { documentAlignmentTool } from "@/ai/flows/document-alignment-tool";
 import { insertSectionsFromPastDocuments } from "@/ai/flows/insert-sections-from-past-documents";
 import { automatedSectionQualityChecks } from "@/ai/flows/automated-section-quality-checks";
 import { interpretSelection } from "@/ai/flows/interpret-selection";
+import { rephraseText } from "@/ai/flows/rephrase-text";
 import { cn } from "@/lib/utils";
 import { Textarea } from "./ui/textarea";
 import { Switch } from "./ui/switch";
@@ -198,6 +199,57 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
       setIsLoading(false);
     }
   };
+
+  const handleRephrase = async () => {
+    if (isLoading || !selectedText) return;
+    setIsLoading(true);
+
+    addMessage("user", (
+      <div>
+        <p>Rephrase this text:</p>
+        <p className="italic bg-primary-foreground/10 p-2 rounded-md mt-1">"{selectedText}"</p>
+      </div>
+    ));
+    
+    try {
+      const { rephrasedText } = await rephraseText({ text: selectedText });
+      
+      if (mode === 'agent') {
+        onInsertText(rephrasedText, 'replace');
+        addMessage("assistant", (
+          <div>
+            <p className="mb-2">I have rephrased the text and updated the document. Here is the new version:</p>
+            <div className="p-2 border-l-2 border-primary/50 bg-primary/10 rounded-r-md">
+              <p>{rephrasedText}</p>
+            </div>
+          </div>
+        ));
+      } else {
+         addMessage("assistant", (
+          <div>
+            <p className="mb-2">Here is a rephrased version of your text:</p>
+            <div className="p-2 border-l-2 border-primary/50 bg-primary/10 rounded-r-md">
+              <p>{rephrasedText}</p>
+            </div>
+            <Button 
+              size="sm" 
+              className="mt-3"
+              onClick={() => onInsertText(rephrasedText, 'replace')}
+            >
+              <PencilRuler className="mr-2" />
+              Insert into Document
+            </Button>
+          </div>
+        ));
+      }
+
+    } catch (error) {
+      console.error(error);
+      addMessage("assistant", "Sorry, I was unable to rephrase the text at this time.");
+    }
+
+    setIsLoading(false);
+  };
   
   const handleUseSelectionAsContext = () => {
     if (selectedText) {
@@ -224,6 +276,7 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     { label: "Search Repository", icon: Book, action: handleSearchRepository, show: true },
     { label: "Check Alignment", icon: Scale, action: handleAlignmentCheck, show: true },
     { label: "Insert Section", icon: ClipboardPlus, action: onInsertSection, show: selectionType === 'text' && !selectedText },
+    { label: "Rephrase Text", icon: RefreshCw, action: handleRephrase, show: !!selectedText },
     { label: "Interpret Table", icon: BarChart, action: handleInterpretSelection, show: selectionType === 'table' },
     { label: "Interpret Image", icon: ImageIcon, action: handleInterpretSelection, show: selectionType === 'image' },
     { label: "Quality Check", icon: CheckCircle, action: handleQualityCheck, show: true },
@@ -332,5 +385,3 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     </Card>
   );
 }
-
-    
