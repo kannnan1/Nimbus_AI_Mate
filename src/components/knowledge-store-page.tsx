@@ -32,8 +32,48 @@ type KnowledgeDocument = ProcessDocumentOutput & {
   documentContent: string;
 };
 
+const sampleDocuments: KnowledgeDocument[] = [
+  {
+    fileName: "SR11-7_Compliance_Guide.txt",
+    title: "SR 11-7 Compliance Guide (Internal)",
+    summary: "An internal guide outlining the standards and procedures for documenting model limitations and ensuring compliance with SR 11-7 regulations. Covers best practices for risk assessment and reporting.",
+    metadata: {
+      keyTopics: ["Compliance", "SR 11-7", "Risk Management"],
+      wordCount: 3450,
+    },
+    vectorizationStatus: "Completed",
+    createdAt: "2024-07-21T10:00:00Z",
+    documentContent: "This document provides a detailed walkthrough of SR 11-7 requirements...\n\nSection 1: Introduction to Model Risk Management...\nSection 2: Documentation Standards...",
+  },
+  {
+    fileName: "Project_Alpha_Methodology.txt",
+    title: "Project Alpha Development Methodology",
+    summary: "Details the development methodology for Project Alpha, focusing on the approach for handling missing data in income variables and the use of logistic regression for PD models.",
+    metadata: {
+      keyTopics: ["Project Alpha", "Methodology", "Data Handling"],
+      wordCount: 5210,
+    },
+    vectorizationStatus: "Completed",
+    createdAt: "2024-06-15T14:30:00Z",
+    documentContent: "The methodology for Project Alpha is grounded in robust statistical techniques...\n\nData Imputation: We utilize a k-NN imputation model for missing income data...\nModel Specification: The primary model is a logistic regression...",
+  },
+  {
+    fileName: "Q2_2024_Monitoring_Report.txt",
+    title: "Q2 2024 Model Monitoring Report",
+    summary: "Contains analysis of model performance decay in high-risk segments for the second quarter of 2024. Includes Gini, KS, and PSI metrics and recommends model recalibration.",
+    metadata: {
+      keyTopics: ["Monitoring", "Q2 2024", "Performance"],
+      wordCount: 2100,
+    },
+    vectorizationStatus: "Completed",
+    createdAt: "2024-07-05T09:00:00Z",
+    documentContent: "This report summarizes the monitoring results for Q2 2024...\n\nKey Metrics:\n- Gini Coefficient: 0.72 (down from 0.75)\n- Population Stability Index: 0.18 (Moderate drift observed)...",
+  }
+];
+
+
 export function KnowledgeStorePage() {
-  const [documents, setDocuments] = useState<KnowledgeDocument[]>([]);
+  const [documents, setDocuments] = useState<KnowledgeDocument[]>(sampleDocuments);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<KnowledgeDocument | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -159,7 +199,7 @@ export function KnowledgeStorePage() {
            </header>
           
           <main className="flex-1">
-            <Tabs defaultValue="upload">
+            <Tabs defaultValue="repository">
                 <TabsList>
                     <TabsTrigger value="upload">Upload Document</TabsTrigger>
                     <TabsTrigger value="repository">Repository</TabsTrigger>
@@ -202,7 +242,6 @@ export function KnowledgeStorePage() {
                                     <TableRow>
                                         <TableHead>Title</TableHead>
                                         <TableHead>Key Topics</TableHead>
-                                        <TableHead>Word Count</TableHead>
                                         <TableHead>Status</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -217,7 +256,6 @@ export function KnowledgeStorePage() {
                                                     ))}
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{doc.metadata.wordCount}</TableCell>
                                             <TableCell>
                                                  <Badge className={doc.vectorizationStatus === 'Completed' ? 'bg-green-100 text-green-800' : ''}>
                                                     {doc.vectorizationStatus}
@@ -226,7 +264,7 @@ export function KnowledgeStorePage() {
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="h-24 text-center">
+                                            <TableCell colSpan={3} className="h-24 text-center">
                                                 No documents uploaded yet.
                                             </TableCell>
                                         </TableRow>
