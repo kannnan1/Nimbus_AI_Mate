@@ -42,8 +42,6 @@ const accessReferenceRepositoryFlow = ai.defineFlow(
         'Project Alpha Development Docs: Details a comparable approach for handling missing data in income variables.',
         'SR 11-7 Compliance Guide (Internal): Outlines standards for documenting model limitations, relevant to your selected text.',
         'Q4 2022 Monitoring Report: Contains analysis of model performance decay in high-risk segments.',
-        'Market Risk Model Methodology (2022): Describes the use of VAR models for assessing market risk.',
-        'Operational Risk Framework: Details the process for identifying and mitigating operational risks.',
     ];
 
     // Simulate searching the repository and filtering the results based on the query.
