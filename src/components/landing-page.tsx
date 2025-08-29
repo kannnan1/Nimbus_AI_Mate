@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Bot, User, FilePlus2, LayoutTemplate, CopyPlus, Eye, Share2, MoreVertical, Trash2, Copy, Folder, Download, ClipboardPlus, CheckCircle, FileText } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Bot, User, FilePlus2, Eye, Share2, Trash2, Copy, Folder, Download, ClipboardPlus, CheckCircle, FileText, LayoutDashboard, Settings, Users } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { TemplateSelectionDialog } from "./template-selection-dialog";
 import type { Section } from "@/types/document";
@@ -19,7 +18,16 @@ import { SmartDocumentDialog } from "./smart-document-dialog";
 import { CreateDocumentDialog } from "./create-document-dialog";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarInset,
+} from "@/components/ui/sidebar";
 
 type MyDocument = {
     title: string;
@@ -47,10 +55,8 @@ export function LandingPage() {
   const [myDocuments, setMyDocuments] = useState<MyDocument[]>([]);
   const [newDocumentTitle, setNewDocumentTitle] = useState("");
   const router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
-    // We need to check for `window` because this component is rendered on the server first.
     if (typeof window !== "undefined") {
       const storedDocsString = localStorage.getItem("myDocuments");
       const storedDocs: any[] = storedDocsString ? JSON.parse(storedDocsString) : [];
@@ -88,6 +94,7 @@ export function LandingPage() {
         const newDoc = {
             title: title,
             lastModified: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
             content: `# ${title}\n\n`,
             sections: [],
             comments: [],
@@ -126,7 +133,6 @@ export function LandingPage() {
     } else if (action === "View Document") {
       router.push(`/editor?title=${encodeURIComponent(doc.title)}`);
     }
-    // Handle other actions...
   };
 
   const formatDate = (dateString: string) => {
@@ -142,121 +148,155 @@ export function LandingPage() {
 
   return (
     <>
-    <div className="flex flex-col min-h-screen bg-muted/20">
-      <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-card">
-        <Link href="#" className="flex items-center justify-center gap-2" prefetch={false}>
-          <Image src="https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/logo.png" alt="Nimbus Uno Application Logo" width={150} height={40} />
-        </Link>
-        <div className="ml-auto flex items-center gap-4">
-            <Button onClick={() => setIsCreateModalOpen(true)}>
-              <FilePlus2 className="mr-2 h-4 w-4" />
-              Create Document
-            </Button>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full">
-                        <User className="h-5 w-5 text-primary" />
-                        <span className="sr-only">User Menu</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Logout</DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
-      </header>
-      
-      <main className="flex-1 p-4 sm:p-8">
-        <div className="max-w-7xl mx-auto">
-            <h1 className="text-2xl font-bold tracking-tight mb-6">Recent Documents</h1>
-            <Tabs defaultValue="my-documents">
-                <TabsList>
-                    <TabsTrigger value="my-documents">Created by me</TabsTrigger>
-                    <TabsTrigger value="shared-with-me">Shared with me</TabsTrigger>
-                </TabsList>
-                <TabsContent value="my-documents">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-                        {myDocuments.length === 0 ? (
-                           <p className="text-center text-muted-foreground mt-4 col-span-full">You haven't created any documents yet.</p>
-                        ) : (
-                          myDocuments.map((doc) => (
-                            <Card key={doc.title} className="flex flex-col">
-                                <CardHeader className="bg-muted/50 p-4">
-                                    <CardTitle className="text-base truncate">
-                                      <Link href={`/editor?title=${encodeURIComponent(doc.title)}`} className="hover:underline">{doc.title}</Link>
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm flex-1">
-                                    <div className="font-medium text-muted-foreground">Project ID</div>
-                                    <div>{doc.projectId}</div>
-                                    <div className="font-medium text-muted-foreground">Created at</div>
-                                    <div>{formatDate(doc.createdAt)}</div>
-                                    <div className="font-medium text-muted-foreground">Updated at</div>
-                                    <div>{formatDate(doc.lastModified)}</div>
-                                    <div className="font-medium text-muted-foreground">Document type</div>
-                                    <div>{doc.documentType}</div>
-                                </CardContent>
-                                <div className="p-2 border-t flex flex-wrap justify-center gap-1">
-                                    <TooltipProvider>
-                                    {documentActions.map(({ icon: Icon, tooltip }) => (
-                                        <Tooltip key={tooltip}>
-                                            <TooltipTrigger asChild>
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
-                                                    className="h-8 w-8"
-                                                    onClick={() => handleActionClick(doc, tooltip)}
-                                                >
-                                                    <Icon className="h-4 w-4" />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent><p>{tooltip}</p></TooltipContent>
-                                        </Tooltip>
-                                    ))}
-                                    </TooltipProvider>
-                                </div>
-                            </Card>
-                          ))
-                        )}
-                    </div>
-                </TabsContent>
-                <TabsContent value="shared-with-me">
-                     <div className="grid gap-4 mt-4">
-                        {sharedDocuments.map((doc) => (
-                            <Card key={doc.title}>
-                                <CardContent className="p-4 flex items-center justify-between">
-                                    <div>
-                                        <h3 className="font-semibold">{doc.title}</h3>
-                                        <p className="text-sm text-muted-foreground">Shared by: {doc.sharedBy}</p>
-                                    </div>
-                                     <div className="flex items-center gap-2">
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarHeader>
+          <div className="flex items-center gap-2">
+            <Image src="https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/logo.png" alt="Nimbus Uno Application Logo" width={100} height={26} />
+            <h2 className="text-lg font-semibold tracking-tight">AI Mate</h2>
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive>
+                <LayoutDashboard />
+                Dashboard
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <Users />
+                Team
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <Settings />
+                Settings
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarContent>
+      </Sidebar>
+      <SidebarInset>
+        <div className="flex flex-col min-h-screen bg-muted/20">
+          <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-card">
+            <Link href="#" className="flex items-center justify-center gap-2" prefetch={false}>
+              <span className="text-xl font-semibold">Welcome Back!</span>
+            </Link>
+            <div className="ml-auto flex items-center gap-4">
+                <Button onClick={() => setIsCreateModalOpen(true)}>
+                  <FilePlus2 className="mr-2 h-4 w-4" />
+                  Create Document
+                </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full">
+                            <User className="h-5 w-5 text-primary" />
+                            <span className="sr-only">User Menu</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>Profile</DropdownMenuItem>
+                        <DropdownMenuItem>Settings</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>Logout</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+          </header>
+          
+          <main className="flex-1 p-4 sm:p-8">
+            <div className="max-w-7xl mx-auto">
+                <h1 className="text-2xl font-bold tracking-tight mb-6">Recent Documents</h1>
+                <Tabs defaultValue="my-documents">
+                    <TabsList>
+                        <TabsTrigger value="my-documents">Created by me</TabsTrigger>
+                        <TabsTrigger value="shared-with-me">Shared with me</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="my-documents">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                            {myDocuments.length === 0 ? (
+                               <p className="text-center text-muted-foreground mt-4 col-span-full">You haven't created any documents yet.</p>
+                            ) : (
+                              myDocuments.map((doc) => (
+                                <Card key={doc.title} className="flex flex-col">
+                                    <CardHeader className="bg-muted/50 p-4">
+                                        <CardTitle className="text-base truncate">
+                                          <Link href={`/editor?title=${encodeURIComponent(doc.title)}`} className="hover:underline">{doc.title}</Link>
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm flex-1">
+                                        <div className="font-medium text-muted-foreground">Project ID</div>
+                                        <div>{doc.projectId}</div>
+                                        <div className="font-medium text-muted-foreground">Created at</div>
+                                        <div>{formatDate(doc.createdAt)}</div>
+                                        <div className="font-medium text-muted-foreground">Updated at</div>
+                                        <div>{formatDate(doc.lastModified)}</div>
+                                        <div className="font-medium text-muted-foreground">Document type</div>
+                                        <div>{doc.documentType}</div>
+                                    </CardContent>
+                                    <div className="p-2 border-t flex flex-wrap justify-center gap-1">
                                         <TooltipProvider>
-                                            <Tooltip>
+                                        {documentActions.map(({ icon: Icon, tooltip }) => (
+                                            <Tooltip key={tooltip}>
                                                 <TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" asChild>
-                                                        <Link href="/editor"><Eye className="h-4 w-4" /></Link>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-8 w-8"
+                                                        onClick={() => handleActionClick(doc, tooltip)}
+                                                    >
+                                                        <Icon className="h-4 w-4" />
                                                     </Button>
                                                 </TooltipTrigger>
-                                                <TooltipContent><p>Open document</p></TooltipContent>
+                                                <TooltipContent><p>{tooltip}</p></TooltipContent>
                                             </Tooltip>
+                                        ))}
                                         </TooltipProvider>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </TabsContent>
-            </Tabs>
+                                </Card>
+                              ))
+                            )}
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="shared-with-me">
+                         <div className="grid gap-4 mt-4">
+                            {sharedDocuments.map((doc) => (
+                                <Card key={doc.title}>
+                                    <CardContent className="p-4 flex items-center justify-between">
+                                        <div>
+                                            <h3 className="font-semibold">{doc.title}</h3>
+                                            <p className="text-sm text-muted-foreground">Shared by: {doc.sharedBy}</p>
+                                        </div>
+                                         <div className="flex items-center gap-2">
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button variant="ghost" size="icon" asChild>
+                                                            <Link href="/editor"><Eye className="h-4 w-4" /></Link>
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent><p>Open document</p></TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </div>
+          </main>
+          <footer className="flex items-center justify-center py-4 border-t bg-card">
+            <p className="text-sm text-muted-foreground">© 2024 Nimbus Uno. All rights reserved.</p>
+          </footer>
         </div>
-      </main>
-      <footer className="flex items-center justify-center py-4 border-t bg-card">
-        <p className="text-sm text-muted-foreground">© 2024 Nimbus Uno. All rights reserved.</p>
-      </footer>
+      </SidebarInset>
 
       {selectedDocument && (
         <ShareDialog
@@ -265,7 +305,7 @@ export function LandingPage() {
             documentTitle={selectedDocument.title}
         />
       )}
-    </div>
+    </SidebarProvider>
     <CreateDocumentDialog
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
