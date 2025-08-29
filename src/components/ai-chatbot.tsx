@@ -62,12 +62,8 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     }
   }, [messages]);
 
-  const addMessage = (role: "user" | "assistant", content: React.ReactNode, insertionMode: 'replace' | 'after' = 'replace') => {
+  const addMessage = (role: "user" | "assistant", content: React.ReactNode) => {
     setMessages((prev) => [...prev, { id: Date.now(), role, content }]);
-    if (role === 'assistant' && mode === 'agent' && typeof content === 'string') {
-        const textToInsert = `\n\n${content}\n\n`;
-        onInsertText(textToInsert, insertionMode);
-    }
   };
 
   const handleSearchRepository = async () => {
@@ -105,9 +101,41 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
 
     addMessage("user", `Interpret the selected ${type}.`);
     try {
-      const result = await interpretSelection({ selection: selectedText, contentType: type });
+      const { interpretation } = await interpretSelection({ selection: selectedText, contentType: type });
+
       setTimeout(() => {
-        addMessage("assistant", result.interpretation, 'after');
+        if (mode === 'agent') {
+            const textToInsert = `\n\n<p><strong><em>Interpretation:</em></strong> <em>${interpretation}</em></p>\n\n`;
+            onInsertText(textToInsert, 'after');
+            addMessage("assistant", (
+              <div>
+                <p className="mb-2">I have added my interpretation to the document:</p>
+                <div className="p-2 border-l-2 border-primary/50 bg-primary/10 rounded-r-md">
+                  <p>{interpretation}</p>
+                </div>
+              </div>
+            ));
+        } else {
+            addMessage("assistant", (
+              <div>
+                <p className="mb-2">Here is my interpretation of the selected {type}:</p>
+                <div className="p-2 border-l-2 border-primary/50 bg-primary/10 rounded-r-md">
+                  <p>{interpretation}</p>
+                </div>
+                <Button 
+                  size="sm" 
+                  className="mt-3"
+                  onClick={() => {
+                      const textToInsert = `\n\n<p><strong><em>Interpretation:</em></strong> <em>${interpretation}</em></p>\n\n`;
+                      onInsertText(textToInsert, 'after');
+                  }}
+                >
+                  <PencilRuler className="mr-2" />
+                  Insert into Document
+                </Button>
+              </div>
+            ));
+        }
         setIsLoading(false);
       }, 2000);
     } catch (error) {
@@ -394,3 +422,5 @@ export function AiChatbot({ documentContent, setDocumentContent, onInsertSection
     </Card>
   );
 }
+
+    
