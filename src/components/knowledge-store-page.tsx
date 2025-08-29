@@ -50,21 +50,21 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "SR11-7_Compliance_Guide.pdf",
     title: "SR 11-7 Compliance Guide (Internal)",
-    summary: "This comprehensive internal guide provides a detailed framework for ensuring adherence to the Federal Reserve's SR 11-7 guidance on model risk management. It meticulously outlines the standards and procedures for documenting model design, theory, and limitations. The document serves as a critical resource for validation teams, developers, and business stakeholders, covering best practices for initial validation, ongoing monitoring, and governance. Key sections address the importance of independent review, the criteria for assessing conceptual soundness, data verification processes, and the requirements for robust outcomes analysis. By establishing clear protocols for risk assessment, reporting, and management response, this guide aims to institutionalize a culture of rigorous model governance. It is essential for mitigating model risk, satisfying regulatory requirements, and ensuring that all models are performing as intended across their lifecycle, ultimately safeguarding the institution from financial and reputational harm.",
+    summary: "This guide provides a detailed framework for ensuring adherence to the Federal Reserve's SR 11-7 guidance on model risk management. It outlines standards for documenting model design, theory, and limitations. The document serves as a critical resource for validation teams, developers, and stakeholders, covering best practices for validation, monitoring, and governance. Key sections address independent review, conceptual soundness, data verification, and outcomes analysis. This guide is essential for mitigating model risk and ensuring regulatory compliance for all models throughout their lifecycle.",
     metadata: {
       keyTopics: ["Compliance", "SR 11-7", "Risk Management", "Validation", "Governance", "Model Theory", "Data Quality"],
       wordCount: 3450,
     },
     vectorizationStatus: "Completed",
     createdAt: "2024-07-21T10:00:00Z",
-    documentContent: "https://arxiv.org/pdf/1706.03762.pdf", // Using a sample PDF URL
+    documentContent: "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/sr1107.pdf", // Using a sample PDF URL
     documentType: "Internal Policy",
     sourceProject: "Regulatory Compliance",
   },
   {
     fileName: "Project_Alpha_Methodology.txt",
     title: "Project Alpha Development Methodology",
-    summary: "This document details the complete technical methodology for Project Alpha's predictive model, a logistic regression designed to assess probability of default (PD). It offers an in-depth exploration of the data handling strategy, specifically focusing on the advanced k-NN imputation technique used for missing income variables, a critical feature in the dataset. The report meticulously covers the variable selection process, outlining the statistical tests and business logic that guided the inclusion of each predictor. Furthermore, it presents a comprehensive breakdown of the model's performance metrics, including Gini coefficient, AUC, and KS statistics, derived from both training and out-of-time validation samples. This documentation is intended to provide a transparent and replicable account of the model's construction, ensuring that stakeholders and validation teams can fully understand its theoretical underpinnings, strengths, and limitations, thereby facilitating effective governance and future redevelopment efforts.",
+    summary: "This document details the technical methodology for Project Alpha's predictive model, a logistic regression for assessing probability of default (PD). It explores the data handling strategy, focusing on k-NN imputation for missing income variables. The report covers the variable selection process, outlining the statistical tests and business logic behind each predictor. It also presents a comprehensive breakdown of the model's performance metrics, including Gini, AUC, and KS statistics from training and validation samples, ensuring transparent and replicable model construction.",
     metadata: {
       keyTopics: ["Project Alpha", "Methodology", "Data Handling", "Logistic Regression", "PD Models", "Imputation"],
       wordCount: 5210,
@@ -78,7 +78,7 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "Q2_2024_Monitoring_Report.txt",
     title: "Q2 2024 Model Monitoring Report",
-    summary: "This quarterly report provides a thorough analysis of production model performance for the second quarter of 2024, with a specific focus on identifying performance decay in high-risk customer segments. It systematically presents key monitoring metrics, including the Gini coefficient, Kolmogorov-Smirnov (KS) statistic, and the Population Stability Index (PSI), comparing them against established thresholds and historical trends. The findings indicate a moderate but statistically significant drift in the underlying population and a slight degradation in the model's discriminatory power. Based on this evidence, the report concludes with a formal recommendation to trigger a model recalibration cycle in the upcoming quarter. The analysis contained herein is vital for proactive model risk management, ensuring that the model remains accurate, reliable, and fit for purpose in a changing economic environment, thereby preventing potential losses and ensuring regulatory compliance.",
+    summary: "This report analyzes production model performance for Q2 2024, focusing on performance decay in high-risk segments. It presents key metrics like the Gini coefficient, KS statistic, and Population Stability Index (PSI), comparing them against established thresholds. Findings indicate a moderate drift in the underlying population and a slight degradation in the model's discriminatory power. The report concludes with a recommendation to trigger a model recalibration cycle to ensure the model remains accurate, reliable, and fit for purpose.",
     metadata: {
       keyTopics: ["Monitoring", "Q2 2024", "Performance Decay", "PSI", "Recalibration", "Model Risk"],
       wordCount: 2100,
