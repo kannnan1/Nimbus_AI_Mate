@@ -113,3 +113,8 @@ body {
   font-size: 1.5em; /* Approximately 24px if base is 16px */
   font-weight: 700;
 }
+
+.prose h2 {
+  font-size: 1.25em; /* Approximately 20px */
+  font-weight: 700;
+}
