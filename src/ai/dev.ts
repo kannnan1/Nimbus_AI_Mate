@@ -9,3 +9,4 @@ import '@/ai/flows/interpret-selection.ts';
 import '@/ai/flows/process-document.ts';
 import '@/ai/flows/fetch-and-process-docx.ts';
 import '@/ai/flows/rephrase-text.ts';
+import '@/ai/flows/correct-tables-flow.ts';

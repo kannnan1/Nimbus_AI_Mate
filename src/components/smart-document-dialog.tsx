@@ -25,6 +25,7 @@ import { Progress } from "@/components/ui/progress";
 import { Loader2, FileText } from "lucide-react";
 import type { Section } from "@/types/document";
 import type { Template } from "./template-selection-dialog";
+import { correctTables } from "@/ai/flows/correct-tables-flow";
 
 // Sample data for projects, pipelines, and versions
 const projects = [
@@ -268,9 +269,11 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
     }, 1500);
   };
 
-  const finishGeneration = () => {
+  const finishGeneration = async () => {
     const finalProjectName = selectedProjectId === 'other' ? otherProjectName.trim() : projects.find(p => p.id === selectedProjectId)?.name;
     if (!documentTitle || !finalProjectName) return;
+
+    const { correctedHtml } = await correctTables({ htmlContent: populatedSR117ValidationReport.content });
 
     const storedDocsString = localStorage.getItem("myDocuments");
     const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
@@ -287,7 +290,7 @@ export function SmartDocumentDialog({ open, onOpenChange, documentTitle }: Smart
       title: docTitle,
       lastModified: new Date().toISOString(),
       createdAt: new Date().toISOString(),
-      content: populatedSR117ValidationReport.content,
+      content: correctedHtml,
       sections: populatedSR117ValidationReport.sections,
       comments: [],
       documentType: "Smart Generation",

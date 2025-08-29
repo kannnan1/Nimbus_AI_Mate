@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import type { Section } from "@/types/document";
 import { fetchAndProcessDocx } from "@/ai/flows/fetch-and-process-docx";
+import { correctTables } from "@/ai/flows/correct-tables-flow";
 import { useToast } from "@/hooks/use-toast";
 
 // Sample data for projects, pipelines, and versions
@@ -119,28 +120,22 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
     setIsNavigating(true);
     
     try {
-        const result = await fetchAndProcessDocx({ url: documentUrl });
+        const initialResult = await fetchAndProcessDocx({ url: documentUrl });
         
-        if (result.html.includes("Error processing document")) {
-            throw new Error(result.html);
+        if (initialResult.html.includes("Error processing document")) {
+            throw new Error(initialResult.html);
         }
+
+        const { correctedHtml } = await correctTables({ htmlContent: initialResult.html });
 
         const storedDocsString = localStorage.getItem("myDocuments");
         const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
         
-        let docTitle = documentTitle;
-        
-        let counter = 1;
-        while (storedDocs.some((doc: { title: string }) => doc.title === docTitle)) {
-          docTitle = `${documentTitle} (${counter})`;
-          counter++;
-        }
-
         const newDoc = {
-          title: docTitle,
+          title: documentTitle,
           lastModified: new Date().toISOString(),
           createdAt: new Date().toISOString(),
-          content: result.html,
+          content: correctedHtml,
           sections: [], // Sections would need to be parsed from the HTML or handled differently
           comments: [],
           documentType: "Populated Document",
