@@ -51,7 +51,10 @@ const fetchAndProcessDocxFlow = ai.defineFlow(
                     src: "data:" + image.contentType + ";base64," + imageBuffer
                 };
             });
-        })
+        }),
+        styleMap: [
+            "p[style-name='Table'] => table > tr > td:fresh",
+        ]
       };
 
       const result = await mammoth.convertToHtml({ buffer: Buffer.from(arrayBuffer) }, mammothOptions);
