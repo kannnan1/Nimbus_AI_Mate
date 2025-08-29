@@ -96,7 +96,7 @@ export function LandingPage() {
             title: title,
             lastModified: new Date().toISOString(),
             createdAt: new Date().toISOString(),
-            content: `# ${title}\n\n`,
+            content: '',
             sections: [],
             comments: [],
             documentType: "Blank Document",

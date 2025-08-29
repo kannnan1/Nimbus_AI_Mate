@@ -108,6 +108,8 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
       subsections: [],
     };
     setSections([...sections, newSection]);
+    // Append the new section as an h1 to the editor content
+    setDocumentContent(prevContent => `${prevContent}<h1>${title}</h1>`);
   };
 
   const handleAddSubsection = (title: string) => {
@@ -118,6 +120,8 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
         ? { ...section, subsections: [...section.subsections, newSubSection] }
         : section
     ));
+    // Append the new subsection as an h2 to the editor content
+    setDocumentContent(prevContent => `${prevContent}<h2>${title}</h2>`);
   };
 
   const handleRename = (newTitle: string) => {
@@ -242,7 +246,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             <main className="h-full w-full p-4 flex flex-col">
               <Card className="h-full w-full shadow-inner relative bg-card">
                 <CardContent className="p-0 h-full">
-                  {documentContent ? (
+                  {documentContent !== null ? (
                     <RichTextEditor
                       ref={editorRef}
                       value={documentContent}
