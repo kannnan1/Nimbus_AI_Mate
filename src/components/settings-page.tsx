@@ -14,7 +14,7 @@ import {
   SidebarMenuButton,
   SidebarProvider
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Users, Settings, FolderKanban } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, FolderKanban, User } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,7 @@ import { Slider } from "@/components/ui/slider";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import { Avatar, AvatarFallback } from './ui/avatar';
 
 const teamMembers = [
   { name: "Alex Doe", email: "alex.doe@example.com", role: "Admin" },
@@ -63,12 +64,6 @@ export function SettingsPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <Users />
-                Team
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               <SidebarMenuButton asChild isActive>
                 <Link href="/settings">
                   <Settings />
@@ -80,13 +75,40 @@ export function SettingsPage() {
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <div className="flex flex-col min-h-screen bg-muted/20 p-4 sm:p-8">
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-            <p className="text-muted-foreground">Manage your application's configuration and user permissions.</p>
+        <div className="flex flex-col min-h-screen bg-muted/20">
+          <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-card">
+              <div className="flex flex-col">
+                <h1 className="text-xl font-semibold">AI Mate</h1>
+                <p className="text-xs text-muted-foreground">Your AI-powered collaborative document editor</p>
+              </div>
+            <div className="ml-auto flex items-center gap-4">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>K</AvatarFallback>
+                            </Avatar>
+                            <span className="sr-only">User Menu</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>Profile</DropdownMenuItem>
+                        <DropdownMenuItem>Settings</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>Logout</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
           </header>
 
-          <main className="flex-1">
+          <main className="flex-1 p-4 sm:p-8">
+            <header className="mb-8">
+              <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+              <p className="text-muted-foreground">Manage your application's configuration and user permissions.</p>
+            </header>
+
             <Tabs defaultValue="vector-db">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="vector-db">Vector DB</TabsTrigger>

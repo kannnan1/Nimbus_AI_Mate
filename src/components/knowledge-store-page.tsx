@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { UploadCloud, FileText, Loader2 } from 'lucide-react';
+import { UploadCloud, FileText, Loader2, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { ProcessDocumentOutput } from '@/ai/flows/process-document';
 import Link from 'next/link';
@@ -19,12 +19,15 @@ import {
   SidebarMenuButton,
   SidebarProvider
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Users, Settings, FolderKanban } from 'lucide-react';
+import { LayoutDashboard, Settings, FolderKanban } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { KnowledgeUploadDialog, type UploadMetadata } from './knowledge-upload-dialog';
 import { Progress } from './ui/progress';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { Button } from './ui/button';
+import { Avatar, AvatarFallback } from './ui/avatar';
 
 // Dynamically import the dialog to prevent SSR issues with react-pdf
 const KnowledgeDocumentDialog = dynamic(() => import('./knowledge-document-dialog').then(mod => mod.KnowledgeDocumentDialog), {
@@ -59,7 +62,7 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "Project_Alpha_Methodology.txt",
     title: "Project Alpha Development Methodology",
-    summary: "This document details the technical methodology for Project Alpha's predictive model. It explores the data handling strategy, focusing on k-NN imputation for missing income variables. The report covers the variable selection process, outlining the statistical tests and business logic behind each predictor. It also presents a comprehensive breakdown of the model's performance metrics.",
+    summary: "This document details the technical methodology for Project Alpha's predictive model. It explores the data handling strategy, focusing on k-NN imputation for missing income variables. The report covers the variable selection process, outlining the statistical tests and business logic behind each predictor.",
     metadata: {
       keyTopics: ["Project Alpha", "Methodology", "Data Handling", "Logistic Regression", "PD Models", "Imputation"],
       wordCount: 5210,
@@ -73,7 +76,7 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "Q2_2024_Monitoring_Report.txt",
     title: "Q2 2024 Model Monitoring Report",
-    summary: "This report analyzes production model performance for Q2 2024, focusing on performance decay in high-risk segments. It presents key metrics like the Gini coefficient, KS statistic, and Population Stability Index (PSI). Findings indicate a moderate drift in the underlying population and a slight degradation in the model's discriminatory power. The report recommends a model recalibration.",
+    summary: "This report analyzes production model performance for Q2 2024, focusing on performance decay in high-risk segments. It presents key metrics like the Gini coefficient, KS statistic, and Population Stability Index (PSI). Findings indicate a moderate drift in the underlying population.",
     metadata: {
       keyTopics: ["Monitoring", "Q2 2024", "Performance Decay", "PSI", "Recalibration", "Model Risk"],
       wordCount: 2100,
@@ -244,12 +247,6 @@ export function KnowledgeStorePage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <Users />
-                Team
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/settings">
                   <Settings />
@@ -261,13 +258,40 @@ export function KnowledgeStorePage() {
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <div className="flex flex-col min-h-screen bg-muted/20 p-4 sm:p-8">
+        <div className="flex flex-col min-h-screen bg-muted/20">
+          <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-card">
+              <div className="flex flex-col">
+                <h1 className="text-xl font-semibold">AI Mate</h1>
+                <p className="text-xs text-muted-foreground">Your AI-powered collaborative document editor</p>
+              </div>
+            <div className="ml-auto flex items-center gap-4">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>K</AvatarFallback>
+                            </Avatar>
+                            <span className="sr-only">User Menu</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>Profile</DropdownMenuItem>
+                        <DropdownMenuItem>Settings</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>Logout</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+          </header>
+
+          <main className="flex-1 p-4 sm:p-8">
            <header className="mb-8">
               <h1 className="text-3xl font-bold tracking-tight">Knowledge Store</h1>
               <p className="text-muted-foreground">Upload and manage documents to build your organization's knowledge base for the AI Mate.</p>
            </header>
           
-          <main className="flex-1">
             <Tabs defaultValue="repository">
                 <TabsList>
                     <TabsTrigger value="upload">Upload Document</TabsTrigger>

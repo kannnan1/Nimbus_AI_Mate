@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Bot, User, FilePlus2, Eye, Share2, Trash2, Copy, Folder, Download, ClipboardPlus, CheckCircle, FileText, LayoutDashboard, Settings, Users, FolderKanban } from "lucide-react";
+import { Bot, User, FilePlus2, Eye, Share2, Trash2, Copy, Folder, Download, ClipboardPlus, CheckCircle, FileText, LayoutDashboard, Settings, FolderKanban } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { TemplateSelectionDialog } from "./template-selection-dialog";
 import type { Section } from "@/types/document";
@@ -28,6 +28,7 @@ import {
   SidebarMenuButton,
   SidebarInset,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback } from "./ui/avatar";
 
 type MyDocument = {
     title: string;
@@ -175,12 +176,6 @@ export function LandingPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <Users />
-                Team
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/settings">
                   <Settings />
@@ -194,18 +189,17 @@ export function LandingPage() {
       <SidebarInset>
         <div className="flex flex-col min-h-screen bg-muted/20">
           <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-card">
-            <Link href="#" className="flex items-center justify-center gap-2" prefetch={false}>
-              <span className="text-xl font-semibold">AI Mate</span>
-            </Link>
+              <div className="flex flex-col">
+                <h1 className="text-xl font-semibold">AI Mate</h1>
+                <p className="text-xs text-muted-foreground">Your AI-powered collaborative document editor</p>
+              </div>
             <div className="ml-auto flex items-center gap-4">
-                <Button onClick={() => setIsCreateModalOpen(true)}>
-                  <FilePlus2 className="mr-2 h-4 w-4" />
-                  Create Document
-                </Button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="rounded-full">
-                            <User className="h-5 w-5 text-primary" />
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>K</AvatarFallback>
+                            </Avatar>
                             <span className="sr-only">User Menu</span>
                         </Button>
                     </DropdownMenuTrigger>
@@ -223,7 +217,13 @@ export function LandingPage() {
           
           <main className="flex-1 p-4 sm:p-8">
             <div className="max-w-7xl mx-auto">
-                <h1 className="text-2xl font-bold tracking-tight mb-6">Recent Documents</h1>
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-bold tracking-tight">Recent Documents</h1>
+                    <Button onClick={() => setIsCreateModalOpen(true)}>
+                      <FilePlus2 className="mr-2 h-4 w-4" />
+                      Create Document
+                    </Button>
+                </div>
                 <Tabs defaultValue="my-documents">
                     <TabsList>
                         <TabsTrigger value="my-documents">Created by me</TabsTrigger>
