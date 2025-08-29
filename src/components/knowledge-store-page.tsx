@@ -261,8 +261,8 @@ export function KnowledgeStorePage() {
         <div className="flex flex-col min-h-screen bg-muted/20">
           <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-card">
               <div className="flex flex-col">
-                <h1 className="text-xl font-semibold">AI Mate</h1>
-                <p className="text-xs text-muted-foreground">Your AI-powered collaborative document editor</p>
+                <h1 className="text-xl font-semibold">Knowledge Store</h1>
+                <p className="text-xs text-muted-foreground">Upload and manage documents to build your organization's knowledge base for the AI Mate.</p>
               </div>
             <div className="ml-auto flex items-center gap-4">
                 <DropdownMenu>
@@ -287,11 +287,6 @@ export function KnowledgeStorePage() {
           </header>
 
           <main className="flex-1 p-4 sm:p-8">
-           <header className="mb-8">
-              <h1 className="text-3xl font-bold tracking-tight">Knowledge Store</h1>
-              <p className="text-muted-foreground">Upload and manage documents to build your organization's knowledge base for the AI Mate.</p>
-           </header>
-          
             <Tabs defaultValue="repository">
                 <TabsList>
                     <TabsTrigger value="upload">Upload Document</TabsTrigger>
