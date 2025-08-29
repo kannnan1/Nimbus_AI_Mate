@@ -56,7 +56,7 @@ const projects = [
   },
 ];
 
-const documentUrl = "https://github.com/kannnan1/NIMBUS_Demo/blob/main/document_example.docx";
+const documentUrl = "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/document_example.docx";
 
 
 interface PopulatedDocumentDialogProps {
