@@ -7,3 +7,4 @@ import '@/ai/flows/access-reference-repository.ts';
 import '@/ai/flows/automated-section-quality-checks.ts';
 import '@/ai/flows/interpret-selection.ts';
 import '@/ai/flows/process-document.ts';
+import '@/ai/flows/fetch-and-process-docx.ts';

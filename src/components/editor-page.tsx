@@ -45,7 +45,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const hasSetInitialPosition = useRef(false);
-  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
 
 
   useEffect(() => {
@@ -176,34 +176,37 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   };
 
   const handleInsertText = (text: string, mode: 'replace' | 'after' = 'replace') => {
-    const textarea = editorRef.current;
-    if (!textarea) return;
+    const editor = editorRef.current;
+    if (!editor) return;
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const currentText = textarea.value;
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    let range = selection.getRangeAt(0);
     
-    let newText;
-    let newCursorPosition;
+    // If not in 'after' mode, we replace the current selection
+    if (mode !== 'after') {
+        range.deleteContents();
+    } else {
+        // In 'after' mode, we collapse the selection to its end point to insert after.
+        range.collapse(false);
+    }
 
-    if (mode === 'after') {
-        newText = currentText.substring(0, end) + text + currentText.substring(end);
-        newCursorPosition = end + text.length;
-    } else { // 'replace' mode, also used for insertion at cursor
-        newText = currentText.substring(0, start) + text + currentText.substring(end);
-        newCursorPosition = start + text.length;
+    const documentFragment = range.createContextualFragment(text);
+    const lastNode = documentFragment.lastChild;
+    range.insertNode(documentFragment);
+
+    // Move cursor to the end of the inserted content
+    if (lastNode) {
+        range = range.cloneRange();
+        range.setStartAfter(lastNode);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
     }
     
-    setDocumentContent(newText);
-
-    // This is required to make sure the state update is rendered before we set the selection.
-    setTimeout(() => {
-        if (textarea) {
-          textarea.selectionStart = newCursorPosition;
-          textarea.selectionEnd = newCursorPosition;
-          textarea.focus();
-        }
-    }, 0);
+    setDocumentContent(editor.innerHTML);
+    editor.focus();
   };
 
   const showRightPanel = isCommentsOpen || isAddResultsOpen || isPreviewOpen;
