@@ -109,7 +109,7 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
         const result = await fetchAndProcessDocx({ url: documentUrl });
         
         if (result.html.includes("Error processing document")) {
-            throw new Error("Failed to process the document from the URL.");
+            throw new Error(result.html);
         }
 
         const storedDocsString = localStorage.getItem("myDocuments");
@@ -141,11 +141,11 @@ export function PopulatedDocumentDialog({ open, onOpenChange, documentTitle }: P
         onOpenChange(false);
         router.push(`/editor?title=${encodeURIComponent(newDoc.title)}`);
 
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
         toast({
             title: "Error",
-            description: "Could not load the document. Please check the URL and try again.",
+            description: `Could not load the document. ${error.message}`,
             variant: "destructive",
         });
     } finally {

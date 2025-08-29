@@ -11,7 +11,6 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import mammoth from 'mammoth';
-import { a } from 'vitest/dist/reporters-5f784f42';
 
 const FetchAndProcessDocxInputSchema = z.object({
   url: z.string().url().describe('The URL of the .docx file to fetch.'),
