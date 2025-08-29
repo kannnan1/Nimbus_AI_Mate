@@ -52,8 +52,8 @@ type ResultItem = ChartItem | TableItem;
 const resultsData: Record<string, { charts: ChartItem[], tables: TableItem[] }> = {
   "Univariate Analysis": {
     charts: [
-      { id: "uni_chart_1", name: "Age Distribution Histogram", type: 'chart', imageUrl: "https://picsum.photos/400/300?random=1" },
-      { id: "uni_chart_2", name: "Income Box Plot", type: 'chart', imageUrl: "https://picsum.photos/400/300?random=2" },
+      { id: "uni_chart_1", name: "Age Distribution Histogram", type: 'chart', imageUrl: "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/image.png" },
+      { id: "uni_chart_2", name: "Income Box Plot", type: 'chart', imageUrl: "https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/box.png" },
     ],
     tables: [
       { 
