@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UploadCloud, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { processDocument, type ProcessDocumentOutput } from '@/ai/flows/process-document';
+import type { ProcessDocumentOutput } from '@/ai/flows/process-document';
 import Link from 'next/link';
 import Image from "next/image";
 import {
@@ -250,9 +250,11 @@ export function KnowledgeStorePage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <Settings />
-                Settings
+              <SidebarMenuButton asChild>
+                <Link href="/settings">
+                  <Settings />
+                  Settings
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -372,5 +374,3 @@ export function KnowledgeStorePage() {
     </>
   );
 }
-
-    

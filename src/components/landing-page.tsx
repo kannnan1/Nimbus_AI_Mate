@@ -153,7 +153,7 @@ export function LandingPage() {
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Image src="https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/logo.png" alt="Nimbus Uno Application Logo" width={150} height={40} />
+            <Image src="https://raw.githubusercontent.com/kannnan1/NIMBUS_Demo/main/logo.png" alt="Nimbus Uno Application Logo" width={180} height={48} />
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -167,9 +167,11 @@ export function LandingPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive>
-                <LayoutDashboard />
-                AI Mate
+              <SidebarMenuButton isActive asChild>
+                <Link href="/">
+                  <LayoutDashboard />
+                  AI Mate
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -179,9 +181,11 @@ export function LandingPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <Settings />
-                Settings
+              <SidebarMenuButton asChild>
+                <Link href="/settings">
+                  <Settings />
+                  Settings
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
