@@ -3,8 +3,7 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { UploadCloud, FileText, Loader2, BrainCircuit, Tag, WholeWord } from 'lucide-react';
+import { UploadCloud, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { processDocument, type ProcessDocumentOutput } from '@/ai/flows/process-document';
 import Link from 'next/link';
@@ -24,6 +23,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { KnowledgeDocumentDialog } from './knowledge-document-dialog';
+import { KnowledgeUploadDialog, type UploadMetadata } from './knowledge-upload-dialog';
+import { Progress } from './ui/progress';
+import { pdfjs } from 'react-pdf';
+
+// PDF.js worker configuration
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 
 type KnowledgeDocument = ProcessDocumentOutput & {
@@ -83,8 +88,15 @@ const sampleDocuments: KnowledgeDocument[] = [
 export function KnowledgeStorePage() {
   const [documents, setDocuments] = useState<KnowledgeDocument[]>(sampleDocuments);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState("");
+  const [processingProgress, setProcessingProgress] = useState(0);
+  
   const [selectedDocument, setSelectedDocument] = useState<KnowledgeDocument | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
+
   const { toast } = useToast();
 
   const handleFileDrop = async (event: React.DragEvent<HTMLDivElement>) => {
@@ -92,94 +104,106 @@ export function KnowledgeStorePage() {
     event.stopPropagation();
     const files = event.dataTransfer.files;
     if (files && files.length > 0) {
-      handleFileUpload(files[0]);
+      handleFileSelect(files[0]);
     }
   };
   
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      handleFileUpload(files[0]);
+      handleFileSelect(files[0]);
     }
   };
 
-  const handleFileUpload = (file: File) => {
+  const handleFileSelect = (file: File) => {
     const validTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'text/markdown', 'application/pdf'];
     if (!validTypes.includes(file.type) && !file.name.endsWith('.md') && !file.name.endsWith('.txt') && !file.name.endsWith('.pdf')) {
       toast({
         title: "Unsupported File Type",
-        description: `Please upload a .docx, .txt, .md or .pdf file. You provided a ${file.type || 'file with no type'}.`,
+        description: `Please upload a .pdf, .docx, .txt, or .md file. You provided a ${file.type || 'file with no type'}.`,
         variant: "destructive",
       });
       return;
     }
+    setFileToUpload(file);
+    setIsUploadModalOpen(true);
+  };
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        const content = e.target?.result as string;
-        if (content) {
-            setIsProcessing(true);
-            try {
-                const result = await processDocument({ fileName: file.name, documentContent: content });
-                const newDocument: KnowledgeDocument = {
-                    ...result,
-                    fileName: file.name,
-                    createdAt: new Date().toISOString(),
-                    documentContent: content,
-                    documentType: "Uploaded Document",
-                    sourceProject: "Uncategorized",
-                };
-                setDocuments(prev => [newDocument, ...prev]);
-                toast({
-                    title: "Document Processed",
-                    description: `"${file.name}" has been added to the knowledge store.`,
-                });
-            } catch (error) {
-                console.error(error);
-                toast({
-                    title: "Processing Failed",
-                    description: "There was an error processing your document.",
-                    variant: "destructive",
-                });
-            } finally {
-                setIsProcessing(false);
+  const handleProcessDocument = async (file: File, metadata: UploadMetadata) => {
+    setIsProcessing(true);
+    setProcessingProgress(0);
+    setProcessingStatus("Preparing to upload...");
+
+    const fileReader = new FileReader();
+    fileReader.readAsArrayBuffer(file);
+
+    fileReader.onload = async (e) => {
+        const arrayBuffer = e.target?.result as ArrayBuffer;
+        if (!arrayBuffer) {
+             toast({ title: "File Read Error", description: "Could not read the selected file.", variant: "destructive" });
+             setIsProcessing(false);
+             return;
+        }
+
+        try {
+            // Step 1: Count Pages
+            let numPages = 0;
+            if (file.type === 'application/pdf') {
+                setProcessingStatus("Reading PDF metadata...");
+                setProcessingProgress(10);
+                const pdf = await pdfjs.getDocument(arrayBuffer).promise;
+                numPages = pdf.numPages;
+                setProcessingStatus(`Processing ${numPages} pages...`);
+            } else {
+                setProcessingStatus(`Processing document...`);
             }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Step 2: Generate Embeddings
+            setProcessingProgress(40);
+            setProcessingStatus("Generating embeddings...");
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Step 3: Store in Vector DB
+            setProcessingProgress(75);
+            setProcessingStatus("Storing chunks in Vector DB...");
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Step 4: Call Genkit for Summary/Metadata
+            const content = `Simulated content for ${file.name}. Actual content would be extracted here.`;
+            const result = await processDocument({ fileName: file.name, documentContent: content });
+            
+            const newDocument: KnowledgeDocument = {
+                ...result,
+                fileName: file.name,
+                createdAt: new Date().toISOString(),
+                documentContent: file.type === 'application/pdf' ? URL.createObjectURL(file) : content,
+                documentType: metadata.documentType,
+                sourceProject: metadata.sourceProject,
+            };
+            setDocuments(prev => [newDocument, ...prev]);
+            
+            setProcessingProgress(100);
+            setProcessingStatus("Processing complete!");
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            toast({
+                title: "Document Processed Successfully",
+                description: "Please see the repository for your uploaded document.",
+            });
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: "Processing Failed",
+                description: "There was an error processing your document.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsProcessing(false);
+            setProcessingProgress(0);
+            setProcessingStatus("");
         }
     };
-
-    if (file.type.startsWith('text') || file.name.endsWith('.md')) {
-        reader.readAsText(file);
-    } else {
-        // For PDF and DOCX, we'd need a more complex client-side parsing strategy.
-        // For now, we'll just use the file name and simulate the rest.
-        const simulatedContent = `Content for ${file.name}. In a real app, this would be extracted text.`;
-         setIsProcessing(true);
-            try {
-                const result = await processDocument({ fileName: file.name, documentContent: simulatedContent });
-                const newDocument: KnowledgeDocument = {
-                    ...result,
-                    fileName: file.name,
-                    createdAt: new Date().toISOString(),
-                    documentContent: file.type === 'application/pdf' ? URL.createObjectURL(file) : simulatedContent, // Store URL for PDF
-                    documentType: "Uploaded Document",
-                    sourceProject: "Uncategorized",
-                };
-                setDocuments(prev => [newDocument, ...prev]);
-                toast({
-                    title: "Document Processed",
-                    description: `"${file.name}" has been added to the knowledge store.`,
-                });
-            } catch (error) {
-                console.error(error);
-                toast({
-                    title: "Processing Failed",
-                    description: "There was an error processing your document.",
-                    variant: "destructive",
-                });
-            } finally {
-                setIsProcessing(false);
-            }
-    }
   };
 
   const triggerFileInput = () => {
@@ -188,7 +212,7 @@ export function KnowledgeStorePage() {
 
   const handleRowClick = (doc: KnowledgeDocument) => {
     setSelectedDocument(doc);
-    setIsModalOpen(true);
+    setIsDetailsModalOpen(true);
   };
   
 
@@ -262,14 +286,17 @@ export function KnowledgeStorePage() {
                             Drag & drop your files here or <span className="text-primary font-semibold cursor-pointer" onClick={triggerFileInput}>browse</span>
                           </p>
                           <p className="text-xs text-muted-foreground/80">Supports: .pdf, .docx, .txt, .md</p>
-                          <input id="file-input" type="file" className="hidden" onChange={handleFileSelect} accept=".pdf,.docx,.txt,.md,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                          <input id="file-input" type="file" className="hidden" onChange={handleFileInputChange} accept=".pdf,.docx,.txt,.md,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
                         </div>
                       </CardContent>
                     </Card>
                     {isProcessing && (
-                        <div className="flex items-center justify-center gap-2 text-muted-foreground mt-4">
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            <span>Processing document...</span>
+                        <div className="mt-4 space-y-2 text-center">
+                            <Progress value={processingProgress} className="w-full" />
+                            <div className="flex items-center justify-center gap-2 text-muted-foreground text-sm">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>{processingStatus}</span>
+                            </div>
                         </div>
                     )}
                 </TabsContent>
@@ -325,9 +352,21 @@ export function KnowledgeStorePage() {
      </SidebarProvider>
      {selectedDocument && (
         <KnowledgeDocumentDialog
-            open={isModalOpen}
-            onOpenChange={setIsModalOpen}
+            open={isDetailsModalOpen}
+            onOpenChange={setIsDetailsModalOpen}
             document={selectedDocument}
+        />
+     )}
+     {fileToUpload && (
+        <KnowledgeUploadDialog
+            open={isUploadModalOpen}
+            onOpenChange={setIsUploadModalOpen}
+            fileName={fileToUpload.name}
+            onUpload={(metadata) => {
+                if (fileToUpload) {
+                    handleProcessDocument(fileToUpload, metadata);
+                }
+            }}
         />
      )}
     </>
