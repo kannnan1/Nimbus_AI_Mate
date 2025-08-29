@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import type { PanelGroup } from "react-resizable-panels";
 import { DocumentSidebar } from "@/components/document-sidebar";
 import { EditorToolbar } from "@/components/editor-toolbar";
 import { AiChatbot } from "@/components/ai-chatbot";
@@ -40,12 +41,14 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isOutlineCollapsed, setIsOutlineCollapsed] = useState(false);
   
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const hasSetInitialPosition = useRef(false);
   const editorRef = useRef<HTMLDivElement>(null);
+  const layoutRef = useRef<(PanelGroup | null)>(null);
 
 
   useEffect(() => {
@@ -109,7 +112,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     };
     setSections([...sections, newSection]);
     // Append the new section as an h1 to the editor content
-    setDocumentContent(prevContent => `${prevContent}<h1>${title}</h1>`);
+    setDocumentContent(prevContent => `${prevContent}<h1>${title}</h1><p></p>`);
   };
 
   const handleAddSubsection = (title: string) => {
@@ -121,7 +124,7 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
         : section
     ));
     // Append the new subsection as an h2 to the editor content
-    setDocumentContent(prevContent => `${prevContent}<h2>${title}</h2>`);
+    setDocumentContent(prevContent => `${prevContent}<h2>${title}</h2><p></p>`);
   };
 
   const handleRename = (newTitle: string) => {
@@ -186,6 +189,17 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     }
   };
 
+  const onToggleOutline = () => {
+    const panel = layoutRef.current?.getPanel(0);
+    if (panel) {
+        if (panel.isCollapsed()) {
+            panel.expand();
+        } else {
+            panel.collapse();
+        }
+    }
+  };
+
   const handleInsertText = (text: string, mode: 'replace' | 'after' = 'replace') => {
     const editor = editorRef.current;
     if (!editor) return;
@@ -226,10 +240,23 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
         onToggleComments={onToggleComments}
         onToggleAddResults={onToggleAddResults}
         onTogglePreview={onTogglePreview}
+        onToggleOutline={onToggleOutline}
+        isOutlineCollapsed={isOutlineCollapsed}
       />
       <div className="flex-1 overflow-hidden">
-        <ResizablePanelGroup direction="horizontal" className="h-full w-full">
-          <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+        <ResizablePanelGroup 
+            direction="horizontal" 
+            className="h-full w-full"
+            ref={layoutRef}
+            onLayout={(sizes: number[]) => {
+                if (sizes[0] === 0) {
+                    setIsOutlineCollapsed(true);
+                } else {
+                    setIsOutlineCollapsed(false);
+                }
+            }}
+        >
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={30} collapsible collapsedSize={0}>
             <DocumentSidebar
               sections={sections}
               setSections={setSections}

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Save, History, MessageSquarePlus, ArrowLeft, ClipboardPlus, Eye, User } from "lucide-react";
+import { Save, History, MessageSquarePlus, ArrowLeft, ClipboardPlus, Eye, User, PanelLeft, PanelRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +27,8 @@ interface EditorToolbarProps {
   onToggleComments: () => void;
   onToggleAddResults: () => void;
   onTogglePreview: () => void;
+  onToggleOutline: () => void;
+  isOutlineCollapsed: boolean;
 }
 
 export function EditorToolbar({ 
@@ -38,7 +40,9 @@ export function EditorToolbar({
   comments, 
   onToggleComments,
   onToggleAddResults,
-  onTogglePreview
+  onTogglePreview,
+  onToggleOutline,
+  isOutlineCollapsed
 }: EditorToolbarProps) {
   const [saveStatus, setSaveStatus] = useState("Not saved");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -191,6 +195,15 @@ export function EditorToolbar({
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>Back to Documents</TooltipContent>
+                </Tooltip>
+                 <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" onClick={onToggleOutline}>
+                     {isOutlineCollapsed ? <PanelRight className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+                     <span className="sr-only">Toggle Outline</span>
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>Toggle Outline</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                 <TooltipTrigger asChild>
