@@ -45,7 +45,7 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "SR11-7_Compliance_Guide.pdf",
     title: "SR 11-7 Compliance Guide (Internal)",
-    summary: "This guide outlines standards for documenting model design, theory, and limitations. The document serves as a critical resource for validation teams, developers, and stakeholders, covering best practices for validation, monitoring, and governance. Key sections address independent review, conceptual soundness, data verification, and outcomes analysis. This guide is essential for mitigating model risk and ensuring regulatory compliance.",
+    summary: "This guide outlines standards for documenting model design, theory, and limitations. It serves as a critical resource for validation teams, developers, and stakeholders, covering best practices for validation, monitoring, and governance. Key sections address independent review, conceptual soundness, data verification, and outcomes analysis. This guide is essential for mitigating model risk and ensuring regulatory compliance.",
     metadata: {
       keyTopics: ["Compliance", "SR 11-7", "Risk Management", "Validation", "Governance", "Model Theory", "Data Quality"],
       wordCount: 3450,
@@ -59,7 +59,7 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "Project_Alpha_Methodology.txt",
     title: "Project Alpha Development Methodology",
-    summary: "This document details the technical methodology for Project Alpha's predictive model. It explores the data handling strategy, focusing on k-NN imputation for missing income variables. The report covers the variable selection process, outlining the statistical tests and business logic behind each predictor. It also presents a comprehensive breakdown of the model's performance metrics, ensuring transparent and replicable model construction.",
+    summary: "This document details the technical methodology for Project Alpha's predictive model. It explores the data handling strategy, focusing on k-NN imputation for missing income variables. The report covers the variable selection process, outlining the statistical tests and business logic behind each predictor. It also presents a comprehensive breakdown of the model's performance metrics.",
     metadata: {
       keyTopics: ["Project Alpha", "Methodology", "Data Handling", "Logistic Regression", "PD Models", "Imputation"],
       wordCount: 5210,
@@ -73,7 +73,7 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "Q2_2024_Monitoring_Report.txt",
     title: "Q2 2024 Model Monitoring Report",
-    summary: "This report analyzes production model performance for Q2 2024, focusing on performance decay in high-risk segments. It presents key metrics like the Gini coefficient, KS statistic, and Population Stability Index (PSI). Findings indicate a moderate drift in the underlying population and a slight degradation in the model's discriminatory power. The report concludes with a recommendation to trigger a model recalibration cycle.",
+    summary: "This report analyzes production model performance for Q2 2024, focusing on performance decay in high-risk segments. It presents key metrics like the Gini coefficient, KS statistic, and Population Stability Index (PSI). Findings indicate a moderate drift in the underlying population and a slight degradation in the model's discriminatory power. The report recommends a model recalibration.",
     metadata: {
       keyTopics: ["Monitoring", "Q2 2024", "Performance Decay", "PSI", "Recalibration", "Model Risk"],
       wordCount: 2100,
@@ -170,14 +170,22 @@ export function KnowledgeStorePage() {
         setProcessingStatus("Storing chunks in Vector DB...");
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        const content = `Simulated content for ${file.name}. Actual content would be extracted here.`;
-        const result = await processDocument({ fileName: file.name, documentContent: content });
+        // This is a pure front-end simulation. No backend call is made.
+        const simulatedResult: ProcessDocumentOutput = {
+          title: file.name.replace(/\.[^/.]+$/, ""),
+          summary: `This is a high-level summary for the document '${file.name}'. The AI would generate a more detailed summary based on the actual content. This document appears to be related to ${metadata.sourceProject} and is classified as ${metadata.documentType}.`,
+          metadata: {
+            keyTopics: ["AI Generated", "Simulation", metadata.documentType.split(" ")[0]],
+            wordCount: Math.floor(Math.random() * 2000) + 500, // Random word count
+          },
+          vectorizationStatus: "Completed",
+        };
         
         const newDocument: KnowledgeDocument = {
-            ...result,
+            ...simulatedResult,
             fileName: file.name,
             createdAt: new Date().toISOString(),
-            documentContent: file.type === 'application/pdf' ? URL.createObjectURL(file) : content,
+            documentContent: file.type === 'application/pdf' ? URL.createObjectURL(file) : `Simulated content for ${file.name}`,
             documentType: metadata.documentType,
             sourceProject: metadata.sourceProject,
         };
@@ -364,3 +372,5 @@ export function KnowledgeStorePage() {
     </>
   );
 }
+
+    
