@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UploadCloud, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -22,10 +23,16 @@ import { LayoutDashboard, Users, Settings, FolderKanban } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { KnowledgeDocumentDialog } from './knowledge-document-dialog';
 import { KnowledgeUploadDialog, type UploadMetadata } from './knowledge-upload-dialog';
 import { Progress } from './ui/progress';
 import { pdfjs } from 'react-pdf';
+
+// Dynamically import the dialog to prevent SSR issues with react-pdf
+const KnowledgeDocumentDialog = dynamic(() => import('./knowledge-document-dialog').then(mod => mod.KnowledgeDocumentDialog), {
+  ssr: false,
+  loading: () => <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>
+});
+
 
 // PDF.js worker configuration
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
