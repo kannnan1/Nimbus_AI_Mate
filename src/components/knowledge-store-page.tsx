@@ -30,44 +30,52 @@ type KnowledgeDocument = ProcessDocumentOutput & {
   fileName: string;
   createdAt: string;
   documentContent: string;
+  documentType: string;
+  sourceProject: string;
 };
 
 const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "SR11-7_Compliance_Guide.txt",
     title: "SR 11-7 Compliance Guide (Internal)",
-    summary: "An internal guide outlining the standards and procedures for documenting model limitations and ensuring compliance with SR 11-7 regulations. Covers best practices for risk assessment and reporting.",
+    summary: "An internal guide outlining the standards and procedures for documenting model limitations and ensuring compliance with SR 11-7 regulations. Covers best practices for risk assessment, reporting, and independent validation.",
     metadata: {
-      keyTopics: ["Compliance", "SR 11-7", "Risk Management"],
+      keyTopics: ["Compliance", "SR 11-7", "Risk Management", "Validation", "Governance"],
       wordCount: 3450,
     },
     vectorizationStatus: "Completed",
     createdAt: "2024-07-21T10:00:00Z",
-    documentContent: "This document provides a detailed walkthrough of SR 11-7 requirements...\n\nSection 1: Introduction to Model Risk Management...\nSection 2: Documentation Standards...",
+    documentContent: "This document provides a detailed walkthrough of SR 11-7 requirements...\n\nSection 1: Introduction to Model Risk Management...\nSection 2: Documentation Standards...\nSection 3: Independent Validation...\nSection 4: Governance and Oversight...",
+    documentType: "Internal Policy",
+    sourceProject: "Regulatory Compliance",
   },
   {
     fileName: "Project_Alpha_Methodology.txt",
     title: "Project Alpha Development Methodology",
-    summary: "Details the development methodology for Project Alpha, focusing on the approach for handling missing data in income variables and the use of logistic regression for PD models.",
+    summary: "Details the development methodology for Project Alpha, focusing on the approach for handling missing data in income variables and the use of logistic regression for PD models. It also covers variable selection and model performance metrics.",
     metadata: {
-      keyTopics: ["Project Alpha", "Methodology", "Data Handling"],
+      keyTopics: ["Project Alpha", "Methodology", "Data Handling", "Logistic Regression", "PD Models"],
       wordCount: 5210,
     },
     vectorizationStatus: "Completed",
     createdAt: "2024-06-15T14:30:00Z",
-    documentContent: "The methodology for Project Alpha is grounded in robust statistical techniques...\n\nData Imputation: We utilize a k-NN imputation model for missing income data...\nModel Specification: The primary model is a logistic regression...",
+    documentContent: "The methodology for Project Alpha is grounded in robust statistical techniques...\n\nData Imputation: We utilize a k-NN imputation model for missing income data...\nModel Specification: The primary model is a logistic regression...\nPerformance Metrics: Gini, AUC, and KS statistics are used for evaluation.",
+    documentType: "Technical Documentation",
+    sourceProject: "Retail Credit Risk",
   },
   {
     fileName: "Q2_2024_Monitoring_Report.txt",
     title: "Q2 2024 Model Monitoring Report",
-    summary: "Contains analysis of model performance decay in high-risk segments for the second quarter of 2024. Includes Gini, KS, and PSI metrics and recommends model recalibration.",
+    summary: "Contains analysis of model performance decay in high-risk segments for the second quarter of 2024. Includes Gini, KS, and Population Stability Index (PSI) metrics and recommends model recalibration.",
     metadata: {
-      keyTopics: ["Monitoring", "Q2 2024", "Performance"],
+      keyTopics: ["Monitoring", "Q2 2024", "Performance", "PSI", "Recalibration"],
       wordCount: 2100,
     },
     vectorizationStatus: "Completed",
     createdAt: "2024-07-05T09:00:00Z",
-    documentContent: "This report summarizes the monitoring results for Q2 2024...\n\nKey Metrics:\n- Gini Coefficient: 0.72 (down from 0.75)\n- Population Stability Index: 0.18 (Moderate drift observed)...",
+    documentContent: "This report summarizes the monitoring results for Q2 2024...\n\nKey Metrics:\n- Gini Coefficient: 0.72 (down from 0.75)\n- Population Stability Index: 0.18 (Moderate drift observed)...\n- Recommendation: Recalibrate the model in Q3 2024.",
+    documentType: "Quarterly Report",
+    sourceProject: "Retail Credit Risk",
   }
 ];
 
@@ -118,6 +126,8 @@ export function KnowledgeStorePage() {
                     fileName: file.name,
                     createdAt: new Date().toISOString(),
                     documentContent: content,
+                    documentType: "Uploaded Document",
+                    sourceProject: "Uncategorized",
                 };
                 setDocuments(prev => [newDocument, ...prev]);
                 toast({
