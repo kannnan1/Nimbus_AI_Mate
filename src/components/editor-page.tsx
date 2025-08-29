@@ -186,34 +186,26 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
     const editor = editorRef.current;
     if (!editor) return;
 
+    editor.focus();
+    
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
-
-    let range = selection.getRangeAt(0);
     
-    // If not in 'after' mode, we replace the current selection
-    if (mode !== 'after') {
-        range.deleteContents();
-    } else {
-        // In 'after' mode, we collapse the selection to its end point to insert after.
+    // Restore selection if needed, although focus() often does this.
+    // In a more complex scenario, you might save/restore the range.
+    
+    // For 'after', we collapse the selection to the end.
+    // For 'replace', we just let insertHTML replace the current selection.
+    if (mode === 'after') {
+        const range = selection.getRangeAt(0);
         range.collapse(false);
     }
 
-    const documentFragment = range.createContextualFragment(text);
-    const lastNode = documentFragment.lastChild;
-    range.insertNode(documentFragment);
-
-    // Move cursor to the end of the inserted content
-    if (lastNode) {
-        range = range.cloneRange();
-        range.setStartAfter(lastNode);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-    }
+    // Use insertHTML which is part of the browser's undo stack
+    document.execCommand('insertHTML', false, text);
     
+    // Update the React state to match the new content
     setDocumentContent(editor.innerHTML);
-    editor.focus();
   };
 
   const showRightPanel = isCommentsOpen || isAddResultsOpen || isPreviewOpen;
