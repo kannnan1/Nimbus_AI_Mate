@@ -195,7 +195,7 @@ export function LandingPage() {
         <div className="flex flex-col min-h-screen bg-muted/20">
           <header className="px-4 lg:px-6 h-16 flex items-center border-b bg-card">
             <Link href="#" className="flex items-center justify-center gap-2" prefetch={false}>
-              <span className="text-xl font-semibold">Welcome Back!</span>
+              <span className="text-xl font-semibold">AI Mate</span>
             </Link>
             <div className="ml-auto flex items-center gap-4">
                 <Button onClick={() => setIsCreateModalOpen(true)}>
