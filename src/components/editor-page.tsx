@@ -14,7 +14,7 @@ import { AddSectionDialog } from "@/components/add-section-dialog";
 import { RenameSectionDialog } from "@/components/rename-section-dialog";
 import type { Section, SubSection } from "@/types/document";
 import { Button } from "./ui/button";
-import { Bot } from "lucide-react";
+import { Bot, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PreviewSidebar } from "./preview-sidebar";
 
@@ -54,6 +54,13 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
       setIsCommentsOpen(true);
     }
   }, [initialComments]);
+
+  useEffect(() => {
+    // This handles the case where initialContent might be populated asynchronously
+    if (initialContent) {
+      setDocumentContent(initialContent);
+    }
+  }, [initialContent]);
 
 
   useEffect(() => {
@@ -243,17 +250,23 @@ export function EditorPage({ initialTitle = "Untitled Document", initialContent 
             <main className="h-full w-full p-4 flex flex-col">
               <Card className="flex-1 w-full shadow-inner relative bg-card">
                 <CardContent className="p-0 h-full">
-                  <RichTextEditor
-                    ref={editorRef}
-                    value={documentContent}
-                    onChange={setDocumentContent}
-                    placeholder="Start writing your document here..."
-                    onSelectText={(text) => {
-                      if (text) {
-                        setSelectedText(text);
-                      }
-                    }}
-                  />
+                  {documentContent ? (
+                    <RichTextEditor
+                      ref={editorRef}
+                      value={documentContent}
+                      onChange={setDocumentContent}
+                      placeholder="Start writing your document here..."
+                      onSelectText={(text) => {
+                        if (text) {
+                          setSelectedText(text);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </main>
