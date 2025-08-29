@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Bot, User, FilePlus2, Eye, Share2, Trash2, Copy, Folder, Download, ClipboardPlus, CheckCircle, FileText, LayoutDashboard, Settings, Users } from "lucide-react";
+import { Bot, User, FilePlus2, Eye, Share2, Trash2, Copy, Folder, Download, ClipboardPlus, CheckCircle, FileText, LayoutDashboard, Settings, Users, FolderKanban } from "lucide-react";
 import { ShareDialog } from "@/components/share-dialog";
 import { TemplateSelectionDialog } from "./template-selection-dialog";
 import type { Section } from "@/types/document";
@@ -99,6 +99,7 @@ export function LandingPage() {
             sections: [],
             comments: [],
             documentType: "Blank Document",
+            projectId: Math.floor(1000 + Math.random() * 9000).toString(),
         };
         const storedDocsString = localStorage.getItem("myDocuments");
         const storedDocs = storedDocsString ? JSON.parse(storedDocsString) : [];
@@ -157,6 +158,14 @@ export function LandingPage() {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/knowledge-store">
+                  <FolderKanban />
+                  Knowledge Store
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton isActive>
                 <LayoutDashboard />
@@ -217,7 +226,7 @@ export function LandingPage() {
                         <TabsTrigger value="shared-with-me">Shared with me</TabsTrigger>
                     </TabsList>
                     <TabsContent value="my-documents">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 mt-4">
                             {myDocuments.length === 0 ? (
                                <p className="text-center text-muted-foreground mt-4 col-span-full">You haven't created any documents yet.</p>
                             ) : (
