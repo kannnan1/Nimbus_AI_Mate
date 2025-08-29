@@ -85,7 +85,6 @@ export const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorPro
                 onMouseUp={handleSelection}
                 onKeyUp={handleSelection}
                 className="prose max-w-none h-full w-full resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-6 text-base overflow-y-auto bg-white"
-                dangerouslySetInnerHTML={{ __html: value }}
                 placeholder={placeholder}
             />
         </div>
