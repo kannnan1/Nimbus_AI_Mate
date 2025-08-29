@@ -152,9 +152,9 @@ export function TemplateSelectionDialog({ open, onOpenChange, documentTitle }: T
   const generateContentFromSections = (sections: Section[]): string => {
     return sections
       .map(section => {
-        const mainSection = `# ${section.title}\n\n`;
+        const mainSection = `<h1>${section.title}</h1>`;
         const subSections = section.subsections
-          .map(sub => `## ${sub.title}\n\n`)
+          .map(sub => `<h2>${sub.title}</h2><p></p>`)
           .join('');
         return mainSection + subSections;
       })
@@ -195,7 +195,15 @@ export function TemplateSelectionDialog({ open, onOpenChange, documentTitle }: T
     // A small delay to show the loading state
     setTimeout(() => {
         onOpenChange(false);
-        router.push(`/editor?title=${encodeURIComponent(newDoc.title)}`);
+        // Pass content via state to avoid race condition with localStorage
+        router.push(`/editor?title=${encodeURIComponent(newDoc.title)}`, {
+          state: { 
+            title: newDoc.title, 
+            content: newDoc.content, 
+            sections: newDoc.sections,
+            comments: newDoc.comments
+          }
+        } as any); // Using 'as any' because Next.js router.push type doesn't officially include state, but it works
         setIsNavigating(false);
     }, 500);
   };
