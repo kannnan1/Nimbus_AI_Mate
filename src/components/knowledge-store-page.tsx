@@ -36,25 +36,25 @@ type KnowledgeDocument = ProcessDocumentOutput & {
 
 const sampleDocuments: KnowledgeDocument[] = [
   {
-    fileName: "SR11-7_Compliance_Guide.txt",
+    fileName: "SR11-7_Compliance_Guide.pdf",
     title: "SR 11-7 Compliance Guide (Internal)",
-    summary: "An internal guide outlining the standards and procedures for documenting model limitations and ensuring compliance with SR 11-7 regulations. Covers best practices for risk assessment, reporting, and independent validation.",
+    summary: "This comprehensive internal guide provides a detailed framework for ensuring adherence to the Federal Reserve's SR 11-7 guidance on model risk management. It meticulously outlines the standards and procedures for documenting model design, theory, and limitations. The document serves as a critical resource for validation teams, developers, and business stakeholders, covering best practices for initial validation, ongoing monitoring, and governance. Key sections address the importance of independent review, the criteria for assessing conceptual soundness, data verification processes, and the requirements for robust outcomes analysis. By establishing clear protocols for risk assessment, reporting, and management response, this guide aims to institutionalize a culture of rigorous model governance. It is essential for mitigating model risk, satisfying regulatory requirements, and ensuring that all models are performing as intended across their lifecycle, ultimately safeguarding the institution from financial and reputational harm.",
     metadata: {
-      keyTopics: ["Compliance", "SR 11-7", "Risk Management", "Validation", "Governance"],
+      keyTopics: ["Compliance", "SR 11-7", "Risk Management", "Validation", "Governance", "Model Theory", "Data Quality"],
       wordCount: 3450,
     },
     vectorizationStatus: "Completed",
     createdAt: "2024-07-21T10:00:00Z",
-    documentContent: "This document provides a detailed walkthrough of SR 11-7 requirements...\n\nSection 1: Introduction to Model Risk Management...\nSection 2: Documentation Standards...\nSection 3: Independent Validation...\nSection 4: Governance and Oversight...",
+    documentContent: "https://arxiv.org/pdf/1706.03762.pdf", // Using a sample PDF URL
     documentType: "Internal Policy",
     sourceProject: "Regulatory Compliance",
   },
   {
     fileName: "Project_Alpha_Methodology.txt",
     title: "Project Alpha Development Methodology",
-    summary: "Details the development methodology for Project Alpha, focusing on the approach for handling missing data in income variables and the use of logistic regression for PD models. It also covers variable selection and model performance metrics.",
+    summary: "This document details the complete technical methodology for Project Alpha's predictive model, a logistic regression designed to assess probability of default (PD). It offers an in-depth exploration of the data handling strategy, specifically focusing on the advanced k-NN imputation technique used for missing income variables, a critical feature in the dataset. The report meticulously covers the variable selection process, outlining the statistical tests and business logic that guided the inclusion of each predictor. Furthermore, it presents a comprehensive breakdown of the model's performance metrics, including Gini coefficient, AUC, and KS statistics, derived from both training and out-of-time validation samples. This documentation is intended to provide a transparent and replicable account of the model's construction, ensuring that stakeholders and validation teams can fully understand its theoretical underpinnings, strengths, and limitations, thereby facilitating effective governance and future redevelopment efforts.",
     metadata: {
-      keyTopics: ["Project Alpha", "Methodology", "Data Handling", "Logistic Regression", "PD Models"],
+      keyTopics: ["Project Alpha", "Methodology", "Data Handling", "Logistic Regression", "PD Models", "Imputation"],
       wordCount: 5210,
     },
     vectorizationStatus: "Completed",
@@ -66,9 +66,9 @@ const sampleDocuments: KnowledgeDocument[] = [
   {
     fileName: "Q2_2024_Monitoring_Report.txt",
     title: "Q2 2024 Model Monitoring Report",
-    summary: "Contains analysis of model performance decay in high-risk segments for the second quarter of 2024. Includes Gini, KS, and Population Stability Index (PSI) metrics and recommends model recalibration.",
+    summary: "This quarterly report provides a thorough analysis of production model performance for the second quarter of 2024, with a specific focus on identifying performance decay in high-risk customer segments. It systematically presents key monitoring metrics, including the Gini coefficient, Kolmogorov-Smirnov (KS) statistic, and the Population Stability Index (PSI), comparing them against established thresholds and historical trends. The findings indicate a moderate but statistically significant drift in the underlying population and a slight degradation in the model's discriminatory power. Based on this evidence, the report concludes with a formal recommendation to trigger a model recalibration cycle in the upcoming quarter. The analysis contained herein is vital for proactive model risk management, ensuring that the model remains accurate, reliable, and fit for purpose in a changing economic environment, thereby preventing potential losses and ensuring regulatory compliance.",
     metadata: {
-      keyTopics: ["Monitoring", "Q2 2024", "Performance", "PSI", "Recalibration"],
+      keyTopics: ["Monitoring", "Q2 2024", "Performance Decay", "PSI", "Recalibration", "Model Risk"],
       wordCount: 2100,
     },
     vectorizationStatus: "Completed",
@@ -104,11 +104,11 @@ export function KnowledgeStorePage() {
   };
 
   const handleFileUpload = (file: File) => {
-    const validTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'text/markdown'];
-    if (!validTypes.includes(file.type) && !file.name.endsWith('.md') && !file.name.endsWith('.txt')) {
+    const validTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'text/markdown', 'application/pdf'];
+    if (!validTypes.includes(file.type) && !file.name.endsWith('.md') && !file.name.endsWith('.txt') && !file.name.endsWith('.pdf')) {
       toast({
         title: "Unsupported File Type",
-        description: `Please upload a .docx, .txt, or .md file. You provided a ${file.type || 'file with no type'}.`,
+        description: `Please upload a .docx, .txt, .md or .pdf file. You provided a ${file.type || 'file with no type'}.`,
         variant: "destructive",
       });
       return;
@@ -146,7 +146,40 @@ export function KnowledgeStorePage() {
             }
         }
     };
-    reader.readAsText(file);
+
+    if (file.type.startsWith('text') || file.name.endsWith('.md')) {
+        reader.readAsText(file);
+    } else {
+        // For PDF and DOCX, we'd need a more complex client-side parsing strategy.
+        // For now, we'll just use the file name and simulate the rest.
+        const simulatedContent = `Content for ${file.name}. In a real app, this would be extracted text.`;
+         setIsProcessing(true);
+            try {
+                const result = await processDocument({ fileName: file.name, documentContent: simulatedContent });
+                const newDocument: KnowledgeDocument = {
+                    ...result,
+                    fileName: file.name,
+                    createdAt: new Date().toISOString(),
+                    documentContent: file.type === 'application/pdf' ? URL.createObjectURL(file) : simulatedContent, // Store URL for PDF
+                    documentType: "Uploaded Document",
+                    sourceProject: "Uncategorized",
+                };
+                setDocuments(prev => [newDocument, ...prev]);
+                toast({
+                    title: "Document Processed",
+                    description: `"${file.name}" has been added to the knowledge store.`,
+                });
+            } catch (error) {
+                console.error(error);
+                toast({
+                    title: "Processing Failed",
+                    description: "There was an error processing your document.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsProcessing(false);
+            }
+    }
   };
 
   const triggerFileInput = () => {
@@ -228,8 +261,8 @@ export function KnowledgeStorePage() {
                           <p className="text-muted-foreground">
                             Drag & drop your files here or <span className="text-primary font-semibold cursor-pointer" onClick={triggerFileInput}>browse</span>
                           </p>
-                          <p className="text-xs text-muted-foreground/80">Supports: .docx, .txt, .md</p>
-                          <input id="file-input" type="file" className="hidden" onChange={handleFileSelect} accept=".docx,.txt,.md,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                          <p className="text-xs text-muted-foreground/80">Supports: .pdf, .docx, .txt, .md</p>
+                          <input id="file-input" type="file" className="hidden" onChange={handleFileSelect} accept=".pdf,.docx,.txt,.md,application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
                         </div>
                       </CardContent>
                     </Card>
@@ -261,9 +294,10 @@ export function KnowledgeStorePage() {
                                             <TableCell className="font-medium">{doc.title}</TableCell>
                                             <TableCell>
                                                 <div className="flex flex-wrap gap-1">
-                                                    {doc.metadata.keyTopics.map(topic => (
+                                                    {doc.metadata.keyTopics.slice(0, 4).map(topic => (
                                                         <Badge key={topic} variant="secondary">{topic}</Badge>
                                                     ))}
+                                                    {doc.metadata.keyTopics.length > 4 && <Badge variant="outline">+{doc.metadata.keyTopics.length - 4}</Badge>}
                                                 </div>
                                             </TableCell>
                                             <TableCell>
