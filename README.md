@@ -1,4 +1,4 @@
- # Firebase Studio - Nimbus AI MAte
+ # Nimbus AI MAte
 
 This is a NextJS starter in Firebase Studio.
 
